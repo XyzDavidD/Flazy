@@ -109,9 +109,9 @@ function Hero() {
   }
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center px-6 lg:px-8 py-20">
+    <section className="relative flex items-center justify-center px-6 lg:px-8 py-32">
       <div className="max-w-7xl mx-auto w-full">
-        <div className="grid lg:grid-cols-2 gap-12 items-stretch">
+        <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div className="flex flex-col justify-center space-y-8">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[rgba(252,211,77,0.1)] border border-[rgba(252,211,77,0.3)] w-fit">
               <span className="text-xs font-semibold text-accent-gold">Générateur FLAZY maintenant disponible</span>
@@ -120,7 +120,7 @@ function Hero() {
               Générateur de Vidéos IA Virales & Monétisables
             </h1>
             <p className="text-lg text-text-soft">
-              Créez des vidéos qui génèrent de l'engagement et des revenus avec la puissance de l'intelligence artificielle.
+              Transformez vos idées en vidéos de 10 secondes prêtes à poster sur TikTok, Reels Instagram et YouTube Shorts. Simple, rapide et efficace.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <button
@@ -138,35 +138,64 @@ function Hero() {
             </div>
           </div>
 
-          <div className="flex items-center justify-center">
-            <div className="relative group w-full max-w-md">
-              <div className="relative rounded-3xl overflow-hidden bg-[rgba(6,9,22,0.8)] backdrop-blur-sm border border-[rgba(252,211,77,0.3)] shadow-2xl aspect-[9/16]">
-                <div className="absolute -inset-1 bg-gradient-to-r from-accent-orange/20 via-accent-red/20 to-accent-orange/20 rounded-3xl blur-xl opacity-50"></div>
-                <video
-                  ref={videoRef}
-                  src="/placeholder.mp4"
-                  muted
-                  loop
-                  playsInline
-                  autoPlay
-                  className="relative z-10 w-full h-full object-cover"
-                />
-                <button
-                  onClick={togglePlayPause}
-                  className="absolute inset-0 z-20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/20"
-                >
-                  <div className="w-16 h-16 rounded-full bg-[rgba(15,23,42,0.95)] backdrop-blur-sm border-2 border-white/30 flex items-center justify-center">
-                    {isPlaying ? (
-                      <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
-                      </svg>
-                    ) : (
-                      <svg className="w-8 h-8 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M8 5v14l11-7z" />
-                      </svg>
-                    )}
+          <div className="flex items-center justify-center w-full">
+            <div className="relative w-full max-w-[520px] bg-[rgba(6,9,22,0.95)] backdrop-blur-xl rounded-[32px] p-8 border-2 border-[rgba(252,211,77,0.6)] shadow-[0_0_0_1px_rgba(252,211,77,0.2),0_25px_50px_rgba(0,0,0,0.9),0_0_60px_rgba(255,138,31,0.15)]">
+              <div className="relative z-10">
+                <div className="flex justify-between items-center mb-6">
+                  <div className="px-4 py-2 rounded-full bg-[rgba(15,23,42,0.95)] border-2 border-[rgba(252,211,77,0.8)] backdrop-blur-sm shadow-lg">
+                    <span className="text-xs font-bold text-accent-orange-soft">Aperçu vidéo FLAZY</span>
                   </div>
-                </button>
+                  <div className="px-4 py-2 rounded-full text-[10px] bg-[rgba(15,23,42,0.95)] border-2 border-[rgba(252,211,77,0.8)] backdrop-blur-sm shadow-lg">
+                    <span className="text-accent-orange-soft font-bold">Vidéo IA virale 9:16</span>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-[1fr_1.2fr] gap-6 items-stretch">
+                  <div className="relative group">
+                    {/* Outer glow */}
+                    <div className="absolute -inset-1 bg-gradient-to-br from-accent-orange/30 via-accent-red/30 to-accent-orange/30 rounded-[20px] blur-lg opacity-60 group-hover:opacity-80 transition-opacity"></div>
+                    
+                    <div className="relative rounded-[20px] overflow-hidden bg-[#0a0e1a] aspect-[9/16] border-2 border-[rgba(252,211,77,0.9)] shadow-[inset_0_0_30px_rgba(0,0,0,0.5),0_10px_30px_rgba(0,0,0,0.8)]">
+                      <video
+                        ref={videoRef}
+                        src="/placeholder.mp4"
+                        muted
+                        loop
+                        playsInline
+                        autoPlay
+                        className="relative z-10 w-full h-full object-cover"
+                      />
+                      <button
+                        onClick={togglePlayPause}
+                        className="absolute inset-0 z-20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/40 backdrop-blur-sm"
+                      >
+                        <div className="relative w-16 h-16 rounded-full bg-[rgba(15,23,42,0.95)] border-2 border-[rgba(252,211,77,0.9)] flex items-center justify-center shadow-[0_0_20px_rgba(255,138,31,0.5),0_10px_30px_rgba(0,0,0,0.9)] backdrop-blur-sm hover:scale-110 transition-transform">
+                          {isPlaying ? (
+                            <svg className="w-7 h-7 text-accent-orange-soft ml-1" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
+                            </svg>
+                          ) : (
+                            <svg className="w-7 h-7 text-accent-orange-soft ml-1" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M8 5v14l11-7z" />
+                            </svg>
+                          )}
+                        </div>
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <div className="flex flex-col gap-4 justify-center">
+                    <div className="relative">
+                      <div className="text-lg font-bold bg-gradient-to-r from-accent-orange-soft via-accent-gold to-accent-orange-soft bg-clip-text text-transparent leading-tight">
+                        2,3M vues potentielles*
+                      </div>
+                      <div className="absolute -top-1 -right-1 w-3 h-3 bg-accent-orange rounded-full animate-pulse shadow-[0_0_10px_rgba(255,138,31,0.8)]"></div>
+                    </div>
+                    <div className="text-xs text-text-soft leading-relaxed bg-[rgba(15,23,42,0.6)] rounded-xl p-4 border border-[rgba(51,65,85,0.5)] backdrop-blur-sm">
+                      Hook optimisé pour capter l'attention dès la première seconde, montage adapté aux formats très courts.
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -411,13 +440,27 @@ function StepsSection() {
         </div>
         <div className="grid md:grid-cols-3 gap-8">
           {[
-            { step: '1', title: 'Remplissez le formulaire', desc: 'Décrivez votre vidéo et téléversez vos fichiers' },
-            { step: '2', title: 'Paiement sécurisé', desc: 'Effectuez le paiement via Stripe' },
-            { step: '3', title: 'Recevez votre vidéo', desc: 'Votre vidéo sera générée et livrée rapidement' },
+            { 
+              step: '1', 
+              title: 'Remplissez le formulaire', 
+              desc: 'Décrivez votre vidéo en détail : type de contenu, ambiance, message et langue. Téléversez vos fichiers vidéo si nécessaire. Plus votre description est précise, meilleur sera le résultat.' 
+            },
+            { 
+              step: '2', 
+              title: 'Paiement sécurisé', 
+              desc: 'Effectuez le paiement de manière sécurisée via Stripe. Vos informations sont protégées et cryptées. Vous recevez une confirmation par email avec le suivi de votre commande.' 
+            },
+            { 
+              step: '3', 
+              title: 'Recevez votre vidéo', 
+              desc: 'Votre vidéo est générée automatiquement en quelques minutes. Vous la recevez par email dans un format optimisé pour TikTok, Reels et YouTube Shorts, prête à être publiée.' 
+            },
           ].map((item) => (
-            <div key={item.step} className="bg-[rgba(6,9,22,0.8)] border border-[rgba(51,65,85,0.5)] rounded-2xl p-8">
-              <div className="text-4xl font-extrabold text-accent-orange mb-4">{item.step}</div>
-              <h3 className="text-xl font-bold mb-2">{item.title}</h3>
+            <div key={item.step} className="relative bg-[rgba(6,9,22,0.8)] border border-[rgba(51,65,85,0.5)] rounded-2xl p-8 pt-12">
+              <div className="absolute -top-5 -left-5 w-14 h-14 rounded-xl bg-gradient-to-br from-accent-orange to-accent-red flex items-center justify-center shadow-[0_8px_24px_rgba(255,138,31,0.4)] border-2 border-[rgba(6,9,22,0.9)] z-10">
+                <span className="text-2xl font-extrabold text-[#111827]">{item.step}</span>
+              </div>
+              <h3 className="text-xl font-bold mb-4">{item.title}</h3>
               <p className="text-text-soft">{item.desc}</p>
             </div>
           ))}
@@ -429,17 +472,108 @@ function StepsSection() {
 
 // Examples Section
 function ExamplesSection() {
+  const [playingIndex, setPlayingIndex] = useState<number | null>(null)
+  const videoRefs = useRef<(HTMLVideoElement | null)[]>([])
+
+  const examples = [
+    {
+      title: 'Vidéos Viralité',
+      tag: 'Interview / plateau / info',
+      desc: 'Formats type plateau TV, interview, témoignage ou info virale, pensés pour crédibiliser votre message et maximiser les vues et les partages.',
+    },
+    {
+      title: 'Vidéos Boost',
+      tag: 'Publicité et retours clients',
+      desc: 'Vidéos orientées conversion : publicité, mise en avant d\'offre, retours clients mis en scène et hooks puissants pour booster votre business.',
+    },
+    {
+      title: 'Motivation et Vibes',
+      tag: 'Mindset et lifestyle',
+      desc: 'Scènes stylées type voiture de luxe, skyline ou Dubaï avec messages motivants, listes pourquoi tu ne réussis pas ou citations impactantes.',
+    },
+    {
+      title: 'Divertissement',
+      tag: 'Humour et insolite',
+      desc: 'Contenus fun, insolites ou décalés pour divertir, faire réagir votre audience et alimenter vos comptes de manière régulière.',
+    },
+    {
+      title: 'Détente',
+      tag: 'ASMR, animaux et paysages',
+      desc: 'Vidéos relaxantes : sons doux, ASMR visuel, animaux, paysages esthétiques ou ambiance zen, parfaites pour des comptes chill et apaisants.',
+    },
+    {
+      title: 'Mystère et Frisson',
+      tag: 'Caméra de surveillance',
+      desc: 'Caméra de surveillance, ambiance thriller léger, bruits étranges, scènes bizarres mais safe pour le public. Idéal pour créer de la tension sans choquer.',
+    },
+  ]
+
+  const handleVideoClick = (index: number) => {
+    const video = videoRefs.current[index]
+    if (!video) return
+
+    if (playingIndex === index) {
+      // Pause if already playing
+      video.pause()
+      setPlayingIndex(null)
+    } else {
+      // Pause all other videos
+      videoRefs.current.forEach((v, i) => {
+        if (v && i !== index) {
+          v.pause()
+          v.currentTime = 0
+        }
+      })
+      // Play clicked video
+      video.play()
+      setPlayingIndex(index)
+    }
+  }
+
   return (
     <section id="examples" className="py-20 px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12">
-          <h2 className="text-3xl lg:text-4xl font-extrabold mb-4">Exemples</h2>
-          <p className="text-text-soft">Découvrez des vidéos créées avec FLAZY</p>
+          <div className="text-xs uppercase tracking-wider text-accent-orange-soft mb-2">Exemples de vidéos virales</div>
+          <h2 className="text-3xl lg:text-4xl font-extrabold mb-4">Aperçu des vidéos que vous pouvez générer avec FLAZY</h2>
+          <p className="text-text-soft max-w-3xl mx-auto">
+            Chaque exemple ci-dessous correspond à une catégorie FLAZY : Viralité, Boost, Motivation / Vibes, Divertissement, Détente et Mystère & Frisson.
+          </p>
         </div>
         <div className="grid md:grid-cols-3 gap-6">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="aspect-[9/16] rounded-2xl overflow-hidden bg-[rgba(6,9,22,0.8)] border border-[rgba(51,65,85,0.5)]">
-              <video src="/placeholder.mp4" muted loop playsInline className="w-full h-full object-cover" />
+          {examples.map((example, i) => (
+            <div
+              key={i}
+              className="bg-[radial-gradient(circle_at_top,rgba(255,138,31,0.16),transparent_60%),rgba(6,9,22,0.98)] border border-[rgba(252,211,77,0.85)] rounded-2xl p-4 flex flex-col gap-3 shadow-[0_18px_40px_rgba(0,0,0,0.8)]"
+            >
+              <div
+                className="w-full aspect-[9/16] rounded-2xl overflow-hidden border border-[rgba(252,211,77,0.7)] bg-[#020617] cursor-pointer relative group"
+                onClick={() => handleVideoClick(i)}
+              >
+                <video
+                  ref={(el) => (videoRefs.current[i] = el)}
+                  src="/placeholder.mp4"
+                  muted
+                  loop
+                  playsInline
+                  className="w-full h-full object-cover"
+                  onEnded={() => setPlayingIndex(null)}
+                />
+                {playingIndex !== i && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/20 transition-colors">
+                    <div className="w-16 h-16 rounded-full bg-[rgba(15,23,42,0.9)] border-2 border-white/30 flex items-center justify-center">
+                      <svg className="w-8 h-8 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M8 5v14l11-7z" />
+                      </svg>
+                    </div>
+                  </div>
+                )}
+              </div>
+              <div className="text-sm font-semibold text-text-main">{example.title}</div>
+              <div className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full border border-[rgba(252,211,77,0.8)] bg-[rgba(15,23,42,0.96)] text-accent-orange-soft w-fit">
+                {example.tag}
+              </div>
+              <p className="text-xs text-text-soft">{example.desc}</p>
             </div>
           ))}
         </div>
@@ -510,6 +644,35 @@ function FAQSection() {
   )
 }
 
+// Footer Component
+function Footer() {
+  const currentYear = new Date().getFullYear()
+
+  return (
+    <footer className="py-12 px-6 lg:px-8 border-t border-[rgba(30,41,59,0.9)] bg-[rgba(3,7,18,0.98)] text-[11px] text-text-muted">
+      <div className="max-w-7xl mx-auto">
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <div>© {currentYear} FLAZY. Tous droits réservés.</div>
+          <div className="flex gap-4 flex-wrap">
+            <a href="#" className="text-text-muted hover:text-text-main transition-colors">
+              Mentions légales
+            </a>
+            <a href="#" className="text-text-muted hover:text-text-main transition-colors">
+              Conditions générales
+            </a>
+            <a href="#" className="text-text-muted hover:text-text-main transition-colors">
+              Politique de confidentialité
+            </a>
+            <a href="mailto:Flazy.orders@gmail.com" className="text-text-muted hover:text-text-main transition-colors">
+              Flazy.orders@gmail.com
+            </a>
+          </div>
+        </div>
+      </div>
+    </footer>
+  )
+}
+
 // Main Page Component
 export default function Home() {
   return (
@@ -520,6 +683,7 @@ export default function Home() {
       <StepsSection />
       <ExamplesSection />
       <FAQSection />
+      <Footer />
     </main>
   )
 }
