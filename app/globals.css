@@ -5,29 +5,38 @@
 @layer base {
   body {
     @apply bg-bg-main text-text-main;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
       'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
       sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
+  
+  html {
+    scroll-behavior: smooth;
+  }
 }
 
 @keyframes flazyTopbar {
   0% {
-    transform: translateX(0);
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
   }
   100% {
-    transform: translateX(-50%);
+    background-position: 0% 50%;
   }
 }
 
 @keyframes flazyGradient {
-  0%,
-  100% {
+  0% {
     background-position: 0% 50%;
   }
   50% {
+    background-position: 50% 50%;
+  }
+  100% {
     background-position: 100% 50%;
   }
 }

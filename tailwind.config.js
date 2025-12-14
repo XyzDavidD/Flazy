@@ -19,21 +19,24 @@ module.exports = {
         'accent-gold': '#FCD34D',
       },
       animation: {
-        'flazy-topbar': 'flazyTopbar 20s linear infinite',
-        'flazy-gradient': 'flazyGradient 8s ease infinite',
+        'flazy-topbar': 'flazyTopbar 10s ease-in-out infinite alternate',
+        'flazy-gradient': 'flazyGradient 6s ease-in-out infinite alternate',
       },
       keyframes: {
         flazyTopbar: {
-          '0%': { transform: 'translateX(0)' },
-          '100%': { transform: 'translateX(-50%)' },
+          '0%': { backgroundPosition: '0% 50%' },
+          '50%': { backgroundPosition: '100% 50%' },
+          '100%': { backgroundPosition: '0% 50%' },
         },
         flazyGradient: {
-          '0%, 100%': { backgroundPosition: '0% 50%' },
-          '50%': { backgroundPosition: '100% 50%' },
+          '0%': { backgroundPosition: '0% 50%' },
+          '50%': { backgroundPosition: '50% 50%' },
+          '100%': { backgroundPosition: '100% 50%' },
         },
       },
     },
   },
   plugins: [],
 }
+
 
