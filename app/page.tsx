@@ -475,6 +475,10 @@ function ExamplesSection() {
   const [playingIndex, setPlayingIndex] = useState<number | null>(null)
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([])
 
+  const setVideoRef = (index: number) => (el: HTMLVideoElement | null) => {
+    videoRefs.current[index] = el
+  }
+
   const examples = [
     {
       title: 'Vidéos Viralité',
@@ -551,9 +555,7 @@ function ExamplesSection() {
                 onClick={() => handleVideoClick(i)}
               >
                 <video
-                  ref={(el) => {
-                    videoRefs.current[i] = el
-                  }}
+                  ref={setVideoRef(i)}
                   src="/placeholder.mp4"
                   muted
                   loop
