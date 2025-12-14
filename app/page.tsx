@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabaseClient'
 import {
@@ -18,6 +18,10 @@ import {
   TrendingUp,
   Users,
   Rocket,
+  Volume2,
+  VolumeX,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react'
 
 // Top Bar Component
@@ -125,12 +129,17 @@ function Header() {
         </div>
 
         <div className="flex items-center gap-2.5">
-          <Link
-            href="/carrousel"
+          <button
+            onClick={() => {
+              const element = document.getElementById('carousel')
+              if (element) {
+                element.scrollIntoView({ behavior: 'smooth' })
+              }
+            }}
             className="hidden sm:flex items-center justify-center px-4 py-2 rounded-full border border-[rgba(148,163,184,0.7)] bg-transparent text-text-soft text-[13px] font-semibold transition-all duration-[0.18s] ease-out hover:bg-[rgba(15,23,42,0.9)] hover:text-text-main hover:border-[rgba(203,213,225,0.9)]"
           >
             Feed
-          </Link>
+          </button>
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="lg:hidden p-2 text-text-soft"
@@ -362,6 +371,289 @@ function Hero() {
   )
 }
 
+// Carousel Component - EXACT LOGIC FROM CAROUSEL PAGE
+function CarouselSection() {
+  const [videos, setVideos] = useState<VideoData[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [currentIndex, setCurrentIndex] = useState(0)
+  const [isPlaying, setIsPlaying] = useState(true)
+  const [isMuted, setIsMuted] = useState(true)
+  const videoRef = useRef<HTMLVideoElement>(null)
+
+  interface VideoData {
+    id: string
+    videoUrl: string
+    pseudo: string
+    prompt: string
+  }
+
+  // Fetch videos from Supabase
+  useEffect(() => {
+    const fetchVideos = async () => {
+      try {
+        setIsLoading(true)
+
+        // Fetch submissions where payment_status = 'paid' AND allow_public = true
+        const { data, error } = await supabase
+          .from('submissions')
+          .select('id, name, prompt, video_path')
+          .eq('payment_status', 'paid')
+          .eq('allow_public', true)
+          .order('created_at', { ascending: false })
+
+        if (error) {
+          console.error('Error fetching videos:', error)
+          return
+        }
+
+        if (!data || data.length === 0) {
+          setVideos([])
+          return
+        }
+
+        // Map the data to VideoData format and handle video_path
+        const mappedVideos: VideoData[] = data.map((submission) => {
+          let videoUrl: string
+
+          // Check if video_path is already a full URL
+          if (submission.video_path.startsWith('http')) {
+            videoUrl = submission.video_path
+          } else {
+            // Get public URL from Supabase Storage
+            const { data: urlData } = supabase.storage
+              .from('videos')
+              .getPublicUrl(submission.video_path)
+            videoUrl = urlData.publicUrl
+          }
+
+          return {
+            id: submission.id,
+            videoUrl,
+            pseudo: submission.name,
+            prompt: submission.prompt,
+          }
+        })
+
+        setVideos(mappedVideos)
+      } catch (error) {
+        console.error('Error fetching videos:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchVideos()
+  }, [])
+
+  const currentVideo = videos[currentIndex]
+
+  // Navigate to previous video
+  const goToPrevious = useCallback(() => {
+    if (videos.length === 0) return
+    setCurrentIndex((prev) => (prev === 0 ? videos.length - 1 : prev - 1))
+    setIsPlaying(true)
+  }, [videos.length])
+
+  // Navigate to next video
+  const goToNext = useCallback(() => {
+    if (videos.length === 0) return
+    setCurrentIndex((prev) => (prev === videos.length - 1 ? 0 : prev + 1))
+    setIsPlaying(true)
+  }, [videos.length])
+
+  // Handle video play/pause
+  const togglePlayPause = useCallback(() => {
+    if (videoRef.current) {
+      if (isPlaying) {
+        videoRef.current.pause()
+      } else {
+        videoRef.current.play()
+      }
+      setIsPlaying(!isPlaying)
+    }
+  }, [isPlaying])
+
+  // Handle mute/unmute
+  const toggleMute = useCallback(() => {
+    if (videoRef.current) {
+      videoRef.current.muted = !isMuted
+      setIsMuted(!isMuted)
+    }
+  }, [isMuted])
+
+  // Reset video when index changes
+  useEffect(() => {
+    if (videoRef.current && currentVideo) {
+      videoRef.current.load()
+      videoRef.current.play().catch(() => {
+        // Autoplay might fail, handle silently
+      })
+      setIsPlaying(true)
+    }
+  }, [currentIndex, currentVideo])
+
+  // Sync state with video events
+  useEffect(() => {
+    const video = videoRef.current
+    if (video) {
+      const handlePlay = () => setIsPlaying(true)
+      const handlePause = () => setIsPlaying(false)
+
+      video.addEventListener('play', handlePlay)
+      video.addEventListener('pause', handlePause)
+
+      return () => {
+        video.removeEventListener('play', handlePlay)
+        video.removeEventListener('pause', handlePause)
+      }
+    }
+  }, [currentVideo])
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      // Only handle keyboard events when carousel is in view
+      const carouselSection = document.getElementById('carousel')
+      if (!carouselSection) return
+      
+      const rect = carouselSection.getBoundingClientRect()
+      const isInView = rect.top < window.innerHeight && rect.bottom > 0
+      
+      if (!isInView) return
+      
+      if (e.key === 'ArrowLeft') goToPrevious()
+      if (e.key === 'ArrowRight') goToNext()
+      if (e.key === ' ') {
+        e.preventDefault()
+        togglePlayPause()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyPress)
+    return () => window.removeEventListener('keydown', handleKeyPress)
+  }, [goToPrevious, goToNext, togglePlayPause])
+
+  return (
+    <section id="carousel" className="py-12 pb-4">
+      <div className="max-w-[1120px] mx-auto px-5">
+        <div className="text-left mb-8">
+          <div className="text-[11px] uppercase tracking-[0.16em] text-accent-orange-soft mb-1.5 font-semibold">
+            Carrousel public
+          </div>
+          <h2 className="text-[28px] lg:text-[32px] mb-3 font-extrabold leading-tight">
+            Découvrez les vidéos créées par la communauté FLAZY
+          </h2>
+          <p className="text-[14px] lg:text-[15px] text-text-soft max-w-[600px] leading-relaxed">
+            Parcourez les vidéos publiques partagées par nos utilisateurs.
+          </p>
+        </div>
+
+        {isLoading ? (
+          <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-6">
+            <div className="w-16 h-16 border-4 border-[rgba(252,211,77,0.3)] border-t-accent-orange-soft rounded-full animate-spin"></div>
+            <p className="text-text-soft text-lg">Chargement des vidéos...</p>
+          </div>
+        ) : videos.length === 0 ? (
+          <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
+            <Video className="w-16 h-16 text-text-muted mb-4" />
+            <p className="text-text-main text-xl font-semibold">Aucune vidéo publique pour le moment.</p>
+            <p className="text-text-soft text-sm">Revenez bientôt pour découvrir de nouvelles créations !</p>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center space-y-6">
+            <div className="relative group w-full max-w-md">
+              <div className="relative rounded-3xl overflow-hidden bg-[rgba(6,9,22,0.8)] backdrop-blur-sm border border-[rgba(252,211,77,0.3)] shadow-2xl aspect-[9/16]">
+                <div className="absolute -inset-1 bg-gradient-to-r from-accent-orange/20 via-accent-red/20 to-accent-orange/20 rounded-3xl blur-xl opacity-50"></div>
+
+                <video
+                  ref={videoRef}
+                  src={currentVideo?.videoUrl}
+                  muted={isMuted}
+                  loop
+                  playsInline
+                  autoPlay
+                  className="relative z-10 w-full h-full object-cover"
+                />
+
+                <div className="absolute inset-0 z-20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <div className="flex items-center gap-4">
+                    <button
+                      onClick={togglePlayPause}
+                      className="relative w-16 h-16 rounded-full flex items-center justify-center"
+                    >
+                      <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[#ff8a1f] via-[#ffd700] to-[#ff4b2b] opacity-60 blur-md"></div>
+                      <div className="relative w-14 h-14 rounded-full bg-gradient-to-br from-[rgba(15,23,42,0.98)] via-[rgba(15,23,42,0.95)] to-[rgba(6,9,22,0.98)] border-2 border-[rgba(252,211,77,0.8)] backdrop-blur-sm flex items-center justify-center shadow-[0_8px_32px_rgba(0,0,0,0.9),0_0_0_1px_rgba(252,211,77,0.3),inset_0_1px_0_rgba(255,255,255,0.1)]">
+                        {isPlaying ? (
+                          <svg className="w-7 h-7" viewBox="0 0 24 24" fill="none">
+                            <defs>
+                              <linearGradient id="carouselPauseGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stopColor="#ffd700" />
+                                <stop offset="50%" stopColor="#ff8a1f" />
+                                <stop offset="100%" stopColor="#ffffff" />
+                              </linearGradient>
+                            </defs>
+                            <rect x="6" y="4" width="4" height="16" rx="1" fill="url(#carouselPauseGradient)" />
+                            <rect x="14" y="4" width="4" height="16" rx="1" fill="url(#carouselPauseGradient)" />
+                          </svg>
+                        ) : (
+                          <svg className="w-7 h-7 ml-0.5" viewBox="0 0 24 24" fill="none">
+                            <defs>
+                              <linearGradient id="carouselPlayGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stopColor="#ffd700" />
+                                <stop offset="50%" stopColor="#ff8a1f" />
+                                <stop offset="100%" stopColor="#ffffff" />
+                              </linearGradient>
+                            </defs>
+                            <path d="M8 5v14l11-7z" fill="url(#carouselPlayGradient)" />
+                          </svg>
+                        )}
+                      </div>
+                    </button>
+
+                    <button
+                      onClick={toggleMute}
+                      className="relative w-16 h-16 rounded-full flex items-center justify-center"
+                    >
+                      <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[#ff8a1f] via-[#ffd700] to-[#ff4b2b] opacity-60 blur-md"></div>
+                      <div className="relative w-14 h-14 rounded-full bg-gradient-to-br from-[rgba(15,23,42,0.98)] via-[rgba(15,23,42,0.95)] to-[rgba(6,9,22,0.98)] border-2 border-[rgba(252,211,77,0.8)] backdrop-blur-sm flex items-center justify-center shadow-[0_8px_32px_rgba(0,0,0,0.9),0_0_0_1px_rgba(252,211,77,0.3),inset_0_1px_0_rgba(255,255,255,0.1)]">
+                        {isMuted ? (
+                          <VolumeX className="w-6 h-6 text-white drop-shadow-lg" />
+                        ) : (
+                          <Volume2 className="w-6 h-6 text-white drop-shadow-lg" />
+                        )}
+                      </div>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {videos.length > 1 && (
+                <>
+                  <button
+                    onClick={goToPrevious}
+                    className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 lg:-translate-x-12 w-12 h-12 lg:w-14 lg:h-14 rounded-full bg-[rgba(15,23,42,0.95)] backdrop-blur-sm border-2 border-[rgba(252,211,77,0.5)] flex items-center justify-center shadow-2xl transition-all duration-300 hover:scale-110 hover:border-[rgba(252,211,77,0.9)] hover:bg-[rgba(15,23,42,1)] z-30"
+                    aria-label="Vidéo précédente"
+                  >
+                    <ChevronLeft className="w-6 h-6 text-accent-orange-soft" />
+                  </button>
+
+                  <button
+                    onClick={goToNext}
+                    className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 lg:translate-x-12 w-12 h-12 lg:w-14 lg:h-14 rounded-full bg-[rgba(15,23,42,0.95)] backdrop-blur-sm border-2 border-[rgba(252,211,77,0.5)] flex items-center justify-center shadow-2xl transition-all duration-300 hover:scale-110 hover:border-[rgba(252,211,77,0.9)] hover:bg-[rgba(15,23,42,1)] z-30"
+                    aria-label="Vidéo suivante"
+                  >
+                    <ChevronRight className="w-6 h-6 text-accent-orange-soft" />
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    </section>
+  )
+}
+
 // Features/Why Section
 function FeaturesSection() {
   return (
@@ -456,7 +748,6 @@ function StepsSection() {
 
 // Form Section Component - KEEPING EXACT LOGIC FROM ORIGINAL
 function FormSection() {
-  const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [prompt, setPrompt] = useState('')
   const [allowPublic, setAllowPublic] = useState(false)
@@ -495,7 +786,7 @@ function FormSection() {
     e.preventDefault()
     setError(null)
 
-    if (!name || !email || !prompt || !videoFile) {
+    if (!email || !prompt || !videoFile) {
       setError('Veuillez remplir tous les champs requis.')
       return
     }
@@ -518,11 +809,14 @@ function FormSection() {
       console.log('Uploaded video path:', filePath)
       console.log('Video public URL:', videoPath)
 
+      // Extract name from email or use default
+      const defaultName = email.split('@')[0] || 'Client'
+
       console.log('Calling /api/create-checkout-session...')
       const res = await fetch('/api/create-checkout-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, prompt, allowPublic, videoPath }),
+        body: JSON.stringify({ name: defaultName, email, prompt, allowPublic, videoPath }),
       })
 
       console.log('create-checkout-session status:', res.status)
@@ -577,33 +871,6 @@ function FormSection() {
             </div>
 
             <div className="space-y-5">
-              <div>
-                <label htmlFor="name" className="block text-xs text-text-soft mb-2 font-medium">
-                  Nom complet
-                </label>
-                <input
-                  type="text"
-                  id="name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full px-4 py-3 rounded-2xl border border-[rgba(75,85,99,0.95)] bg-[rgba(15,23,42,0.96)] text-text-main text-[13px] outline-none transition-all duration-[0.18s] ease-out focus:border-accent-orange-soft focus:shadow-[0_0_0_1px_rgba(248,181,86,0.6)] focus:bg-[rgba(15,23,42,0.98)]"
-                  required
-                />
-              </div>
-
-              <div>
-                <label htmlFor="email" className="block text-xs text-text-soft mb-2 font-medium">
-                  Adresse email
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-3 rounded-2xl border border-[rgba(75,85,99,0.95)] bg-[rgba(15,23,42,0.96)] text-text-main text-[13px] outline-none transition-all duration-[0.18s] ease-out focus:border-accent-orange-soft focus:shadow-[0_0_0_1px_rgba(248,181,86,0.6)] focus:bg-[rgba(15,23,42,0.98)]"
-                  required
-                />
-              </div>
 
               <div>
                 <label htmlFor="prompt" className="block text-xs text-text-soft mb-2 font-medium">
@@ -673,13 +940,27 @@ function FormSection() {
                 </div>
               </div>
 
-              <div className="flex items-start gap-3">
+              <div>
+                <label htmlFor="email" className="block text-xs text-text-soft mb-2 font-medium">
+                  Adresse email
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full px-4 py-3 rounded-2xl border border-[rgba(75,85,99,0.95)] bg-[rgba(15,23,42,0.96)] text-text-main text-[13px] outline-none transition-all duration-[0.18s] ease-out focus:border-accent-orange-soft focus:shadow-[0_0_0_1px_rgba(248,181,86,0.6)] focus:bg-[rgba(15,23,42,0.98)]"
+                  required
+                />
+              </div>
+
+              <div className="flex items-center gap-3">
                 <input
                   type="checkbox"
                   id="allowPublic"
                   checked={allowPublic}
                   onChange={(e) => setAllowPublic(e.target.checked)}
-                  className="mt-1 w-4 h-4 rounded border-[rgba(75,85,99,0.95)] bg-[rgba(15,23,42,0.96)] text-accent-orange focus:ring-accent-orange"
+                  className="w-4 h-4 rounded border-[rgba(75,85,99,0.95)] bg-[rgba(15,23,42,0.96)] text-accent-orange focus:ring-accent-orange"
                 />
                 <label htmlFor="allowPublic" className="text-xs text-text-soft leading-relaxed">
                   J'autorise ma vidéo à être publiée dans le carrousel public de FLAZY.
@@ -1144,6 +1425,7 @@ export default function Home() {
       <Header />
       <main className="py-8 pb-12">
         <Hero />
+        <CarouselSection />
         <FeaturesSection />
         <StepsSection />
         <FormSection />
