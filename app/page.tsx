@@ -551,7 +551,9 @@ function ExamplesSection() {
                 onClick={() => handleVideoClick(i)}
               >
                 <video
-                  ref={(el) => (videoRefs.current[i] = el)}
+                  ref={(el) => {
+                    videoRefs.current[i] = el
+                  }}
                   src="/placeholder.mp4"
                   muted
                   loop
