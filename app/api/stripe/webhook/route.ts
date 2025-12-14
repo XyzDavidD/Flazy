@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { headers } from 'next/headers'
 import Stripe from 'stripe'
 import { supabase } from '@/lib/supabaseClient'
+import { sendAdminNotification } from '@/lib/email'
 
 export const runtime = 'nodejs'
 
@@ -46,15 +47,53 @@ export async function POST(req: Request) {
       const submissionId = session.metadata?.submissionId
 
       if (submissionId) {
-        const { data, error } = await supabase
+        // Update payment status to paid
+        const { data: updateData, error: updateError } = await supabase
           .from('submissions')
           .update({ payment_status: 'paid' })
           .eq('id', submissionId)
 
-        console.log('Supabase update result:', { data, error })
+        console.log('Supabase update result:', { data: updateData, error: updateError })
 
-        if (error) {
-          console.error('Error updating submission:', error)
+        if (updateError) {
+          console.error('Error updating submission:', updateError)
+        } else {
+          // Fetch the submission to get all details for email
+          const { data: submission, error: fetchError } = await supabase
+            .from('submissions')
+            .select('id, name, email, prompt, allow_public, video_path')
+            .eq('id', submissionId)
+            .single()
+
+          if (fetchError) {
+            console.error('Error fetching submission:', fetchError)
+          } else if (submission) {
+            // Compute videoUrl
+            let videoUrl: string
+            if (submission.video_path.startsWith('http')) {
+              videoUrl = submission.video_path
+            } else {
+              const { data: urlData } = supabase.storage
+                .from('videos')
+                .getPublicUrl(submission.video_path)
+              videoUrl = urlData.publicUrl
+            }
+
+            // Send admin notification email
+            try {
+              await sendAdminNotification({
+                submissionId: submission.id,
+                name: submission.name,
+                email: submission.email,
+                prompt: submission.prompt,
+                allowPublic: submission.allow_public || false,
+                videoUrl: videoUrl,
+              })
+            } catch (emailError) {
+              // Log error but don't fail the webhook
+              console.error('Error sending admin notification email:', emailError)
+            }
+          }
         }
       } else {
         console.warn('No submissionId found in session metadata')
