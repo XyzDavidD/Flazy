@@ -50,9 +50,7 @@ export async function POST(request: Request) {
       )
     }
 
-    const stripe = new Stripe(stripeSecretKey, {
-      apiVersion: '2025-11-17',
-    })
+    const stripe = new Stripe(stripeSecretKey)
 
     // Get Stripe price ID
     const stripePriceId = process.env.STRIPE_PRICE_ID

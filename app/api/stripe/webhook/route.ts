@@ -27,9 +27,7 @@ export async function POST(req: Request) {
       )
     }
 
-    const stripe = new Stripe(stripeSecretKey, {
-      apiVersion: '2025-11-17',
-    })
+    const stripe = new Stripe(stripeSecretKey)
 
     let event: Stripe.Event
 
