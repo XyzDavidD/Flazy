@@ -306,13 +306,14 @@ function CarouselSection() {
       try {
         setIsLoading(true)
 
-        // Fetch submissions where payment_status = 'paid' AND allow_public = true AND video_path is not null
+        // Fetch submissions where payment_status = 'paid' AND allow_public = true AND video_path is not null/empty
         const { data, error } = await supabase
           .from('submissions')
           .select('id, name, prompt, video_path')
           .eq('payment_status', 'paid')
           .eq('allow_public', true)
           .not('video_path', 'is', null)
+          .neq('video_path', '') // Also filter out empty strings
           .order('created_at', { ascending: false })
 
         if (error) {
@@ -327,7 +328,7 @@ function CarouselSection() {
 
         // Map the data to VideoData format and handle video_path
         const mappedVideos: VideoData[] = data
-          .filter((submission) => submission.video_path) // Additional safety check
+          .filter((submission) => submission.video_path && submission.video_path.trim() !== '') // Additional safety check for non-empty strings
           .map((submission) => {
             let videoUrl: string
 

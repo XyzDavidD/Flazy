@@ -68,9 +68,9 @@ export async function POST(req: Request) {
           if (fetchError) {
             console.error('Error fetching submission:', fetchError)
           } else if (submission) {
-            // Compute videoUrl only if video_path exists
+            // Compute videoUrl only if video_path exists and is not empty
             let videoUrl: string | null = null
-            if (submission.video_path) {
+            if (submission.video_path && submission.video_path.trim() !== '') {
               if (submission.video_path.startsWith('http')) {
                 videoUrl = submission.video_path
               } else {
