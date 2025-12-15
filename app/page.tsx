@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect, useCallback } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { supabase } from '@/lib/supabaseClient'
 import {
   Zap,
@@ -91,9 +92,14 @@ function Header() {
       <nav className="relative flex items-center justify-between py-[14px] px-5 max-w-[1120px] mx-auto">
         <div className="flex items-center gap-3">
           <Link href="/" className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-[radial-gradient(circle_at_20%_10%,#ffe29f,#ff8a1f_45%,#ff4b2b_90%)] flex items-center justify-center shadow-[0_0_0_1px_rgba(15,23,42,0.9),0_14px_30px_rgba(0,0,0,0.9)] text-lg font-extrabold text-[#111827]">
-              F
-            </div>
+            <Image
+              src="/logo.png"
+              alt="FLAZY Logo"
+              width={48}
+              height={48}
+              className="w-12 h-12"
+              priority
+            />
             <div>
               <div className="font-extrabold tracking-[0.08em] uppercase text-[15px]">FLAZY</div>
               <div className="text-[11px] text-text-muted">Vidéos IA virales prêtes à poster</div>
@@ -103,16 +109,16 @@ function Header() {
 
         <div className="hidden lg:flex items-center gap-[18px] text-[13px] text-text-muted absolute left-1/2 -translate-x-1/2">
           <button
-            onClick={() => scrollToSection('features')}
+            onClick={() => scrollToSection('prompt-zone')}
             className="relative cursor-pointer transition-colors duration-[0.18s] ease-out hover:text-text-main after:content-[''] after:absolute after:left-0 after:-bottom-[6px] after:w-0 after:h-0.5 after:rounded-full after:bg-gradient-to-r after:from-[#ffb347] after:via-[#ff8a1f] after:to-[#ff4b2b] after:transition-all after:duration-[0.18s] after:ease-out hover:after:w-[18px]"
           >
-            Fonctionnalités
+            Créer
           </button>
           <button
-            onClick={() => scrollToSection('steps')}
+            onClick={() => scrollToSection('examples')}
             className="relative cursor-pointer transition-colors duration-[0.18s] ease-out hover:text-text-main after:content-[''] after:absolute after:left-0 after:-bottom-[6px] after:w-0 after:h-0.5 after:rounded-full after:bg-gradient-to-r after:from-[#ffb347] after:via-[#ff8a1f] after:to-[#ff4b2b] after:transition-all after:duration-[0.18s] after:ease-out hover:after:w-[18px]"
           >
-            Comment ça marche
+            Exemples
           </button>
           <button
             onClick={() => scrollToSection('tarifs')}
@@ -152,16 +158,16 @@ function Header() {
       {mobileMenuOpen && (
         <div className="lg:hidden pb-4 px-5 space-y-2 border-t border-[rgba(51,65,85,0.5)] pt-4">
           <button
-            onClick={() => scrollToSection('features')}
+            onClick={() => scrollToSection('prompt-zone')}
             className="block w-full text-left px-4 py-2 text-sm text-text-soft hover:text-text-main transition-colors"
           >
-            Fonctionnalités
+            Créer
           </button>
           <button
-            onClick={() => scrollToSection('steps')}
+            onClick={() => scrollToSection('examples')}
             className="block w-full text-left px-4 py-2 text-sm text-text-soft hover:text-text-main transition-colors"
           >
-            Comment ça marche
+            Exemples
           </button>
           <button
             onClick={() => scrollToSection('tarifs')}
@@ -181,11 +187,8 @@ function Header() {
   )
 }
 
-// Hero Component with Video
+// Hero Component
 function Hero() {
-  const videoRef = useRef<HTMLVideoElement>(null)
-  const [isPlaying, setIsPlaying] = useState(false)
-
   const scrollToForm = () => {
     const element = document.getElementById('prompt-zone')
     if (element) {
@@ -200,22 +203,11 @@ function Hero() {
     }
   }
 
-  const togglePlayPause = () => {
-    if (videoRef.current) {
-      if (isPlaying) {
-        videoRef.current.pause()
-      } else {
-        videoRef.current.play()
-      }
-      setIsPlaying(!isPlaying)
-    }
-  }
-
   return (
     <section className="hero mt-2 pb-12">
       <div className="max-w-[1120px] mx-auto px-5">
-        <div className="grid lg:grid-cols-[1.3fr_1fr] gap-8 items-center">
-          <div className="hero-left">
+        <div className="flex justify-center">
+          <div className="hero-left max-w-[700px] text-center">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[rgba(15,23,42,0.9)] border border-[rgba(148,163,184,0.6)] text-text-soft text-xs mb-4">
               <span className="text-[#111827] rounded-full px-2.5 py-[3px] font-bold text-[11px] uppercase tracking-[0.08em] flex items-center gap-1" style={{
                 backgroundImage: 'linear-gradient(90deg, #ff6b00 0%, #ffd700 25%, #ff4b2b 50%, #ffd700 75%, #ff6b00 100%)',
@@ -235,12 +227,12 @@ function Hero() {
               </span>
             </h1>
 
-            <p className="mb-6 text-text-soft text-sm lg:text-base max-w-[480px] leading-relaxed">
+            <p className="mb-6 text-text-soft text-sm lg:text-base max-w-[480px] mx-auto leading-relaxed">
               Transformez vos idées en vidéos de 10 secondes prêtes à poster sur TikTok, Reels Instagram et
               YouTube Shorts. Simple, rapide et efficace.
             </p>
 
-            <div className="flex flex-wrap gap-2.5 mb-4">
+            <div className="flex flex-wrap gap-2.5 mb-4 justify-center">
               <button
                 onClick={scrollToForm}
                 className="relative overflow-hidden bg-transparent text-[#111827] shadow-[0_18px_45px_rgba(0,0,0,0.75)] z-0 rounded-full border-none text-[13px] font-semibold px-6 py-3 cursor-pointer inline-flex items-center gap-2 transition-all duration-[0.18s] ease-out hover:-translate-y-px hover:shadow-[0_22px_60px_rgba(0,0,0,0.95)]"
@@ -265,7 +257,7 @@ function Hero() {
               </button>
             </div>
 
-            <div className="flex flex-wrap gap-6 items-center text-xs text-white mt-4">
+            <div className="flex flex-wrap gap-6 items-center text-xs text-white mt-4 justify-center">
               <div className="inline-flex items-center gap-2">
                 <div className="w-[18px] h-[18px] rounded-full bg-[radial-gradient(circle_at_30%_0,#ffe29f,#ff8a1f_50%,#ff4b2b_90%)] flex items-center justify-center">
                   <Lock className="w-3 h-3 text-[#111827]" />
@@ -283,85 +275,6 @@ function Hero() {
                   <Zap className="w-3 h-3 text-[#111827]" />
                 </div>
                 <span>Résultats rapides</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="hero-right flex justify-end">
-            <div className="w-full max-w-[320px] rounded-[28px] p-4 pb-[18px] shadow-[0_18px_40px_rgba(0,0,0,0.8)] border border-[rgba(252,211,77,0.9)] relative overflow-hidden" style={{
-              background: `
-                radial-gradient(circle at top left, rgba(255, 138, 31, 0.32), transparent 60%),
-                radial-gradient(circle at bottom right, rgba(37, 99, 235, 0.35), transparent 60%),
-                #020617
-              `
-            }}>
-              <div className="flex justify-between items-center mb-3 text-[11px] text-text-soft">
-                <div className="px-2.5 py-1 rounded-full bg-[rgba(15,23,42,0.9)] border border-[rgba(252,211,77,0.9)]">
-                  Aperçu vidéo FLAZY
-                </div>
-                <div className="px-2 py-[3px] rounded-full text-[10px] bg-[rgba(15,23,42,0.9)] border border-[rgba(252,211,77,0.9)]">
-                  Vidéo IA virale 9:16
-                </div>
-              </div>
-
-              <div className="grid grid-cols-[0.9fr_1.1fr] gap-3 items-stretch">
-                <div className="relative rounded-[18px] overflow-hidden bg-[radial-gradient(circle_at_top,#0f172a,#020617)] aspect-[9/16] border border-[rgba(252,211,77,0.9)] group cursor-pointer">
-                  <video
-                    ref={videoRef}
-                    src="/placeholder.mp4"
-                    muted
-                    loop
-                    playsInline
-                    className="w-full h-full object-cover"
-                    onPlay={() => setIsPlaying(true)}
-                    onPause={() => setIsPlaying(false)}
-                  />
-                  <button
-                    onClick={togglePlayPause}
-                    className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300"
-                  >
-                    <div className="relative w-16 h-16 rounded-full flex items-center justify-center group/btn">
-                      {/* Outer glow */}
-                      <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[#ff8a1f] via-[#ffd700] to-[#ff4b2b] opacity-60 blur-md"></div>
-                      {/* Main button */}
-                      <div className="relative w-14 h-14 rounded-full bg-gradient-to-br from-[rgba(15,23,42,0.98)] via-[rgba(15,23,42,0.95)] to-[rgba(6,9,22,0.98)] border-2 border-[rgba(252,211,77,0.8)] backdrop-blur-sm flex items-center justify-center shadow-[0_8px_32px_rgba(0,0,0,0.9),0_0_0_1px_rgba(252,211,77,0.3),inset_0_1px_0_rgba(255,255,255,0.1)]">
-                        {isPlaying ? (
-                          <svg className="w-7 h-7 drop-shadow-lg" viewBox="0 0 24 24" fill="none">
-                            <defs>
-                              <linearGradient id="pauseGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="0%" stopColor="#ffd700" />
-                                <stop offset="50%" stopColor="#ff8a1f" />
-                                <stop offset="100%" stopColor="#ffffff" />
-                              </linearGradient>
-                            </defs>
-                            <rect x="6" y="4" width="4" height="16" rx="1" fill="url(#pauseGradient)" />
-                            <rect x="14" y="4" width="4" height="16" rx="1" fill="url(#pauseGradient)" />
-                          </svg>
-                        ) : (
-                          <svg className="w-7 h-7 ml-0.5 drop-shadow-lg" viewBox="0 0 24 24" fill="none">
-                            <defs>
-                              <linearGradient id="playGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="0%" stopColor="#ffd700" />
-                                <stop offset="50%" stopColor="#ff8a1f" />
-                                <stop offset="100%" stopColor="#ffffff" />
-                              </linearGradient>
-                            </defs>
-                            <path d="M8 5v14l11-7z" fill="url(#playGradient)" />
-                          </svg>
-                        )}
-                      </div>
-                    </div>
-                  </button>
-                </div>
-                <div className="text-[11px] text-text-soft flex flex-col gap-1.5 justify-center">
-                  <div className="text-[13px] font-semibold text-accent-orange-soft">
-                    2,3M vues potentielles*
-                  </div>
-                  <div className="text-[11px] text-text-muted leading-relaxed">
-                    Hook optimisé pour capter l'attention dès la première seconde, montage adapté aux formats
-                    très courts.
-                  </div>
-                </div>
               </div>
             </div>
           </div>
@@ -882,7 +795,7 @@ function FormSection() {
                   onChange={(e) => setPrompt(e.target.value)}
                   rows={6}
                   className="w-full min-h-[160px] resize-y rounded-2xl border border-[rgba(75,85,99,0.95)] bg-[rgba(15,23,42,0.96)] text-text-main px-4 py-3 text-[13px] outline-none transition-all duration-[0.18s] ease-out placeholder:text-text-muted focus:border-accent-orange-soft focus:shadow-[0_0_0_1px_rgba(248,181,86,0.6)] focus:bg-[rgba(15,23,42,0.98)]"
-                  placeholder="Exemple : Vidéo verticale 9:16 une femme 25 ans filmée en selfie dans une rue animée de Paris. Elle regarde la caméra et dit qu'elle a réussi à multiplier par 3 ses ventes grâce à des vidéos courtes postées tous les jours. Ton énergique, dynamique, sous-titres lisibles, idéal TikTok / Reels."
+                  placeholder="Exemple : Vidéo verticale 9:16, une femme de 28 ans en blazer élégant, debout devant la Tour Eiffel à Paris en fin d'après-midi, lumière dorée. Elle regarde la caméra et parle d'un ton enthousiaste en français, partageant comment elle a triplé ses ventes grâce à des vidéos quotidiennes. Montage dynamique, sous-titres lisibles, idéal TikTok/Reels."
                   required
                 />
               </div>
@@ -996,30 +909,7 @@ function FormSection() {
             )}
           </div>
 
-          <div className="text-[13px] text-text-soft space-y-4">
-            <div>
-              <strong className="text-text-main flex items-center gap-2 mb-3">
-                <Sparkles className="w-4 h-4 text-accent-orange-soft" />
-                Éléments à préciser dans votre prompt :
-              </strong>
-              <div className="flex flex-wrap gap-2">
-                {[
-                  'Format de prise de vue : Selfie POV, GoPro, caméra fixe',
-                  'Environnement : rue animée, intérieur, paysage urbain',
-                  'Météo et ambiance : soleil, nuit, pluie',
-                  'Personnage : âge, style vestimentaire, attitude',
-                  'Voix et langue : français, anglais, accent léger ou marqué',
-                  'Intention du message : informer, divertir, motiver',
-                ].map((chip, i) => (
-                  <div
-                    key={i}
-                    className="text-[11px] px-3 py-2 rounded-full border border-[rgba(75,85,99,0.95)] bg-[rgba(15,23,42,0.98)] hover:border-accent-orange-soft transition-colors cursor-default"
-                  >
-                    {chip}
-                  </div>
-                ))}
-              </div>
-            </div>
+          <div className="text-[13px] text-text-soft">
             <div className="p-4 rounded-xl bg-[rgba(15,23,42,0.5)] border border-[rgba(51,65,85,0.3)]">
               <p className="text-xs text-text-muted leading-relaxed m-0">
                 Une fois votre prompt envoyé, la vidéo est générée automatiquement en quelques minutes.<br />
@@ -1425,11 +1315,9 @@ export default function Home() {
       <Header />
       <main className="py-8 pb-12">
         <Hero />
-        <CarouselSection />
-        <FeaturesSection />
-        <StepsSection />
         <FormSection />
         <ExamplesSection />
+        <CarouselSection />
         <PricingSection />
         <FAQSection />
       </main>
