@@ -26,12 +26,13 @@ export default function CarrouselPage() {
       try {
         setIsLoading(true)
 
-        // Fetch submissions where payment_status = 'paid' AND allow_public = true
+        // Fetch submissions where payment_status = 'paid' AND allow_public = true AND video_path is not null
         const { data, error } = await supabase
           .from('submissions')
           .select('id, name, prompt, video_path')
           .eq('payment_status', 'paid')
           .eq('allow_public', true)
+          .not('video_path', 'is', null)
           .order('created_at', { ascending: false })
 
         if (error) {
@@ -45,27 +46,29 @@ export default function CarrouselPage() {
         }
 
         // Map the data to VideoData format and handle video_path
-        const mappedVideos: VideoData[] = data.map((submission) => {
-          let videoUrl: string
+        const mappedVideos: VideoData[] = data
+          .filter((submission) => submission.video_path) // Additional safety check
+          .map((submission) => {
+            let videoUrl: string
 
-          // Check if video_path is already a full URL
-          if (submission.video_path.startsWith('http')) {
-            videoUrl = submission.video_path
-          } else {
-            // Get public URL from Supabase Storage
-            const { data: urlData } = supabase.storage
-              .from('videos')
-              .getPublicUrl(submission.video_path)
-            videoUrl = urlData.publicUrl
-          }
+            // Check if video_path is already a full URL
+            if (submission.video_path.startsWith('http')) {
+              videoUrl = submission.video_path
+            } else {
+              // Get public URL from Supabase Storage
+              const { data: urlData } = supabase.storage
+                .from('videos')
+                .getPublicUrl(submission.video_path)
+              videoUrl = urlData.publicUrl
+            }
 
-          return {
-            id: submission.id,
-            videoUrl,
-            pseudo: submission.name,
-            prompt: submission.prompt,
-          }
-        })
+            return {
+              id: submission.id,
+              videoUrl,
+              pseudo: submission.name,
+              prompt: submission.prompt,
+            }
+          })
 
         setVideos(mappedVideos)
       } catch (error) {

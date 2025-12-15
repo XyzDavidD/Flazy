@@ -7,8 +7,8 @@ export async function POST(request: Request) {
     const body = await request.json()
     const { name, email, prompt, allowPublic, videoPath } = body
 
-    // Validate fields
-    if (!name || !email || !prompt || !videoPath) {
+    // Validate required fields (videoPath is now optional)
+    if (!name || !email || !prompt) {
       return NextResponse.json(
         { error: 'Tous les champs sont requis.' },
         { status: 400 }
@@ -23,8 +23,8 @@ export async function POST(request: Request) {
           name,
           email,
           prompt,
-          allow_public: allowPublic || false,
-          video_path: videoPath,
+          allow_public: false, // Always set to false when no video upload
+          video_path: videoPath || null, // Set to null if not provided
           payment_status: 'pending',
         },
       ])

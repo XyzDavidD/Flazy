@@ -68,15 +68,17 @@ export async function POST(req: Request) {
           if (fetchError) {
             console.error('Error fetching submission:', fetchError)
           } else if (submission) {
-            // Compute videoUrl
-            let videoUrl: string
-            if (submission.video_path.startsWith('http')) {
-              videoUrl = submission.video_path
-            } else {
-              const { data: urlData } = supabase.storage
-                .from('videos')
-                .getPublicUrl(submission.video_path)
-              videoUrl = urlData.publicUrl
+            // Compute videoUrl only if video_path exists
+            let videoUrl: string | null = null
+            if (submission.video_path) {
+              if (submission.video_path.startsWith('http')) {
+                videoUrl = submission.video_path
+              } else {
+                const { data: urlData } = supabase.storage
+                  .from('videos')
+                  .getPublicUrl(submission.video_path)
+                videoUrl = urlData.publicUrl
+              }
             }
 
             // Send admin notification email
@@ -87,7 +89,7 @@ export async function POST(req: Request) {
                 email: submission.email,
                 prompt: submission.prompt,
                 allowPublic: submission.allow_public || false,
-                videoUrl: videoUrl,
+                videoUrl: videoUrl || '', // Pass empty string if no video
               })
             } catch (emailError) {
               // Log error but don't fail the webhook

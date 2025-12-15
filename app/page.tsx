@@ -306,12 +306,13 @@ function CarouselSection() {
       try {
         setIsLoading(true)
 
-        // Fetch submissions where payment_status = 'paid' AND allow_public = true
+        // Fetch submissions where payment_status = 'paid' AND allow_public = true AND video_path is not null
         const { data, error } = await supabase
           .from('submissions')
           .select('id, name, prompt, video_path')
           .eq('payment_status', 'paid')
           .eq('allow_public', true)
+          .not('video_path', 'is', null)
           .order('created_at', { ascending: false })
 
         if (error) {
@@ -325,27 +326,29 @@ function CarouselSection() {
         }
 
         // Map the data to VideoData format and handle video_path
-        const mappedVideos: VideoData[] = data.map((submission) => {
-          let videoUrl: string
+        const mappedVideos: VideoData[] = data
+          .filter((submission) => submission.video_path) // Additional safety check
+          .map((submission) => {
+            let videoUrl: string
 
-          // Check if video_path is already a full URL
-          if (submission.video_path.startsWith('http')) {
-            videoUrl = submission.video_path
-          } else {
-            // Get public URL from Supabase Storage
-            const { data: urlData } = supabase.storage
-              .from('videos')
-              .getPublicUrl(submission.video_path)
-            videoUrl = urlData.publicUrl
-          }
+            // Check if video_path is already a full URL
+            if (submission.video_path.startsWith('http')) {
+              videoUrl = submission.video_path
+            } else {
+              // Get public URL from Supabase Storage
+              const { data: urlData } = supabase.storage
+                .from('videos')
+                .getPublicUrl(submission.video_path)
+              videoUrl = urlData.publicUrl
+            }
 
-          return {
-            id: submission.id,
-            videoUrl,
-            pseudo: submission.name,
-            prompt: submission.prompt,
-          }
-        })
+            return {
+              id: submission.id,
+              videoUrl,
+              pseudo: submission.name,
+              prompt: submission.prompt,
+            }
+          })
 
         setVideos(mappedVideos)
       } catch (error) {
@@ -663,43 +666,14 @@ function StepsSection() {
 function FormSection() {
   const [email, setEmail] = useState('')
   const [prompt, setPrompt] = useState('')
-  const [allowPublic, setAllowPublic] = useState(false)
-  const [videoFile, setVideoFile] = useState<File | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [dragActive, setDragActive] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
-
-  const handleDrag = (e: React.DragEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    if (e.type === 'dragenter' || e.type === 'dragover') {
-      setDragActive(true)
-    } else if (e.type === 'dragleave') {
-      setDragActive(false)
-    }
-  }
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setDragActive(false)
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      setVideoFile(e.dataTransfer.files[0])
-    }
-  }
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setVideoFile(e.target.files[0])
-    }
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
 
-    if (!email || !prompt || !videoFile) {
+    if (!email || !prompt) {
       setError('Veuillez remplir tous les champs requis.')
       return
     }
@@ -707,21 +681,6 @@ function FormSection() {
     setIsLoading(true)
 
     try {
-      const filePath = `flazy/${Date.now()}-${videoFile.name}`
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('videos')
-        .upload(filePath, videoFile)
-
-      if (uploadError) {
-        throw new Error(uploadError.message)
-      }
-
-      const { data: urlData } = supabase.storage.from('videos').getPublicUrl(filePath)
-      const videoPath = urlData.publicUrl
-
-      console.log('Uploaded video path:', filePath)
-      console.log('Video public URL:', videoPath)
-
       // Extract name from email or use default
       const defaultName = email.split('@')[0] || 'Client'
 
@@ -729,7 +688,7 @@ function FormSection() {
       const res = await fetch('/api/create-checkout-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: defaultName, email, prompt, allowPublic, videoPath }),
+        body: JSON.stringify({ name: defaultName, email, prompt, allowPublic: false }),
       })
 
       console.log('create-checkout-session status:', res.status)
@@ -801,59 +760,6 @@ function FormSection() {
               </div>
 
               <div>
-                <label className="block text-xs text-text-soft mb-2 font-medium">
-                  Téléversez votre vidéo
-                </label>
-                <div
-                  onDragEnter={handleDrag}
-                  onDragLeave={handleDrag}
-                  onDragOver={handleDrag}
-                  onDrop={handleDrop}
-                  className={`border-2 border-dashed rounded-2xl p-8 text-center transition-colors ${
-                    dragActive
-                      ? 'border-accent-orange-soft bg-[rgba(255,138,31,0.1)]'
-                      : 'border-[rgba(75,85,99,0.95)] bg-[rgba(15,23,42,0.3)]'
-                  }`}
-                >
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="video/*"
-                    onChange={handleFileChange}
-                    className="hidden"
-                  />
-                  {videoFile ? (
-                    <div className="space-y-2">
-                      <Video className="w-8 h-8 mx-auto text-accent-orange-soft" />
-                      <p className="text-text-main font-semibold text-sm">{videoFile.name}</p>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setVideoFile(null)
-                          if (fileInputRef.current) fileInputRef.current.value = ''
-                        }}
-                        className="text-xs text-accent-orange hover:underline"
-                      >
-                        Changer de fichier
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      <Video className="w-10 h-10 mx-auto text-text-muted" />
-                      <p className="text-text-soft text-sm">Glissez-déposez votre vidéo ici ou</p>
-                      <button
-                        type="button"
-                        onClick={() => fileInputRef.current?.click()}
-                        className="text-accent-orange hover:underline font-semibold text-sm"
-                      >
-                        Parcourir les fichiers
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div>
                 <label htmlFor="email" className="block text-xs text-text-soft mb-2 font-medium">
                   Adresse email
                 </label>
@@ -867,18 +773,6 @@ function FormSection() {
                 />
               </div>
 
-              <div className="flex items-center gap-3">
-                <input
-                  type="checkbox"
-                  id="allowPublic"
-                  checked={allowPublic}
-                  onChange={(e) => setAllowPublic(e.target.checked)}
-                  className="w-4 h-4 rounded border-[rgba(75,85,99,0.95)] bg-[rgba(15,23,42,0.96)] text-accent-orange focus:ring-accent-orange"
-                />
-                <label htmlFor="allowPublic" className="text-xs text-text-soft leading-relaxed">
-                  J'autorise ma vidéo à être publiée dans le carrousel public de FLAZY.
-                </label>
-              </div>
             </div>
 
             <div className="mt-6 flex items-center justify-between gap-4 text-[11px] text-text-muted">
