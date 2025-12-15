@@ -23,7 +23,7 @@ export async function POST(request: Request) {
           name,
           email,
           prompt,
-          allow_public: false, // Always set to false when no video upload
+          allow_public: allowPublic || false, // Use the value from the form
           video_path: videoPath || '', // Use empty string if not provided (database has NOT NULL constraint)
           payment_status: 'pending',
         },

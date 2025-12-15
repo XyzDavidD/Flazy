@@ -667,6 +667,7 @@ function StepsSection() {
 function FormSection() {
   const [email, setEmail] = useState('')
   const [prompt, setPrompt] = useState('')
+  const [allowPublic, setAllowPublic] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -689,7 +690,7 @@ function FormSection() {
       const res = await fetch('/api/create-checkout-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: defaultName, email, prompt, allowPublic: false }),
+        body: JSON.stringify({ name: defaultName, email, prompt, allowPublic }),
       })
 
       console.log('create-checkout-session status:', res.status)
@@ -772,6 +773,19 @@ function FormSection() {
                   className="w-full px-4 py-3 rounded-2xl border border-[rgba(75,85,99,0.95)] bg-[rgba(15,23,42,0.96)] text-text-main text-[13px] outline-none transition-all duration-[0.18s] ease-out focus:border-accent-orange-soft focus:shadow-[0_0_0_1px_rgba(248,181,86,0.6)] focus:bg-[rgba(15,23,42,0.98)]"
                   required
                 />
+              </div>
+
+              <div className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  id="allowPublic"
+                  checked={allowPublic}
+                  onChange={(e) => setAllowPublic(e.target.checked)}
+                  className="w-4 h-4 rounded border-[rgba(75,85,99,0.95)] bg-[rgba(15,23,42,0.96)] text-accent-orange focus:ring-accent-orange"
+                />
+                <label htmlFor="allowPublic" className="text-xs text-text-soft leading-relaxed">
+                  J'autorise ma vidéo à être publiée dans le carrousel public de FLAZY.
+                </label>
               </div>
 
             </div>
