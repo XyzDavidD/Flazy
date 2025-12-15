@@ -23,6 +23,7 @@ import {
   VolumeX,
   ChevronLeft,
   ChevronRight,
+  Loader2,
 } from 'lucide-react'
 
 // Top Bar Component
@@ -670,6 +671,20 @@ function FormSection() {
   const [allowPublic, setAllowPublic] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [activeGenerations, setActiveGenerations] = useState(18)
+
+  // Simulate dynamic activity indicator
+  useEffect(() => {
+    const interval = setInterval(() => {
+      // Randomly change the number between 15-35 to simulate activity
+      const baseNumber = 18
+      const variation = Math.floor(Math.random() * 20) - 10 // -10 to +10
+      const newNumber = Math.max(15, Math.min(35, baseNumber + variation))
+      setActiveGenerations(newNumber)
+    }, 3000) // Update every 3 seconds
+
+    return () => clearInterval(interval)
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -726,7 +741,26 @@ function FormSection() {
           <p className="text-[14px] lg:text-[15px] text-text-soft max-w-[600px] leading-relaxed">
             Donnez quelques indications simples et laissez FLAZY transformer vos idées en vidéos prêtes à poster.
           </p>
+          <div className="mt-4 inline-flex items-center px-4 py-2 rounded-full bg-[rgba(255,138,31,0.1)] border border-[rgba(255,138,31,0.3)]">
+            <div className="relative flex items-center w-2 h-2">
+              <div className="absolute w-2 h-2 bg-[#22c55e] rounded-full animate-pulse"></div>
+              <div className="absolute w-2 h-2 bg-[#22c55e] rounded-full animate-ping opacity-75"></div>
+            </div>
+            <span className="text-[13px] text-text-soft font-medium ml-2.5">
+              <strong className="text-accent-orange-soft">{activeGenerations}</strong> générations en cours
+            </span>
+          </div>
         </div>
+
+        {isLoading && (
+          <div className="mb-6 p-4 rounded-xl bg-[rgba(255,138,31,0.1)] border border-[rgba(255,138,31,0.3)] flex items-center gap-3">
+            <Loader2 className="w-5 h-5 text-accent-orange-soft animate-spin" />
+            <div>
+              <p className="text-sm font-semibold text-text-main">Génération en cours...</p>
+              <p className="text-xs text-text-soft">Veuillez patienter, votre vidéo est en cours de génération. Vous serez redirigé vers le paiement dans quelques instants.</p>
+            </div>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="grid md:grid-cols-[1.1fr_0.9fr] gap-8 items-start">
           <div
@@ -797,7 +831,7 @@ function FormSection() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="relative overflow-hidden bg-transparent text-[#111827] shadow-[0_18px_45px_rgba(0,0,0,0.75)] z-0 rounded-full border-none text-[13px] font-semibold px-[26px] py-3 h-[42px] inline-flex items-center justify-center whitespace-nowrap text-center min-w-[140px] transition-all duration-[0.18s] ease-out hover:-translate-y-px hover:shadow-[0_22px_60px_rgba(0,0,0,0.95)] disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+                className="relative overflow-hidden bg-transparent text-[#111827] shadow-[0_18px_45px_rgba(0,0,0,0.75)] z-0 rounded-full border-none text-[13px] font-semibold px-[26px] py-3 h-[42px] inline-flex items-center justify-center gap-2 whitespace-nowrap text-center min-w-[140px] transition-all duration-[0.18s] ease-out hover:-translate-y-px hover:shadow-[0_22px_60px_rgba(0,0,0,0.95)] disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0"
                 style={{
                   position: 'relative',
                 }}
@@ -807,7 +841,14 @@ function FormSection() {
                   backgroundSize: '220% 100%',
                   animation: 'flazyTopbar 10s ease-in-out infinite alternate'
                 }}></span>
-                {isLoading ? 'Téléversement...' : 'Générer'}
+                {isLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Génération en cours...</span>
+                  </>
+                ) : (
+                  'Générer'
+                )}
               </button>
             </div>
 
@@ -1012,6 +1053,7 @@ function PricingSection() {
       offer: '40 % Promo',
       desc: 'Idéal pour tester les vidéos IA et commencer à poster du contenu viral.',
       icon: Sparkles,
+      recommended: false,
     },
     {
       badge: 'Pack Creator',
@@ -1021,6 +1063,7 @@ function PricingSection() {
       offer: '40 % Promo',
       desc: 'Parfait pour publier régulièrement, tester de nombreux hooks et trouver ce qui fonctionne.',
       icon: Users,
+      recommended: true,
     },
     {
       badge: 'Pack Pro',
@@ -1030,6 +1073,7 @@ function PricingSection() {
       offer: '40 % Promo',
       desc: 'Idéal pour les créateurs sérieux, les business et les agences qui veulent accélérer leur croissance.',
       icon: TrendingUp,
+      recommended: false,
     },
     {
       badge: 'Pack Boost',
@@ -1039,6 +1083,7 @@ function PricingSection() {
       offer: '40 % Promo',
       desc: 'Le meilleur rapport quantité prix pour exploser votre présence sur les réseaux chaque mois.',
       icon: Rocket,
+      recommended: false,
     },
   ]
 
@@ -1063,42 +1108,77 @@ function PricingSection() {
           {pricingPlans.map((plan, i) => {
             const Icon = plan.icon
             return (
-              <div
-              key={i}
-              className="rounded-[22px] p-5 border border-[rgba(252,211,77,0.95)] shadow-[0_18px_40px_rgba(0,0,0,0.8)] flex flex-col gap-3 relative hover:border-[rgba(252,211,77,1)] transition-all duration-300"
-              style={{
-                background: `
-                  radial-gradient(circle at top, rgba(255, 138, 31, 0.18), transparent 60%),
-                  rgba(6, 9, 22, 0.98)
-                `
-              }}
-            >
-                <div className="flex items-center justify-between">
-                  <div className="text-[11px] uppercase tracking-[0.14em] text-accent-orange-soft font-semibold">
-                    {plan.badge}
+              <div key={i} className="relative">
+                {plan.recommended && (
+                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
+                    <div className="bg-gradient-to-br from-[#ff6b00] via-[#ffd700] to-[#ff4b2b] text-[#111827] text-[12px] font-bold uppercase tracking-wide px-5 py-2 rounded-full shadow-[0_4px_16px_rgba(0,0,0,0.5)] whitespace-nowrap">
+                      Le plus populaire
+                    </div>
                   </div>
-                  <Icon className="w-5 h-5 text-accent-orange-soft opacity-60" />
-                </div>
-                <div className="text-[13px] text-text-soft">{plan.name}</div>
-                <div className="text-xs text-text-muted line-through">{plan.oldPrice}</div>
-                <div className="flex items-baseline justify-between gap-2">
-                  <span className="text-2xl font-bold text-text-main">{plan.price}</span>
-                  <span className="text-[11px] px-2 py-1 rounded-full bg-[rgba(22,163,74,0.18)] border border-[rgba(22,163,74,0.8)] text-[#bbf7d0]">
-                    {plan.offer}
-                  </span>
-                </div>
-                <p className="text-xs text-text-soft min-h-[50px] leading-relaxed">{plan.desc}</p>
-                <div className="mt-auto pt-2">
-                  <button
-                    onClick={scrollToForm}
-                    className="w-full bg-transparent text-accent-orange-soft border border-[rgba(248,181,86,0.95)] shadow-[0_0_0_1px_rgba(248,181,86,0.4)] rounded-full text-[13px] font-semibold px-4 py-2.5 cursor-pointer inline-flex items-center justify-center gap-2 transition-all duration-[0.18s] ease-out hover:bg-[radial-gradient(circle_at_top_left,rgba(255,138,31,0.16),transparent_70%)] hover:border-[rgba(248,181,86,1)] hover:scale-105"
-                  >
-                    Choisir ce pack
-                  </button>
+                )}
+                <div
+                  className={`rounded-[22px] p-5 border shadow-[0_18px_40px_rgba(0,0,0,0.8)] flex flex-col gap-3 hover:border-[rgba(252,211,77,1)] transition-all duration-300 ${
+                    plan.recommended 
+                      ? 'border-2 border-[rgba(252,211,77,1)] pt-7' 
+                      : 'border border-[rgba(252,211,77,0.95)]'
+                  }`}
+                  style={{
+                    background: `
+                      radial-gradient(circle at top, rgba(255, 138, 31, ${plan.recommended ? '0.25' : '0.18'}), transparent 60%),
+                      rgba(6, 9, 22, 0.98)
+                    `
+                  }}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="text-[11px] uppercase tracking-[0.14em] text-accent-orange-soft font-semibold">
+                      {plan.badge}
+                    </div>
+                    <Icon className="w-5 h-5 text-accent-orange-soft opacity-60" />
+                  </div>
+                  <div className="text-[13px] text-text-soft">{plan.name}</div>
+                  <div className="text-[10px] text-text-muted italic">
+                    1 token = 1 génération
+                  </div>
+                  <div className="text-xs text-text-muted line-through">{plan.oldPrice}</div>
+                  <div className="flex items-baseline justify-between gap-2">
+                    <span className="text-2xl font-bold text-text-main">{plan.price}</span>
+                    <span className="text-[11px] px-2 py-1 rounded-full bg-[rgba(22,163,74,0.18)] border border-[rgba(22,163,74,0.8)] text-[#bbf7d0]">
+                      {plan.offer}
+                    </span>
+                  </div>
+                  <p className="text-xs text-text-soft min-h-[50px] leading-relaxed">{plan.desc}</p>
+                  <div className="mt-auto pt-2">
+                    <button
+                      onClick={scrollToForm}
+                      className="w-full bg-transparent text-accent-orange-soft border border-[rgba(248,181,86,0.95)] shadow-[0_0_0_1px_rgba(248,181,86,0.4)] rounded-full text-[13px] font-semibold px-4 py-2.5 cursor-pointer inline-flex items-center justify-center gap-2 transition-all duration-[0.18s] ease-out hover:bg-[radial-gradient(circle_at_top_left,rgba(255,138,31,0.16),transparent_70%)] hover:border-[rgba(248,181,86,1)] hover:scale-105"
+                    >
+                      Choisir ce pack
+                    </button>
+                  </div>
                 </div>
               </div>
             )
           })}
+        </div>
+
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-6 pt-6 border-t border-[rgba(51,65,85,0.3)]">
+          <div className="flex items-center gap-2 text-text-soft text-xs">
+            <Lock className="w-4 h-4 text-accent-orange-soft" />
+            <span>Paiement sécurisé SSL</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Image
+              src="/stripe.svg.png"
+              alt="Stripe - Paiement sécurisé"
+              width={60}
+              height={24}
+              className="h-6 w-auto opacity-80"
+            />
+          </div>
+          <div className="flex items-center gap-2 text-text-soft text-xs">
+            <Shield className="w-4 h-4 text-accent-orange-soft" />
+            <span>Données protégées</span>
+          </div>
         </div>
       </div>
     </section>
@@ -1111,12 +1191,32 @@ function FAQSection() {
 
   const faqs = [
     {
-      q: 'Quel est le délai de livraison de mes vidéos ?',
-      a: 'Le délai dépend du volume de demandes mais reste très rapide. En général, vos vidéos sont livrées <strong>en quelques minutes</strong> après la validation de votre prompt.',
+      q: 'Combien de temps faut-il pour générer mes vidéos ?',
+      a: 'Le temps de génération dépend de la demande actuelle, mais dans la plupart des cas, les vidéos sont générées <strong>en quelques minutes</strong> après la validation de votre prompt.',
     },
     {
-      q: 'Où puis-je utiliser mes vidéos virales ?',
-      a: 'Les vidéos sont optimisées pour les formats courts verticaux 9:16 (TikTok, Reels Instagram, YouTube Shorts, Facebook et autres plateformes mobiles), mais peuvent aussi être générées en <strong>format horizontal 16:9</strong> pour YouTube, vos publicités et autres supports. Vous pouvez les réutiliser sur tous vos comptes.',
+      q: 'Qui possède les vidéos générées ?',
+      a: 'Toutes les vidéos générées vous appartiennent à <strong>100%</strong>. Vous êtes libre de les utiliser à des fins personnelles ou professionnelles.',
+    },
+    {
+      q: 'Puis-je utiliser les vidéos à des fins commerciales ?',
+      a: 'Oui. Toutes les vidéos générées sur FLAZY peuvent être utilisées commercialement, <strong>sans frais supplémentaires</strong>.',
+    },
+    {
+      q: 'Les vidéos contiennent-elles un filigrane ?',
+      a: 'Par défaut, les vidéos sont livrées <strong>sans aucun filigrane</strong> et sont prêtes à être publiées.',
+    },
+    {
+      q: 'Où puis-je publier mes vidéos ?',
+      a: 'Les vidéos sont optimisées pour le format vertical 9:16 et peuvent être publiées sur TikTok, Instagram Reels, YouTube Shorts, Snapchat, Facebook et autres plateformes de contenu court.',
+    },
+    {
+      q: 'Que faire si je n\'aime pas le résultat ?',
+      a: 'Vous pouvez ajuster votre prompt et générer une nouvelle vidéo tant que vous avez des tokens disponibles.',
+    },
+    {
+      q: 'Mes prompts et vidéos générées sont-ils privés ?',
+      a: 'Oui. Les prompts et les vidéos générées sont <strong>privés</strong> et ne sont pas partagés publiquement.',
     },
     {
       q: 'Que se passe-t-il si j\'arrive au bout de mes tokens ?',
@@ -1177,6 +1277,81 @@ function FAQSection() {
   )
 }
 
+// How It Works Section
+function HowItWorksSection() {
+  const steps = [
+    {
+      number: '1',
+      title: 'Choisissez votre pack',
+      description: 'Sélectionnez le pack qui correspond à vos besoins (Starter, Creator, Pro ou Boost) et complétez votre paiement sécurisé.',
+      icon: CheckCircle2,
+    },
+    {
+      number: '2',
+      title: 'Décrivez votre vidéo',
+      description: 'Rédigez un prompt détaillé décrivant la vidéo que vous souhaitez générer : personnage, lieu, ton, style, etc.',
+      icon: Video,
+    },
+    {
+      number: '3',
+      title: 'Génération automatique',
+      description: 'Notre IA génère votre vidéo en quelques minutes. Vous recevez un email dès que votre vidéo est prête.',
+      icon: Rocket,
+    },
+    {
+      number: '4',
+      title: 'Publiez et monétisez',
+      description: 'Téléchargez votre vidéo et publiez-la sur TikTok, Reels, YouTube Shorts ou toute autre plateforme. Les vidéos vous appartiennent à 100%.',
+      icon: CheckCircle2,
+    },
+  ]
+
+  return (
+    <section className="py-12 pb-4">
+      <div className="max-w-[1120px] mx-auto px-5">
+        <div className="text-center mb-10">
+          <div className="text-[11px] uppercase tracking-[0.16em] text-accent-orange-soft mb-1.5 font-semibold">
+            Comment ça marche
+          </div>
+          <h2 className="text-[28px] lg:text-[32px] mb-3 font-extrabold leading-tight">
+            En 4 étapes simples, créez vos vidéos virales
+          </h2>
+          <p className="text-[14px] lg:text-[15px] text-text-soft max-w-[600px] mx-auto leading-relaxed">
+            Un processus simple et rapide pour générer des vidéos prêtes à poster en quelques minutes.
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {steps.map((step, index) => {
+            const Icon = step.icon
+            return (
+              <div
+                key={index}
+                className="relative rounded-[22px] p-6 border border-[rgba(252,211,77,0.7)] shadow-[0_18px_40px_rgba(0,0,0,0.8)] hover:border-[rgba(252,211,77,0.9)] transition-all duration-300"
+                style={{
+                  background: `
+                    radial-gradient(circle at top, rgba(255, 138, 31, 0.16), transparent 60%),
+                    rgba(6, 9, 22, 0.98)
+                  `
+                }}
+              >
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#ff8a1f] via-[#ffd700] to-[#ff4b2b] flex items-center justify-center text-[#111827] font-bold text-lg shadow-lg">
+                    {step.number}
+                  </div>
+                  <Icon className="w-6 h-6 text-accent-orange-soft" />
+                </div>
+                <h3 className="text-base font-bold text-text-main mb-2">{step.title}</h3>
+                <p className="text-xs text-text-soft leading-relaxed">{step.description}</p>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+    </section>
+  )
+}
+
 // Footer Component
 function Footer() {
   const currentYear = new Date().getFullYear()
@@ -1187,15 +1362,15 @@ function Footer() {
         <div className="flex items-center justify-between gap-2.5 flex-wrap">
           <div>© {currentYear} FLAZY. Tous droits réservés.</div>
           <div className="flex gap-3.5 flex-wrap">
-            <a href="#" className="text-text-muted hover:text-text-main transition-colors">
+            <Link href="/mentions-legales" className="text-text-muted hover:text-text-main transition-colors">
               Mentions légales
-            </a>
-            <a href="#" className="text-text-muted hover:text-text-main transition-colors">
+            </Link>
+            <Link href="/conditions-generales" className="text-text-muted hover:text-text-main transition-colors">
               Conditions générales
-            </a>
-            <a href="#" className="text-text-muted hover:text-text-main transition-colors">
+            </Link>
+            <Link href="/politique-confidentialite" className="text-text-muted hover:text-text-main transition-colors">
               Politique de confidentialité
-            </a>
+            </Link>
             <a
               href="mailto:Flazy.orders@gmail.com"
               className="text-text-muted hover:text-text-main transition-colors"
@@ -1229,6 +1404,7 @@ export default function Home() {
         <CarouselSection />
         <PricingSection />
         <FAQSection />
+        <HowItWorksSection />
       </main>
       <Footer />
     </div>
