@@ -612,7 +612,7 @@ function StepsSection() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className="grid md:grid-cols-3 gap-4 md:gap-5">
           {[
             {
               step: '1',
@@ -637,7 +637,7 @@ function StepsSection() {
             return (
               <div
               key={item.step}
-              className="rounded-[22px] p-6 border border-[rgba(252,211,77,0.65)] shadow-[0_18px_40px_rgba(0,0,0,0.8)] text-[13px] text-text-soft hover:border-[rgba(252,211,77,0.9)] transition-all duration-300"
+              className="rounded-[16px] p-3 md:p-4 border border-[rgba(252,211,77,0.65)] shadow-[0_8px_24px_rgba(0,0,0,0.6)] text-[13px] text-text-soft hover:border-[rgba(252,211,77,0.9)] transition-all duration-300"
               style={{
                 background: `
                   radial-gradient(circle at top left, rgba(255, 138, 31, 0.22), transparent 60%),
@@ -645,15 +645,12 @@ function StepsSection() {
                 `
               }}
             >
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-[32px] h-[32px] rounded-full bg-[radial-gradient(circle_at_20%_0,#ffe29f,#ff8a1f_45%,#ff4b2b_90%)] flex items-center justify-center text-[14px] text-[#111827] font-bold shadow-lg">
-                    {item.step}
+                <div className="flex items-start gap-3">
+                  <Icon className="w-5 h-5 md:w-6 md:h-6 text-accent-orange-soft flex-shrink-0 mt-0.5" />
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-[14px] md:text-base m-0 text-text-main font-semibold mb-1.5 leading-tight">{item.title}</h3>
+                    <p className="m-0 leading-relaxed text-[12px] md:text-[13px]">{item.text}</p>
                   </div>
-                  <h3 className="text-base m-0 text-text-main font-semibold">{item.title}</h3>
-                </div>
-                <p className="m-0 leading-relaxed">{item.text}</p>
-                <div className="mt-4 pt-4 border-t border-[rgba(51,65,85,0.3)]">
-                  <Icon className="w-5 h-5 text-accent-orange-soft" />
                 </div>
               </div>
             )
@@ -956,13 +953,13 @@ function ExamplesSection() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-5">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
           {examples.map((example, i) => {
             const Icon = example.icon
             return (
               <div
               key={i}
-              className="rounded-[22px] p-4 border border-[rgba(252,211,77,0.85)] shadow-[0_18px_40px_rgba(0,0,0,0.8)] text-xs text-text-soft flex flex-col gap-3 hover:border-[rgba(252,211,77,1)] transition-all duration-300"
+              className="rounded-[16px] p-3 border border-[rgba(252,211,77,0.85)] shadow-[0_8px_24px_rgba(0,0,0,0.6)] text-xs text-text-soft hover:border-[rgba(252,211,77,1)] transition-all duration-300 flex flex-col"
               style={{
                 background: `
                   radial-gradient(circle at top, rgba(255, 138, 31, 0.16), transparent 60%),
@@ -971,7 +968,7 @@ function ExamplesSection() {
               }}
             >
                 <div
-                  className="relative rounded-2xl overflow-hidden border border-[rgba(252,211,77,0.7)] aspect-[9/16] mx-auto bg-[#020617] max-w-[160px] cursor-pointer group"
+                  className="relative rounded-xl overflow-hidden border border-[rgba(252,211,77,0.7)] aspect-[9/16] w-full mb-2 bg-[#020617] cursor-pointer group"
                   onClick={() => handleVideoClick(i)}
                 >
                   <video
@@ -983,13 +980,13 @@ function ExamplesSection() {
                     className="w-full h-full block object-cover"
                   />
                   <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
-                    <div className="relative w-14 h-14 rounded-full flex items-center justify-center">
+                    <div className="relative w-10 h-10 rounded-full flex items-center justify-center">
                       {/* Outer glow */}
-                      <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[#ff8a1f] via-[#ffd700] to-[#ff4b2b] opacity-50 blur-lg"></div>
+                      <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[#ff8a1f] via-[#ffd700] to-[#ff4b2b] opacity-50 blur-md"></div>
                       {/* Main button */}
-                      <div className="relative w-12 h-12 rounded-full bg-gradient-to-br from-[rgba(15,23,42,0.98)] via-[rgba(15,23,42,0.95)] to-[rgba(6,9,22,0.98)] border-2 border-[rgba(252,211,77,0.8)] backdrop-blur-sm flex items-center justify-center shadow-[0_8px_32px_rgba(0,0,0,0.9),0_0_0_1px_rgba(252,211,77,0.3),inset_0_1px_0_rgba(255,255,255,0.1)]">
+                      <div className="relative w-8 h-8 rounded-full bg-gradient-to-br from-[rgba(15,23,42,0.98)] via-[rgba(15,23,42,0.95)] to-[rgba(6,9,22,0.98)] border-2 border-[rgba(252,211,77,0.8)] backdrop-blur-sm flex items-center justify-center shadow-[0_4px_16px_rgba(0,0,0,0.9),0_0_0_1px_rgba(252,211,77,0.3),inset_0_1px_0_rgba(255,255,255,0.1)]">
                         {playingIndex === i ? (
-                          <svg className="w-6 h-6 drop-shadow-lg" viewBox="0 0 24 24" fill="none">
+                          <svg className="w-4 h-4 drop-shadow-lg" viewBox="0 0 24 24" fill="none">
                             <defs>
                               <linearGradient id={`pauseGradient${i}`} x1="0%" y1="0%" x2="100%" y2="100%">
                                 <stop offset="0%" stopColor="#ffd700" />
@@ -1001,7 +998,7 @@ function ExamplesSection() {
                             <rect x="14" y="4" width="4" height="16" rx="1" fill={`url(#pauseGradient${i})`} />
                           </svg>
                         ) : (
-                          <svg className="w-6 h-6 ml-0.5 drop-shadow-lg" viewBox="0 0 24 24" fill="none">
+                          <svg className="w-4 h-4 ml-0.5 drop-shadow-lg" viewBox="0 0 24 24" fill="none">
                             <defs>
                               <linearGradient id={`playGradient${i}`} x1="0%" y1="0%" x2="100%" y2="100%">
                                 <stop offset="0%" stopColor="#ffd700" />
@@ -1016,16 +1013,13 @@ function ExamplesSection() {
                     </div>
                   </div>
                 </div>
-                <div className="flex items-start gap-2">
-                  <Icon className="w-4 h-4 text-accent-orange-soft mt-0.5 flex-shrink-0" />
-                  <div className="flex-1">
-                    <div className="text-[14px] font-semibold text-text-main mb-1">{example.title}</div>
-                    <div className="inline-flex items-center gap-1 text-[11px] px-2 py-1 rounded-full border border-[rgba(252,211,77,0.8)] bg-[rgba(15,23,42,0.96)] text-accent-orange-soft w-fit mb-2">
-                      {example.tag}
-                    </div>
-                    <p className="text-xs text-text-soft leading-relaxed m-0">{example.desc}</p>
+                <div className="flex items-start gap-2 mb-1.5">
+                  <Icon className="w-3.5 h-3.5 text-accent-orange-soft mt-0.5 flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-[12px] font-semibold text-text-main leading-tight">{example.title}</div>
                   </div>
                 </div>
+                <p className="text-[10px] text-text-soft leading-relaxed m-0 line-clamp-2">{example.desc}</p>
               </div>
             )
           })}
@@ -1091,16 +1085,11 @@ function PricingSection() {
     <section id="tarifs" className="py-12 pb-4">
       <div className="max-w-[1120px] mx-auto px-5">
         <div className="text-left mb-8">
-          <div className="text-[11px] uppercase tracking-[0.16em] text-accent-orange-soft mb-1.5 font-semibold">
-            Tarifs simples et lisibles
-          </div>
           <h2 className="text-[28px] lg:text-[32px] mb-3 font-extrabold leading-tight">
             Choisissez le pack qui correspond à votre rythme
           </h2>
           <p className="text-[14px] lg:text-[15px] text-text-soft max-w-[600px] leading-relaxed">
             Des packs attractifs et adaptés à tous les niveaux.
-            <br />
-            Plus le pack est élevé, plus le coût unitaire de la vidéo diminue.
           </p>
         </div>
 
@@ -1216,11 +1205,11 @@ function FAQSection() {
     },
     {
       q: 'Mes prompts et vidéos générées sont-ils privés ?',
-      a: 'Oui. Les prompts et les vidéos générées sont <strong>privés</strong> et ne sont pas partagés publiquement.',
+      a: 'Oui. Les prompts et les vidéos générées sont <strong>privés</strong> et ne sont pas partagés publiquement, sauf si vous avez explicitement approuvé l\'option « J\'autorise ma vidéo à être publiée dans le carrousel public de FLAZY. »',
     },
     {
       q: 'Que se passe-t-il si j\'arrive au bout de mes tokens ?',
-      a: 'Vous pouvez simplement reprendre un pack ou cumuler plusieurs abonnements. Les tokens sont <strong>cumulables</strong> afin de générer autant de vidéos que vous le souhaitez, sans bloquer votre rythme de publication.',
+      a: 'Vous pouvez simplement acheter des packs de tokens supplémentaires ou combiner plusieurs packs de tokens. Les tokens sont <strong>cumulables</strong>, vous permettant de générer autant de vidéos que vous le souhaitez, sans limiter votre rythme de publication.',
     },
   ]
 
@@ -1295,7 +1284,7 @@ function HowItWorksSection() {
     {
       number: '3',
       title: 'Génération automatique',
-      description: 'Notre IA génère votre vidéo en quelques minutes. Vous recevez un email dès que votre vidéo est prête.',
+      description: 'Notre IA génère votre vidéo en quelques minutes. Vos vidéos sont disponibles directement dans votre espace (Mes vidéos).',
       icon: Rocket,
     },
     {
@@ -1311,14 +1300,11 @@ function HowItWorksSection() {
       <div className="max-w-[1120px] mx-auto px-5">
         <div className="text-center mb-10">
           <div className="text-[11px] uppercase tracking-[0.16em] text-accent-orange-soft mb-1.5 font-semibold">
-            Comment ça marche
+            Comment ça fonctionne
           </div>
           <h2 className="text-[28px] lg:text-[32px] mb-3 font-extrabold leading-tight">
-            En 4 étapes simples, créez vos vidéos virales
+            Créez des vidéos virales en quelques minutes, grâce à un processus simple et fluide.
           </h2>
-          <p className="text-[14px] lg:text-[15px] text-text-soft max-w-[600px] mx-auto leading-relaxed">
-            Un processus simple et rapide pour générer des vidéos prêtes à poster en quelques minutes.
-          </p>
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
