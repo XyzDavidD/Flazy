@@ -607,8 +607,7 @@ function StepsSection() {
             En 3 étapes, vos vidéos IA sont prêtes à publier
           </h2>
           <p className="text-[14px] lg:text-[15px] text-text-soft max-w-[600px] leading-relaxed">
-            Choisissez votre pack, décrivez la vidéo que vous voulez, et recevez une vidéo prête à poster sur vos
-            réseaux.
+            Choisissez votre pack, décrivez la vidéo que vous voulez, et retrouvez vos vidéos prêtes à poster dans votre espace (Mes vidéos).
           </p>
         </div>
 
@@ -628,8 +627,8 @@ function StepsSection() {
             },
             {
               step: '3',
-              title: 'Recevez vos vidéos',
-              text: 'Vous recevez vos vidéos de 10 secondes prêtes à poster sur TikTok, Reels Instagram ou YouTube Shorts. Format optimisé, aucun montage à faire.',
+              title: 'Retrouvez vos vidéos',
+              text: 'Vos vidéos de 10 secondes sont disponibles dans votre espace (Mes vidéos), prêtes à poster sur TikTok, Reels Instagram ou YouTube Shorts. Format optimisé, aucun montage à faire.',
               icon: Rocket,
             },
           ].map((item) => {
@@ -860,7 +859,7 @@ function FormSection() {
             <div className="p-4 rounded-xl bg-[rgba(15,23,42,0.5)] border border-[rgba(51,65,85,0.3)]">
               <p className="text-xs text-text-muted leading-relaxed m-0">
                 Une fois votre prompt envoyé, la vidéo est générée automatiquement en quelques minutes.<br />
-                Vous la recevez directement par e-mail, prête à poster.
+                Elle est disponible dans votre espace (Mes vidéos), prête à poster.
               </p>
             </div>
           </div>
@@ -1019,7 +1018,7 @@ function ExamplesSection() {
                     <div className="text-[12px] font-semibold text-text-main leading-tight">{example.title}</div>
                   </div>
                 </div>
-                <p className="text-[10px] text-text-soft leading-relaxed m-0 line-clamp-2">{example.desc}</p>
+                <p className="text-[10px] text-text-soft leading-relaxed m-0">{example.desc}</p>
               </div>
             )
           })}
@@ -1041,41 +1040,41 @@ function PricingSection() {
   const pricingPlans = [
     {
       badge: 'Pack Starter',
-      name: '5 tokens vidéo',
-      oldPrice: '24,90€',
-      price: '14,90€',
-      offer: '40 % Promo',
-      desc: 'Idéal pour tester les vidéos IA et commencer à poster du contenu viral.',
+      name: '5 tokens',
+      oldPrice: '',
+      price: '€19.90',
+      offer: '',
+      desc: 'Ideal for testing the platform and generating your first AI videos.',
       icon: Sparkles,
       recommended: false,
     },
     {
       badge: 'Pack Creator',
-      name: '10 tokens vidéo',
-      oldPrice: '41,90€',
-      price: '24,90€',
-      offer: '40 % Promo',
-      desc: 'Parfait pour publier régulièrement, tester de nombreux hooks et trouver ce qui fonctionne.',
+      name: '10 tokens',
+      oldPrice: '',
+      price: '€34.90',
+      offer: '',
+      desc: 'Perfect for publishing regularly and testing different formats.',
       icon: Users,
       recommended: true,
     },
     {
       badge: 'Pack Pro',
-      name: '25 tokens vidéo',
-      oldPrice: '84,90€',
-      price: '49,90€',
-      offer: '40 % Promo',
-      desc: 'Idéal pour les créateurs sérieux, les business et les agences qui veulent accélérer leur croissance.',
+      name: '25 tokens',
+      oldPrice: '',
+      price: '€74.90',
+      offer: '',
+      desc: 'Designed for advanced creators, businesses, and agencies.',
       icon: TrendingUp,
       recommended: false,
     },
     {
       badge: 'Pack Boost',
-      name: '50 tokens vidéo',
-      oldPrice: '149,90€',
-      price: '89,90€',
-      offer: '40 % Promo',
-      desc: 'Le meilleur rapport quantité prix pour exploser votre présence sur les réseaux chaque mois.',
+      name: '50 tokens',
+      oldPrice: '',
+      offer: '',
+      price: '€139.90',
+      desc: 'Best value for high-volume creators and teams.',
       icon: Rocket,
       recommended: false,
     },
@@ -1093,7 +1092,7 @@ function PricingSection() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5 items-stretch">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-5 items-stretch">
           {pricingPlans.map((plan, i) => {
             const Icon = plan.icon
             return (
@@ -1101,7 +1100,7 @@ function PricingSection() {
                 {plan.recommended && (
                   <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
                     <div className="bg-gradient-to-br from-[#ff6b00] via-[#ffd700] to-[#ff4b2b] text-[#111827] text-[12px] font-bold uppercase tracking-wide px-5 py-2 rounded-full shadow-[0_4px_16px_rgba(0,0,0,0.5)] whitespace-nowrap">
-                      Le plus populaire
+                      Most popular
                     </div>
                   </div>
                 )}
@@ -1128,12 +1127,16 @@ function PricingSection() {
                   <div className="text-[10px] text-text-muted italic">
                     1 token = 1 génération
                   </div>
-                  <div className="text-xs text-text-muted line-through">{plan.oldPrice}</div>
+                  {plan.oldPrice && (
+                    <div className="text-xs text-text-muted line-through">{plan.oldPrice}</div>
+                  )}
                   <div className="flex items-baseline justify-between gap-2">
                     <span className="text-2xl font-bold text-text-main">{plan.price}</span>
-                    <span className="text-[11px] px-2 py-1 rounded-full bg-[rgba(22,163,74,0.18)] border border-[rgba(22,163,74,0.8)] text-[#bbf7d0]">
-                      {plan.offer}
-                    </span>
+                    {plan.offer && (
+                      <span className="text-[11px] px-2 py-1 rounded-full bg-[rgba(22,163,74,0.18)] border border-[rgba(22,163,74,0.8)] text-[#bbf7d0]">
+                        {plan.offer}
+                      </span>
+                    )}
                   </div>
                   <p className="text-xs text-text-soft min-h-[50px] leading-relaxed">{plan.desc}</p>
                   <div className="mt-auto pt-2">
@@ -1193,7 +1196,7 @@ function FAQSection() {
     },
     {
       q: 'Les vidéos contiennent-elles un filigrane ?',
-      a: 'Par défaut, les vidéos sont livrées <strong>sans aucun filigrane</strong> et sont prêtes à être publiées.',
+      a: 'Par défaut, les vidéos sont disponibles <strong>sans aucun filigrane</strong> et sont prêtes à être publiées.',
     },
     {
       q: 'Où puis-je publier mes vidéos ?',
@@ -1221,10 +1224,10 @@ function FAQSection() {
             Questions fréquentes
           </div>
           <h2 className="text-[28px] lg:text-[32px] mb-3 font-extrabold leading-tight">
-            Une offre simple sans prise de tête
+            Des réponses claires et transparentes
           </h2>
           <p className="text-[14px] lg:text-[15px] text-text-soft max-w-[600px] leading-relaxed">
-            Voici les réponses aux questions que l'on nous pose le plus souvent à propos de FLAZY.
+            Voici les informations essentielles à connaître sur FLAZY.
           </p>
         </div>
       </div>
@@ -1298,7 +1301,7 @@ function HowItWorksSection() {
   return (
     <section className="py-12 pb-4">
       <div className="max-w-[1120px] mx-auto px-5">
-        <div className="text-center mb-10">
+        <div className="text-center mb-6">
           <div className="text-[11px] uppercase tracking-[0.16em] text-accent-orange-soft mb-1.5 font-semibold">
             Comment ça fonctionne
           </div>
@@ -1307,13 +1310,13 @@ function HowItWorksSection() {
           </h2>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {steps.map((step, index) => {
             const Icon = step.icon
             return (
               <div
                 key={index}
-                className="relative rounded-[22px] p-6 border border-[rgba(252,211,77,0.7)] shadow-[0_18px_40px_rgba(0,0,0,0.8)] hover:border-[rgba(252,211,77,0.9)] transition-all duration-300"
+                className="relative rounded-[16px] p-4 border border-[rgba(252,211,77,0.7)] shadow-[0_8px_24px_rgba(0,0,0,0.6)] hover:border-[rgba(252,211,77,0.9)] transition-all duration-300"
                 style={{
                   background: `
                     radial-gradient(circle at top, rgba(255, 138, 31, 0.16), transparent 60%),
@@ -1321,14 +1324,14 @@ function HowItWorksSection() {
                   `
                 }}
               >
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#ff8a1f] via-[#ffd700] to-[#ff4b2b] flex items-center justify-center text-[#111827] font-bold text-lg shadow-lg">
+                <div className="flex items-center gap-2.5 mb-3">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#ff8a1f] via-[#ffd700] to-[#ff4b2b] flex items-center justify-center text-[#111827] font-bold text-sm shadow-lg flex-shrink-0">
                     {step.number}
                   </div>
-                  <Icon className="w-6 h-6 text-accent-orange-soft" />
+                  <Icon className="w-5 h-5 text-accent-orange-soft flex-shrink-0" />
                 </div>
-                <h3 className="text-base font-bold text-text-main mb-2">{step.title}</h3>
-                <p className="text-xs text-text-soft leading-relaxed">{step.description}</p>
+                <h3 className="text-sm font-bold text-text-main mb-1.5 leading-tight">{step.title}</h3>
+                <p className="text-[11px] text-text-soft leading-relaxed">{step.description}</p>
               </div>
             )
           })}
