@@ -27,10 +27,19 @@ export default function ConditionsGenerales() {
 
             <section>
               <h2 className="text-xl font-bold text-text-main mb-3">2. Description du service</h2>
-              <p>
+              <p className="mb-3">
                 FLAZY est une plateforme de génération de vidéos par intelligence artificielle permettant aux utilisateurs 
                 de créer des vidéos courtes à partir de prompts textuels. Le service est accessible via abonnement avec 
                 un système de tokens.
+              </p>
+              <p className="mb-3">
+                <strong>Limitations de l'intelligence artificielle :</strong> Le contenu généré est produit par des systèmes 
+                d'intelligence artificielle et peut contenir des erreurs, des approximations ou des incohérences.
+              </p>
+              <p>
+                <strong>Aucune garantie de résultats :</strong> FLAZY ne garantit pas l'exactitude, la qualité, la conformité 
+                ou l'adéquation du contenu généré pour un usage spécifique. L'utilisateur reconnaît que les résultats peuvent 
+                varier et que FLAZY ne peut être tenu responsable de la qualité ou de la pertinence du contenu généré.
               </p>
             </section>
 
@@ -42,7 +51,7 @@ export default function ConditionsGenerales() {
                 </p>
                 <p className="mb-3">
                   En utilisant FLAZY, vous vous engagez formellement à respecter les règles suivantes. 
-                  Toute violation peut entraîner la suspension immédiate de votre compte et des poursuites judiciaires.
+                  Toute violation peut entraîner la suspension immédiate de votre compte et, le cas échéant, des poursuites judiciaires.
                 </p>
                 
                 <h3 className="font-semibold text-text-main mb-2 mt-4">Contenu strictement interdit :</h3>
@@ -102,7 +111,19 @@ export default function ConditionsGenerales() {
             </section>
 
             <section>
-              <h2 className="text-xl font-bold text-text-main mb-3">7. Suspension et résiliation</h2>
+              <h2 className="text-xl font-bold text-text-main mb-3">7. Modération et droit de retrait</h2>
+              <p className="mb-3">
+                FLAZY se réserve le droit, à sa seule discrétion, de refuser, suspendre ou retirer tout contenu ou 
+                compte utilisateur qui ne respecte pas les présentes Conditions, sans préavis.
+              </p>
+              <p>
+                Cette mesure peut être prise en cas de non-conformité avec les règles d'utilisation, de violation 
+                des présentes conditions, ou pour toute autre raison légitime que FLAZY jugerait appropriée.
+              </p>
+            </section>
+
+            <section>
+              <h2 className="text-xl font-bold text-text-main mb-3">8. Suspension et résiliation</h2>
               <p>
                 FLAZY se réserve le droit de suspendre ou résilier votre compte à tout moment en cas de violation 
                 des présentes conditions, notamment en cas de génération de contenu interdit. Aucun remboursement 
@@ -111,7 +132,7 @@ export default function ConditionsGenerales() {
             </section>
 
             <section>
-              <h2 className="text-xl font-bold text-text-main mb-3">8. Modifications des conditions</h2>
+              <h2 className="text-xl font-bold text-text-main mb-3">9. Modifications des conditions</h2>
               <p>
                 FLAZY se réserve le droit de modifier les présentes conditions à tout moment. Les modifications 
                 entrent en vigueur dès leur publication. Il est de votre responsabilité de consulter régulièrement 
@@ -120,7 +141,7 @@ export default function ConditionsGenerales() {
             </section>
 
             <section>
-              <h2 className="text-xl font-bold text-text-main mb-3">9. Droit applicable et juridiction</h2>
+              <h2 className="text-xl font-bold text-text-main mb-3">10. Droit applicable et juridiction</h2>
               <p>
                 Les présentes conditions sont régies par le droit français. Tout litige sera soumis aux tribunaux 
                 compétents français.
@@ -141,3 +162,4 @@ export default function ConditionsGenerales() {
     </div>
   )
 }
+

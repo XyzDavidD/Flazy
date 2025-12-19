@@ -667,19 +667,36 @@ function FormSection() {
   const [allowPublic, setAllowPublic] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [activeGenerations, setActiveGenerations] = useState(18)
+  const [displayedGenerations, setDisplayedGenerations] = useState(5)
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const isActiveRef = useRef(true)
 
-  // Simulate dynamic activity indicator
+  // Simulate dynamic activity indicator (displayed number between 1-8)
   useEffect(() => {
-    const interval = setInterval(() => {
-      // Randomly change the number between 15-35 to simulate activity
-      const baseNumber = 18
-      const variation = Math.floor(Math.random() * 20) - 10 // -10 to +10
-      const newNumber = Math.max(15, Math.min(35, baseNumber + variation))
-      setActiveGenerations(newNumber)
-    }, 3000) // Update every 3 seconds
+    isActiveRef.current = true
+    
+    const updateDisplay = () => {
+      if (!isActiveRef.current) return
+      
+      // Randomly change the displayed number between 1-8
+      const newNumber = Math.floor(Math.random() * 8) + 1 // 1 to 8
+      setDisplayedGenerations(newNumber)
+      
+      // Schedule next update with random interval between 3-4 seconds
+      const nextInterval = 3000 + Math.floor(Math.random() * 1000) // 3000-4000ms
+      timeoutRef.current = setTimeout(updateDisplay, nextInterval)
+    }
 
-    return () => clearInterval(interval)
+    // Initial delay before first update
+    const initialDelay = 3000 + Math.floor(Math.random() * 1000)
+    timeoutRef.current = setTimeout(updateDisplay, initialDelay)
+
+    return () => {
+      isActiveRef.current = false
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current)
+      }
+    }
   }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -743,7 +760,7 @@ function FormSection() {
               <div className="absolute w-2 h-2 bg-[#22c55e] rounded-full animate-ping opacity-75"></div>
             </div>
             <span className="text-[13px] text-text-soft font-medium ml-2.5">
-              <strong className="text-accent-orange-soft">{activeGenerations}</strong> générations en cours
+              <strong className="text-accent-orange-soft">{displayedGenerations}</strong> générations en cours
             </span>
           </div>
         </div>
@@ -820,10 +837,7 @@ function FormSection() {
 
             </div>
 
-            <div className="mt-6 flex items-center justify-between gap-4 text-[11px] text-text-muted">
-              <div className="max-w-[280px] leading-relaxed">
-                Plus votre description est précise, plus le résultat colle à ce que vous imaginez.
-              </div>
+            <div className="mt-6 flex items-center justify-end gap-4 text-[11px] text-text-muted">
               <button
                 type="submit"
                 disabled={isLoading}
@@ -859,7 +873,7 @@ function FormSection() {
             <div className="p-4 rounded-xl bg-[rgba(15,23,42,0.5)] border border-[rgba(51,65,85,0.3)]">
               <p className="text-xs text-text-muted leading-relaxed m-0">
                 Une fois votre prompt envoyé, la vidéo est générée automatiquement en quelques minutes.<br />
-                Elle est disponible dans votre espace (Mes vidéos), prête à poster.
+                Elle est disponible dans votre espace (Mes vidéos).
               </p>
             </div>
           </div>
@@ -1044,7 +1058,7 @@ function PricingSection() {
       oldPrice: '',
       price: '€19.90',
       offer: '',
-      desc: 'Ideal for testing the platform and generating your first AI videos.',
+      desc: 'Idéal pour tester la plateforme et générer vos premières vidéos IA.',
       icon: Sparkles,
       recommended: false,
     },
@@ -1054,7 +1068,7 @@ function PricingSection() {
       oldPrice: '',
       price: '€34.90',
       offer: '',
-      desc: 'Perfect for publishing regularly and testing different formats.',
+      desc: 'Parfait pour publier régulièrement et tester différents formats.',
       icon: Users,
       recommended: true,
     },
@@ -1064,7 +1078,7 @@ function PricingSection() {
       oldPrice: '',
       price: '€74.90',
       offer: '',
-      desc: 'Designed for advanced creators, businesses, and agencies.',
+      desc: 'Conçu pour les créateurs avancés, les entreprises et les agences.',
       icon: TrendingUp,
       recommended: false,
     },
@@ -1074,7 +1088,7 @@ function PricingSection() {
       oldPrice: '',
       offer: '',
       price: '€139.90',
-      desc: 'Best value for high-volume creators and teams.',
+      desc: 'Meilleur rapport qualité-prix pour les créateurs à fort volume et les équipes.',
       icon: Rocket,
       recommended: false,
     },
@@ -1100,7 +1114,7 @@ function PricingSection() {
                 {plan.recommended && (
                   <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
                     <div className="bg-gradient-to-br from-[#ff6b00] via-[#ffd700] to-[#ff4b2b] text-[#111827] text-[12px] font-bold uppercase tracking-wide px-5 py-2 rounded-full shadow-[0_4px_16px_rgba(0,0,0,0.5)] whitespace-nowrap">
-                      Most popular
+                      Le plus populaire
                     </div>
                   </div>
                 )}
@@ -1324,13 +1338,10 @@ function HowItWorksSection() {
                   `
                 }}
               >
-                <div className="flex items-center gap-2.5 mb-3">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#ff8a1f] via-[#ffd700] to-[#ff4b2b] flex items-center justify-center text-[#111827] font-bold text-sm shadow-lg flex-shrink-0">
-                    {step.number}
-                  </div>
+                <div className="flex items-center gap-3 mb-2">
                   <Icon className="w-5 h-5 text-accent-orange-soft flex-shrink-0" />
+                  <h3 className="text-sm font-bold text-text-main leading-tight">{step.title}</h3>
                 </div>
-                <h3 className="text-sm font-bold text-text-main mb-1.5 leading-tight">{step.title}</h3>
                 <p className="text-[11px] text-text-soft leading-relaxed">{step.description}</p>
               </div>
             )
