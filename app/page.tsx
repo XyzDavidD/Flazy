@@ -205,7 +205,7 @@ function Hero() {
   }
 
   return (
-    <section className="hero mt-2 pb-12">
+    <section className="hero mt-2 pb-0">
       <div className="max-w-[1120px] mx-auto px-5">
         <div className="flex justify-center">
           <div className="hero-left max-w-[700px] text-center">
@@ -452,10 +452,10 @@ function CarouselSection() {
   }, [goToPrevious, goToNext, togglePlayPause])
 
   return (
-    <section id="carousel" className="py-12 pb-4">
+    <section id="carousel" className="py-8 md:py-10 pb-2 md:pb-4">
       <div className="max-w-[1120px] mx-auto px-5">
-        <div className="text-left mb-8">
-          <div className="text-[11px] uppercase tracking-[0.16em] text-accent-orange-soft mb-1.5 font-semibold">
+        <div className="text-left mb-6 md:mb-8">
+          <div className="text-[11px] uppercase tracking-[0.16em] mb-1.5 font-semibold bg-gradient-to-r from-[#ffb347] via-[#ff8a1f] to-[#ff4b2b] bg-clip-text text-transparent">
             Carrousel public
           </div>
           <h2 className="text-[28px] lg:text-[32px] mb-3 font-extrabold leading-tight">
@@ -575,10 +575,10 @@ function CarouselSection() {
 // Features/Why Section
 function FeaturesSection() {
   return (
-    <section id="features" className="py-12 pb-4">
+    <section id="features" className="py-8 md:py-10 pb-2 md:pb-4">
       <div className="max-w-[1120px] mx-auto px-5">
-        <div className="text-left mb-8">
-          <div className="text-[11px] uppercase tracking-[0.16em] text-accent-orange-soft mb-1.5 font-semibold">
+        <div className="text-left mb-6 md:mb-8">
+          <div className="text-[11px] uppercase tracking-[0.16em] mb-1.5 font-semibold bg-gradient-to-r from-[#ffb347] via-[#ff8a1f] to-[#ff4b2b] bg-clip-text text-transparent">
             Pourquoi choisir FLAZY
           </div>
           <h2 className="text-[28px] lg:text-[32px] mb-3 font-extrabold leading-tight">
@@ -597,10 +597,10 @@ function FeaturesSection() {
 // Steps Section
 function StepsSection() {
   return (
-    <section id="steps" className="steps pt-12 pb-4">
+    <section id="steps" className="steps pt-8 md:pt-10 pb-2 md:pb-4">
       <div className="max-w-[1120px] mx-auto px-5">
-        <div className="text-left mb-8">
-          <div className="text-[11px] uppercase tracking-[0.16em] text-accent-orange-soft mb-1.5 font-semibold">
+        <div className="text-left mb-6 md:mb-8">
+          <div className="text-[11px] uppercase tracking-[0.16em] mb-1.5 font-semibold bg-gradient-to-r from-[#ffb347] via-[#ff8a1f] to-[#ff4b2b] bg-clip-text text-transparent">
             Comment ça marche
           </div>
           <h2 className="text-[28px] lg:text-[32px] mb-3 font-extrabold leading-tight">
@@ -662,7 +662,6 @@ function StepsSection() {
 
 // Form Section Component - KEEPING EXACT LOGIC FROM ORIGINAL
 function FormSection() {
-  const [email, setEmail] = useState('')
   const [prompt, setPrompt] = useState('')
   const [allowPublic, setAllowPublic] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -703,7 +702,7 @@ function FormSection() {
     e.preventDefault()
     setError(null)
 
-    if (!email || !prompt) {
+    if (!prompt) {
       setError('Veuillez remplir tous les champs requis.')
       return
     }
@@ -711,14 +710,16 @@ function FormSection() {
     setIsLoading(true)
 
     try {
-      // Extract name from email or use default
-      const defaultName = email.split('@')[0] || 'Client'
+      // Generate placeholder email and name
+      const timestamp = Date.now()
+      const defaultName = 'Client'
+      const placeholderEmail = `client-${timestamp}@flazy.com`
 
       console.log('Calling /api/create-checkout-session...')
       const res = await fetch('/api/create-checkout-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: defaultName, email, prompt, allowPublic }),
+        body: JSON.stringify({ name: defaultName, email: placeholderEmail, prompt, allowPublic }),
       })
 
       console.log('create-checkout-session status:', res.status)
@@ -742,10 +743,10 @@ function FormSection() {
   }
 
   return (
-    <section className="prompt-section pt-16 pb-4">
+    <section className="prompt-section pt-10 md:pt-12 pb-2 md:pb-4">
       <div className="max-w-[1120px] mx-auto px-5">
-        <div className="text-left mb-8">
-          <div className="text-[11px] uppercase tracking-[0.16em] text-accent-orange-soft mb-1.5 font-semibold">
+        <div className="text-left mb-6 md:mb-8">
+          <div className="text-[11px] uppercase tracking-[0.16em] mb-1.5 font-semibold bg-gradient-to-r from-[#ffb347] via-[#ff8a1f] to-[#ff4b2b] bg-clip-text text-transparent">
             Décrivez la vidéo que vous voulez
           </div>
           <h2 className="text-[28px] lg:text-[32px] mb-3 font-extrabold leading-tight">
@@ -791,7 +792,7 @@ function FormSection() {
               <span className="font-semibold">Votre prompt</span>
             </div>
 
-            <div className="space-y-5">
+            <div className="space-y-4">
 
               <div>
                 <label htmlFor="prompt" className="block text-xs text-text-soft mb-2 font-medium">
@@ -804,20 +805,6 @@ function FormSection() {
                   rows={6}
                   className="w-full min-h-[160px] resize-y rounded-2xl border border-[rgba(75,85,99,0.95)] bg-[rgba(15,23,42,0.96)] text-text-main px-4 py-3 text-[13px] outline-none transition-all duration-[0.18s] ease-out placeholder:text-text-muted focus:border-accent-orange-soft focus:shadow-[0_0_0_1px_rgba(248,181,86,0.6)] focus:bg-[rgba(15,23,42,0.98)]"
                   placeholder="Exemple : Vidéo verticale 9:16, une femme de 28 ans en blazer élégant, debout devant la Tour Eiffel à Paris en fin d'après-midi, lumière dorée. Elle regarde la caméra et parle d'un ton enthousiaste en français, partageant comment elle a triplé ses ventes grâce à des vidéos quotidiennes. Montage dynamique, sous-titres lisibles, idéal TikTok/Reels."
-                  required
-                />
-              </div>
-
-              <div>
-                <label htmlFor="email" className="block text-xs text-text-soft mb-2 font-medium">
-                  Adresse email
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-3 rounded-2xl border border-[rgba(75,85,99,0.95)] bg-[rgba(15,23,42,0.96)] text-text-main text-[13px] outline-none transition-all duration-[0.18s] ease-out focus:border-accent-orange-soft focus:shadow-[0_0_0_1px_rgba(248,181,86,0.6)] focus:bg-[rgba(15,23,42,0.98)]"
                   required
                 />
               </div>
@@ -837,7 +824,7 @@ function FormSection() {
 
             </div>
 
-            <div className="mt-6 flex items-center justify-end gap-4 text-[11px] text-text-muted">
+            <div className="mt-4 flex items-center justify-end gap-4 text-[11px] text-text-muted">
               <button
                 type="submit"
                 disabled={isLoading}
@@ -951,10 +938,10 @@ function ExamplesSection() {
   }
 
   return (
-    <section id="examples" className="py-12 pb-4">
+    <section id="examples" className="py-8 md:py-10 pb-2 md:pb-4">
       <div className="max-w-[1120px] mx-auto px-5">
-        <div className="text-left mb-8">
-          <div className="text-[11px] uppercase tracking-[0.16em] text-accent-orange-soft mb-1.5 font-semibold">
+        <div className="text-left mb-6 md:mb-8">
+          <div className="text-[11px] uppercase tracking-[0.16em] mb-1.5 font-semibold bg-gradient-to-r from-[#ffb347] via-[#ff8a1f] to-[#ff4b2b] bg-clip-text text-transparent">
             Exemples de vidéos virales
           </div>
           <h2 className="text-[28px] lg:text-[32px] mb-3 font-extrabold leading-tight">
@@ -1095,9 +1082,9 @@ function PricingSection() {
   ]
 
   return (
-    <section id="tarifs" className="py-12 pb-4">
+    <section id="tarifs" className="py-8 md:py-10 pb-2 md:pb-4">
       <div className="max-w-[1120px] mx-auto px-5">
-        <div className="text-left mb-8">
+        <div className="text-left mb-6 md:mb-8">
           <h2 className="text-[28px] lg:text-[32px] mb-3 font-extrabold leading-tight">
             Choisissez le pack qui correspond à votre rythme
           </h2>
@@ -1106,11 +1093,11 @@ function PricingSection() {
           </p>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-5 items-stretch">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-5">
           {pricingPlans.map((plan, i) => {
             const Icon = plan.icon
             return (
-              <div key={i} className="relative">
+              <div key={i} className="relative flex flex-col h-full">
                 {plan.recommended && (
                   <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
                     <div className="bg-gradient-to-br from-[#ff6b00] via-[#ffd700] to-[#ff4b2b] text-[#111827] text-[12px] font-bold uppercase tracking-wide px-5 py-2 rounded-full shadow-[0_4px_16px_rgba(0,0,0,0.5)] whitespace-nowrap">
@@ -1119,7 +1106,7 @@ function PricingSection() {
                   </div>
                 )}
                 <div
-                  className={`rounded-[22px] p-5 border shadow-[0_18px_40px_rgba(0,0,0,0.8)] flex flex-col gap-3 hover:border-[rgba(252,211,77,1)] transition-all duration-300 ${
+                  className={`rounded-[22px] p-5 border shadow-[0_18px_40px_rgba(0,0,0,0.8)] flex flex-col gap-3 h-full hover:border-[rgba(252,211,77,1)] transition-all duration-300 ${
                     plan.recommended 
                       ? 'border-2 border-[rgba(252,211,77,1)] pt-7' 
                       : 'border border-[rgba(252,211,77,0.95)]'
@@ -1152,7 +1139,7 @@ function PricingSection() {
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-text-soft min-h-[50px] leading-relaxed">{plan.desc}</p>
+                  <p className="text-xs text-text-soft flex-grow leading-relaxed">{plan.desc}</p>
                   <div className="mt-auto pt-2">
                     <button
                       onClick={scrollToForm}
@@ -1231,10 +1218,10 @@ function FAQSection() {
   ]
 
   return (
-    <section id="faq" className="py-12 pb-4">
+    <section id="faq" className="py-8 md:py-10 pb-2 md:pb-4">
       <div className="max-w-[1120px] mx-auto px-5">
-        <div className="text-left mb-8">
-          <div className="text-[11px] uppercase tracking-[0.16em] text-accent-orange-soft mb-1.5 font-semibold">
+        <div className="text-left mb-6 md:mb-8">
+          <div className="text-[11px] uppercase tracking-[0.16em] mb-1.5 font-semibold bg-gradient-to-r from-[#ffb347] via-[#ff8a1f] to-[#ff4b2b] bg-clip-text text-transparent">
             Questions fréquentes
           </div>
           <h2 className="text-[28px] lg:text-[32px] mb-3 font-extrabold leading-tight">
@@ -1313,10 +1300,10 @@ function HowItWorksSection() {
   ]
 
   return (
-    <section className="py-12 pb-4">
+    <section className="py-8 md:py-10 pb-2 md:pb-4">
       <div className="max-w-[1120px] mx-auto px-5">
         <div className="text-center mb-6">
-          <div className="text-[11px] uppercase tracking-[0.16em] text-accent-orange-soft mb-1.5 font-semibold">
+          <div className="text-[11px] uppercase tracking-[0.16em] mb-1.5 font-semibold bg-gradient-to-r from-[#ffb347] via-[#ff8a1f] to-[#ff4b2b] bg-clip-text text-transparent">
             Comment ça fonctionne
           </div>
           <h2 className="text-[28px] lg:text-[32px] mb-3 font-extrabold leading-tight">
@@ -1389,7 +1376,7 @@ export default function Home() {
   return (
     <div className="min-h-screen" style={{
       background: `
-        radial-gradient(circle at top right, rgba(255, 138, 31, 0.24), transparent 58%),
+        radial-gradient(circle at top right, rgba(255, 138, 31, 0.4), transparent 58%),
         radial-gradient(circle at bottom left, rgba(56, 189, 248, 0.22), transparent 60%),
         radial-gradient(circle at bottom right, rgba(129, 140, 248, 0.4), transparent 58%),
         #020314
@@ -1397,7 +1384,7 @@ export default function Home() {
     }}>
       <TopBar />
       <Header />
-      <main className="py-8 pb-12">
+      <main className="py-6 pb-0">
         <Hero />
         <FormSection />
         <ExamplesSection />
