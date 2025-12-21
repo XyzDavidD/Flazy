@@ -98,7 +98,7 @@ function Header() {
               alt="FLAZY Logo"
               width={48}
               height={48}
-              className="w-12 h-12"
+              className="w-10 h-10 md:w-12 md:h-12"
               priority
             />
             <div>
@@ -804,7 +804,7 @@ function FormSection() {
                   onChange={(e) => setPrompt(e.target.value)}
                   rows={6}
                   className="w-full min-h-[160px] resize-y rounded-2xl border border-[rgba(75,85,99,0.95)] bg-[rgba(15,23,42,0.96)] text-text-main px-4 py-3 text-[13px] outline-none transition-all duration-[0.18s] ease-out placeholder:text-text-muted focus:border-accent-orange-soft focus:shadow-[0_0_0_1px_rgba(248,181,86,0.6)] focus:bg-[rgba(15,23,42,0.98)]"
-                  placeholder="Exemple : Vidéo verticale 9:16, une femme de 28 ans en blazer élégant, debout devant la Tour Eiffel à Paris en fin d'après-midi, lumière dorée. Elle regarde la caméra et parle d'un ton enthousiaste en français, partageant comment elle a triplé ses ventes grâce à des vidéos quotidiennes. Montage dynamique, sous-titres lisibles, idéal TikTok/Reels."
+                  placeholder="« Une femme élégante explique comment elle a augmenté ses ventes grâce aux vidéos courtes générées par l'IA. »"
                   required
                 />
               </div>
@@ -857,8 +857,8 @@ function FormSection() {
           </div>
 
           <div className="text-[13px] text-text-soft">
-            <div className="p-4 rounded-xl bg-[rgba(15,23,42,0.5)] border border-[rgba(51,65,85,0.3)]">
-              <p className="text-xs text-text-muted leading-relaxed m-0">
+            <div className="p-2.5 md:p-3 rounded-xl bg-[rgba(15,23,42,0.5)] border border-[rgba(51,65,85,0.3)]">
+              <p className="text-xs text-text-muted leading-snug md:leading-relaxed m-0">
                 Une fois votre prompt envoyé, la vidéo est générée automatiquement en quelques minutes.<br />
                 Elle est disponible dans votre espace (Mes vidéos).
               </p>
@@ -883,37 +883,37 @@ function ExamplesSection() {
     {
       title: 'Vidéos Viralité',
       tag: 'Interview / plateau / info',
-      desc: 'Formats type plateau TV, interview, témoignage ou info virale, pensés pour crédibiliser votre message et maximiser les vues et les partages.',
+      desc: 'Formats TV, interviews ou témoignages pensés pour crédibiliser votre message et maximiser la viralité.',
       icon: TrendingUp,
     },
     {
       title: 'Vidéos Boost',
       tag: 'Publicité et retours clients',
-      desc: 'Vidéos orientées conversion : publicité, mise en avant d\'offre, retours clients mis en scène et hooks puissants pour booster votre business.',
+      desc: 'Vidéos orientées conversion pour promouvoir une offre et booster vos ventes.',
       icon: Rocket,
     },
     {
       title: 'Motivation et Vibes',
       tag: 'Mindset et lifestyle',
-      desc: 'Scènes stylées type voiture de luxe, skyline ou Dubaï avec messages motivants, listes pourquoi tu ne réussis pas ou citations impactantes.',
+      desc: 'Scènes premium (luxe, skyline, Dubaï) avec messages motivants et citations impactantes.',
       icon: Sparkles,
     },
     {
       title: 'Divertissement',
       tag: 'Humour et insolite',
-      desc: 'Contenus fun, insolites ou décalés pour divertir, faire réagir votre audience et alimenter vos comptes de manière régulière.',
+      desc: 'Contenus fun et décalés pour engager votre audience et publier régulièrement.',
       icon: Video,
     },
     {
       title: 'Détente',
       tag: 'ASMR, animaux et paysages',
-      desc: 'Vidéos relaxantes : sons doux, ASMR visuel, animaux, paysages esthétiques ou ambiance zen, parfaites pour des comptes chill et apaisants.',
+      desc: 'Vidéos relaxantes et apaisantes pour une ambiance zen et chill.',
       icon: CheckCircle2,
     },
     {
       title: 'Mystère et Frisson',
       tag: 'Caméra de surveillance',
-      desc: 'Caméra de surveillance, ambiance thriller léger, bruits étranges, scènes bizarres mais safe pour le public. Idéal pour créer de la tension sans choquer.',
+      desc: 'Vidéos intrigantes et légères pour créer de la tension sans choquer.',
       icon: Shield,
     },
   ]
@@ -948,8 +948,7 @@ function ExamplesSection() {
             Aperçu des vidéos que vous pouvez générer avec FLAZY
           </h2>
           <p className="text-[14px] lg:text-[15px] text-text-soft max-w-[600px] leading-relaxed">
-            Chaque exemple ci-dessous correspond à une catégorie FLAZY : Viralité, Boost, Motivation / Vibes,
-            Divertissement, Détente et Mystère & Frisson.
+            Chaque exemple ci-dessous illustre un type de vidéo que vous pouvez générer avec FLAZY.
           </p>
         </div>
 
@@ -1118,11 +1117,11 @@ function PricingSection() {
                     `
                   }}
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="text-[11px] uppercase tracking-[0.14em] text-accent-orange-soft font-semibold">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="text-[11px] uppercase tracking-[0.14em] text-accent-orange-soft font-semibold flex-1 leading-tight">
                       {plan.badge}
                     </div>
-                    <Icon className="w-5 h-5 text-accent-orange-soft opacity-60" />
+                    <Icon className="w-5 h-5 text-accent-orange-soft opacity-60 flex-shrink-0" />
                   </div>
                   <div className="text-[13px] text-text-soft">{plan.name}</div>
                   <div className="text-[10px] text-text-muted italic">
