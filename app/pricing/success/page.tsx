@@ -3,9 +3,10 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { useSearchParams } from 'next/navigation'
+import { Suspense } from 'react'
 import { CheckCircle2 } from 'lucide-react'
 
-export default function PricingSuccessPage() {
+function SuccessContent() {
   const searchParams = useSearchParams()
   const sessionId = searchParams.get('session_id')
 
@@ -85,6 +86,25 @@ export default function PricingSuccessPage() {
         </div>
       </main>
     </div>
+  )
+}
+
+export default function PricingSuccessPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center" style={{
+        background: `
+          radial-gradient(circle at top right, rgba(255, 138, 31, 0.4), transparent 58%),
+          radial-gradient(circle at bottom left, rgba(56, 189, 248, 0.22), transparent 60%),
+          radial-gradient(circle at bottom right, rgba(129, 140, 248, 0.4), transparent 58%),
+          #020314
+        `
+      }}>
+        <div className="text-text-soft">Chargement...</div>
+      </div>
+    }>
+      <SuccessContent />
+    </Suspense>
   )
 }
 
