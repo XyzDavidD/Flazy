@@ -24,6 +24,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Loader2,
+  LogOut,
+  User,
 } from 'lucide-react'
 
 // Top Bar Component
@@ -79,6 +81,76 @@ function TopBar() {
 // Header Component
 function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [user, setUser] = useState<any>(null)
+  const [credits, setCredits] = useState<number | null>(null)
+  const [isLoadingAuth, setIsLoadingAuth] = useState(true)
+  const [accountDropdownOpen, setAccountDropdownOpen] = useState(false)
+
+  useEffect(() => {
+    // Check auth state
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        setUser(session.user)
+        fetchCredits(session.access_token)
+      } else {
+        setIsLoadingAuth(false)
+      }
+    })
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session?.user) {
+        setUser(session.user)
+        fetchCredits(session.access_token)
+      } else {
+        setUser(null)
+        setCredits(null)
+        setIsLoadingAuth(false)
+      }
+    })
+
+    // Listen for credits updates
+    const handleCreditsUpdate = () => {
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session?.user && session?.access_token) {
+          fetchCredits(session.access_token)
+        }
+      })
+    }
+
+    window.addEventListener('credits-updated', handleCreditsUpdate)
+
+    return () => {
+      subscription.unsubscribe()
+      window.removeEventListener('credits-updated', handleCreditsUpdate)
+    }
+  }, [])
+
+  const fetchCredits = async (accessToken: string) => {
+    try {
+      const response = await fetch('/api/me', {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+        },
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setCredits(data.credits)
+      }
+    } catch (error) {
+      console.error('Error fetching credits:', error)
+    } finally {
+      setIsLoadingAuth(false)
+    }
+  }
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut()
+    setUser(null)
+    setCredits(null)
+    setAccountDropdownOpen(false)
+  }
 
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id)
@@ -121,12 +193,12 @@ function Header() {
           >
             Exemples
           </button>
-          <button
-            onClick={() => scrollToSection('tarifs')}
+          <Link
+            href="/pricing"
             className="relative cursor-pointer transition-colors duration-[0.18s] ease-out hover:text-text-main after:content-[''] after:absolute after:left-0 after:-bottom-[6px] after:w-0 after:h-0.5 after:rounded-full after:bg-gradient-to-r after:from-[#ffb347] after:via-[#ff8a1f] after:to-[#ff4b2b] after:transition-all after:duration-[0.18s] after:ease-out hover:after:w-[18px]"
           >
             Tarifs
-          </button>
+          </Link>
           <button
             onClick={() => scrollToSection('faq')}
             className="relative cursor-pointer transition-colors duration-[0.18s] ease-out hover:text-text-main after:content-[''] after:absolute after:left-0 after:-bottom-[6px] after:w-0 after:h-0.5 after:rounded-full after:bg-gradient-to-r after:from-[#ffb347] after:via-[#ff8a1f] after:to-[#ff4b2b] after:transition-all after:duration-[0.18s] after:ease-out hover:after:w-[18px]"
@@ -135,18 +207,55 @@ function Header() {
           </button>
         </div>
 
-        <div className="flex items-center gap-2.5">
-          <button
-            onClick={() => {
-              const element = document.getElementById('carousel')
-              if (element) {
-                element.scrollIntoView({ behavior: 'smooth' })
-              }
-            }}
-            className="hidden sm:flex items-center justify-center px-4 py-2 rounded-full border border-[rgba(148,163,184,0.7)] bg-transparent text-text-soft text-[13px] font-semibold transition-all duration-[0.18s] ease-out hover:bg-[rgba(15,23,42,0.9)] hover:text-text-main hover:border-[rgba(203,213,225,0.9)]"
-          >
-            Feed
-          </button>
+        <div className="flex items-center gap-3">
+          {!isLoadingAuth && (
+            <>
+              {user ? (
+                <>
+                  <span className="hidden sm:inline-flex items-center gap-1.5 text-text-soft text-[12px] font-medium">
+                    <span className="text-accent-orange-soft font-semibold">{credits ?? 0}</span>
+                    <span>crédits</span>
+                  </span>
+                  <div className="hidden sm:block relative">
+                    <button
+                      onClick={() => setAccountDropdownOpen(!accountDropdownOpen)}
+                      className="flex items-center gap-2 px-4 py-2 rounded-full border border-[rgba(148,163,184,0.7)] bg-transparent text-text-soft text-[13px] font-semibold transition-all duration-[0.18s] ease-out hover:bg-[rgba(15,23,42,0.9)] hover:text-text-main hover:border-[rgba(203,213,225,0.9)]"
+                    >
+                      <User className="w-4 h-4" />
+                      Mon compte
+                      <ChevronDown className={`w-3 h-3 transition-transform ${accountDropdownOpen ? 'rotate-180' : ''}`} />
+                    </button>
+                    {accountDropdownOpen && (
+                      <div className="absolute right-0 mt-2 w-48 rounded-xl bg-[rgba(6,9,22,0.98)] border border-[rgba(252,211,77,0.75)] shadow-lg overflow-hidden z-50">
+                        <button
+                          onClick={handleLogout}
+                          className="w-full text-left px-4 py-3 text-sm text-text-soft hover:bg-[rgba(15,23,42,0.5)] transition-colors flex items-center gap-2"
+                        >
+                          <LogOut className="w-4 h-4" />
+                          Se déconnecter
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/auth/login"
+                    className="hidden sm:flex items-center justify-center px-4 py-2 rounded-full border border-[rgba(148,163,184,0.7)] bg-transparent text-text-soft text-[13px] font-semibold transition-all duration-[0.18s] ease-out hover:bg-[rgba(15,23,42,0.9)] hover:text-text-main hover:border-[rgba(203,213,225,0.9)]"
+                  >
+                    Se connecter
+                  </Link>
+                  <Link
+                    href="/auth/signup"
+                    className="hidden sm:flex items-center justify-center px-4 py-2 rounded-full border border-[rgba(148,163,184,0.7)] bg-transparent text-text-soft text-[13px] font-semibold transition-all duration-[0.18s] ease-out hover:bg-[rgba(15,23,42,0.9)] hover:text-text-main hover:border-[rgba(203,213,225,0.9)]"
+                  >
+                    S'inscrire
+                  </Link>
+                </>
+              )}
+            </>
+          )}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="lg:hidden p-2 text-text-soft"
@@ -170,18 +279,54 @@ function Header() {
           >
             Exemples
           </button>
-          <button
-            onClick={() => scrollToSection('tarifs')}
+          <Link
+            href="/pricing"
             className="block w-full text-left px-4 py-2 text-sm text-text-soft hover:text-text-main transition-colors"
+            onClick={() => setMobileMenuOpen(false)}
           >
             Tarifs
-          </button>
+          </Link>
           <button
             onClick={() => scrollToSection('faq')}
             className="block w-full text-left px-4 py-2 text-sm text-text-soft hover:text-text-main transition-colors"
           >
             FAQ
           </button>
+          {user ? (
+            <>
+              <div className="px-4 py-2 flex items-center gap-1.5 text-text-soft text-sm">
+                <span className="text-accent-orange-soft font-semibold">{credits ?? 0}</span>
+                <span>crédits</span>
+              </div>
+              <button
+                onClick={() => {
+                  handleLogout()
+                  setMobileMenuOpen(false)
+                }}
+                className="block w-full text-left px-4 py-2 text-sm text-text-soft hover:text-text-main transition-colors flex items-center gap-2"
+              >
+                <LogOut className="w-4 h-4" />
+                Se déconnecter
+              </button>
+            </>
+          ) : (
+            <>
+              <Link
+                href="/auth/login"
+                className="block w-full text-left px-4 py-2 text-sm text-text-soft hover:text-text-main transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Se connecter
+              </Link>
+              <Link
+                href="/auth/signup"
+                className="block w-full text-left px-4 py-2 text-sm text-text-soft hover:text-text-main transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                S'inscrire
+              </Link>
+            </>
+          )}
         </div>
       )}
     </header>
@@ -192,13 +337,6 @@ function Header() {
 function Hero() {
   const scrollToForm = () => {
     const element = document.getElementById('prompt-zone')
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' })
-    }
-  }
-
-  const scrollToPricing = () => {
-    const element = document.getElementById('tarifs')
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' })
     }
@@ -250,12 +388,12 @@ function Hero() {
                 Créer ma vidéo virale
               </button>
 
-              <button
-                onClick={scrollToPricing}
+              <Link
+                href="/pricing"
                 className="bg-transparent text-white border border-[rgba(248,181,86,0.95)] shadow-[0_0_0_1px_rgba(248,181,86,0.4)] rounded-full text-[13px] font-semibold px-6 py-3 cursor-pointer inline-flex items-center gap-2 transition-all duration-[0.18s] ease-out hover:bg-[radial-gradient(circle_at_top_left,rgba(255,138,31,0.16),transparent_70%)] hover:border-[rgba(248,181,86,1)]"
               >
                 Voir les offres et les packs
-              </button>
+              </Link>
             </div>
 
             <div className="flex flex-wrap gap-6 items-center text-xs text-white mt-4 justify-center">
@@ -297,24 +435,19 @@ function CarouselSection() {
   interface VideoData {
     id: string
     videoUrl: string
-    pseudo: string
-    prompt: string
   }
 
-  // Fetch videos from Supabase
+  // Fetch videos from carousel_videos table
   useEffect(() => {
     const fetchVideos = async () => {
       try {
         setIsLoading(true)
 
-        // Fetch submissions where payment_status = 'paid' AND allow_public = true AND video_path is not null/empty
+        // Fetch published videos from carousel_videos table
         const { data, error } = await supabase
-          .from('submissions')
-          .select('id, name, prompt, video_path')
-          .eq('payment_status', 'paid')
-          .eq('allow_public', true)
-          .not('video_path', 'is', null)
-          .neq('video_path', '') // Also filter out empty strings
+          .from('carousel_videos')
+          .select('id, video_path')
+          .eq('is_published', true)
           .order('created_at', { ascending: false })
 
         if (error) {
@@ -327,28 +460,18 @@ function CarouselSection() {
           return
         }
 
-        // Map the data to VideoData format and handle video_path
+        // Map the data to VideoData format and build public URLs
         const mappedVideos: VideoData[] = data
-          .filter((submission) => submission.video_path && submission.video_path.trim() !== '') // Additional safety check for non-empty strings
-          .map((submission) => {
-            let videoUrl: string
-
-            // Check if video_path is already a full URL
-            if (submission.video_path.startsWith('http')) {
-              videoUrl = submission.video_path
-            } else {
-              // Get public URL from Supabase Storage
-              const { data: urlData } = supabase.storage
-                .from('videos')
-                .getPublicUrl(submission.video_path)
-              videoUrl = urlData.publicUrl
-            }
-
+          .filter((video) => video.video_path && video.video_path.trim() !== '')
+          .map((video) => {
+            // Get public URL from Supabase Storage
+            const { data: urlData } = supabase.storage
+              .from('videos')
+              .getPublicUrl(video.video_path)
+            
             return {
-              id: submission.id,
-              videoUrl,
-              pseudo: submission.name,
-              prompt: submission.prompt,
+              id: video.id,
+              videoUrl: urlData.publicUrl,
             }
           })
 
@@ -462,7 +585,7 @@ function CarouselSection() {
             Découvrez les vidéos créées par la communauté FLAZY
           </h2>
           <p className="text-[14px] lg:text-[15px] text-text-soft max-w-[600px] leading-relaxed">
-            Parcourez les vidéos publiques partagées par nos utilisateurs.
+            Découvrez les dernières vidéos ajoutées au carrousel.
           </p>
         </div>
 
@@ -474,8 +597,8 @@ function CarouselSection() {
         ) : videos.length === 0 ? (
           <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
             <Video className="w-16 h-16 text-text-muted mb-4" />
-            <p className="text-text-main text-xl font-semibold">Aucune vidéo publique pour le moment.</p>
-            <p className="text-text-soft text-sm">Revenez bientôt pour découvrir de nouvelles créations !</p>
+            <p className="text-text-main text-xl font-semibold">Aucune vidéo disponible pour le moment.</p>
+            <p className="text-text-soft text-sm">Revenez bientôt pour découvrir de nouvelles vidéos !</p>
           </div>
         ) : (
           <div className="flex flex-col items-center space-y-6">
@@ -660,33 +783,75 @@ function StepsSection() {
   )
 }
 
-// Form Section Component - KEEPING EXACT LOGIC FROM ORIGINAL
+// Form Section Component
 function FormSection() {
   const [prompt, setPrompt] = useState('')
-  const [allowPublic, setAllowPublic] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState(false)
+  const [user, setUser] = useState<any>(null)
+  const [credits, setCredits] = useState<number | null>(null)
+  const [isLoadingAuth, setIsLoadingAuth] = useState(true)
   const [displayedGenerations, setDisplayedGenerations] = useState(5)
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
   const isActiveRef = useRef(true)
 
-  // Simulate dynamic activity indicator (displayed number between 1-8)
+  // Check auth state and fetch credits
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        setUser(session.user)
+        fetchCredits(session.access_token)
+      } else {
+        setIsLoadingAuth(false)
+      }
+    })
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session?.user) {
+        setUser(session.user)
+        fetchCredits(session.access_token)
+      } else {
+        setUser(null)
+        setCredits(null)
+        setIsLoadingAuth(false)
+      }
+    })
+
+    return () => subscription.unsubscribe()
+  }, [])
+
+  const fetchCredits = async (accessToken: string) => {
+    try {
+      const response = await fetch('/api/me', {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+        },
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setCredits(data.credits)
+      }
+    } catch (error) {
+      console.error('Error fetching credits:', error)
+    } finally {
+      setIsLoadingAuth(false)
+    }
+  }
+
+  // Simulate dynamic activity indicator
   useEffect(() => {
     isActiveRef.current = true
     
     const updateDisplay = () => {
       if (!isActiveRef.current) return
-      
-      // Randomly change the displayed number between 1-8
-      const newNumber = Math.floor(Math.random() * 8) + 1 // 1 to 8
+      const newNumber = Math.floor(Math.random() * 8) + 1
       setDisplayedGenerations(newNumber)
-      
-      // Schedule next update with random interval between 3-4 seconds
-      const nextInterval = 3000 + Math.floor(Math.random() * 1000) // 3000-4000ms
+      const nextInterval = 3000 + Math.floor(Math.random() * 1000)
       timeoutRef.current = setTimeout(updateDisplay, nextInterval)
     }
 
-    // Initial delay before first update
     const initialDelay = 3000 + Math.floor(Math.random() * 1000)
     timeoutRef.current = setTimeout(updateDisplay, initialDelay)
 
@@ -701,46 +866,59 @@ function FormSection() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
+    setSuccess(false)
 
-    if (!prompt) {
-      setError('Veuillez remplir tous les champs requis.')
+    if (!prompt.trim()) {
+      setError('Veuillez remplir le prompt.')
+      return
+    }
+
+    if (!user) {
+      setError('Vous devez être connecté pour générer une vidéo.')
       return
     }
 
     setIsLoading(true)
 
     try {
-      // Generate placeholder email and name
-      const timestamp = Date.now()
-      const defaultName = 'Client'
-      const placeholderEmail = `client-${timestamp}@flazy.com`
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session?.access_token) {
+        throw new Error('Session expirée. Veuillez vous reconnecter.')
+      }
 
-      console.log('Calling /api/create-checkout-session...')
-      const res = await fetch('/api/create-checkout-session', {
+      const res = await fetch('/api/generate', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: defaultName, email: placeholderEmail, prompt, allowPublic }),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ prompt: prompt.trim() }),
       })
 
-      console.log('create-checkout-session status:', res.status)
       const data = await res.json()
-      console.log('create-checkout-session response:', data)
 
       if (!res.ok) {
-        throw new Error(data.error || 'Erreur lors de la création de la session de paiement.')
+        throw new Error(data.error || 'Erreur lors de la génération.')
       }
 
-      if (data.url) {
-        window.location.href = data.url
-      } else {
-        throw new Error('URL de paiement non disponible.')
-      }
+      setSuccess(true)
+      setPrompt('')
+      setCredits(data.remainingCredits)
+      
+      // Refresh credits in header (trigger re-fetch)
+      window.dispatchEvent(new Event('credits-updated'))
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Une erreur est survenue. Veuillez réessayer.')
       console.error('Form submission error:', err)
+    } finally {
       setIsLoading(false)
     }
   }
+
+  const isLocked = !user || (user && credits !== null && credits <= 0)
+  const lockReason = !user 
+    ? 'Créez un compte et choisissez un pack pour générer des vidéos.'
+    : 'Choisissez un pack pour générer des vidéos.'
 
   return (
     <section className="prompt-section pt-10 md:pt-12 pb-2 md:pb-4">
@@ -766,27 +944,92 @@ function FormSection() {
           </div>
         </div>
 
+        {success && (
+          <div className="mb-6 p-4 rounded-xl bg-[rgba(34,197,94,0.15)] border border-[rgba(34,197,94,0.6)] flex items-center gap-3">
+            <CheckCircle2 className="w-5 h-5 text-[#86efac]" />
+            <div>
+              <p className="text-sm font-semibold text-[#86efac]">Prompt envoyé avec succès !</p>
+              <p className="text-xs text-[#86efac] opacity-80">Votre prompt a été transmis. Crédits restants : {credits ?? 0}</p>
+            </div>
+          </div>
+        )}
+
         {isLoading && (
           <div className="mb-6 p-4 rounded-xl bg-[rgba(255,138,31,0.1)] border border-[rgba(255,138,31,0.3)] flex items-center gap-3">
             <Loader2 className="w-5 h-5 text-accent-orange-soft animate-spin" />
             <div>
               <p className="text-sm font-semibold text-text-main">Génération en cours...</p>
-              <p className="text-xs text-text-soft">Veuillez patienter, votre vidéo est en cours de génération. Vous serez redirigé vers le paiement dans quelques instants.</p>
+              <p className="text-xs text-text-soft">Votre prompt est en cours de traitement.</p>
             </div>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="grid md:grid-cols-[1.1fr_0.9fr] gap-8 items-start">
-          <div
-            id="prompt-zone"
-            className="rounded-[22px] p-6 border border-[rgba(252,211,77,0.75)] shadow-[0_18px_40px_rgba(0,0,0,0.8)]"
-            style={{
-              background: `
-                radial-gradient(circle at top, rgba(255, 138, 31, 0.22), transparent 60%),
-                rgba(6, 9, 22, 0.98)
-              `
-            }}
-          >
+        <div className="relative">
+          {/* Locked Overlay - only show if locked */}
+          {isLocked && !isLoadingAuth && (
+            <div className="absolute inset-0 z-30 flex items-center justify-center rounded-[22px] backdrop-blur-sm bg-[rgba(0,0,0,0.3)]">
+              <div className="bg-[rgba(6,9,22,0.98)] rounded-[22px] p-8 border-2 border-[rgba(252,211,77,0.8)] shadow-[0_18px_40px_rgba(0,0,0,0.9)] max-w-md mx-4 text-center">
+                <Lock className="w-12 h-12 text-accent-orange-soft mx-auto mb-4" />
+                <h3 className="text-2xl font-extrabold text-text-main mb-3">Accès réservé</h3>
+                <p className="text-sm text-text-soft mb-6 leading-relaxed">
+                  {lockReason}
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                  {!user ? (
+                    <>
+                      <Link
+                        href="/auth/signup"
+                        className="relative overflow-hidden bg-transparent text-[#111827] shadow-[0_18px_45px_rgba(0,0,0,0.75)] z-0 rounded-full border-none text-[13px] font-semibold px-6 py-3 inline-flex items-center justify-center gap-2 transition-all duration-[0.18s] ease-out hover:-translate-y-px hover:shadow-[0_22px_60px_rgba(0,0,0,0.95)]"
+                        style={{
+                          position: 'relative',
+                        }}
+                      >
+                        <span className="absolute inset-0 -z-10 rounded-full" style={{
+                          backgroundImage: 'linear-gradient(90deg, #ff6b00 0%, #ffd700 25%, #ff4b2b 50%, #ffd700 75%, #ff6b00 100%)',
+                          backgroundSize: '220% 100%',
+                          animation: 'flazyTopbar 10s ease-in-out infinite alternate'
+                        }}></span>
+                        Créer un compte
+                      </Link>
+                      <Link
+                        href="/pricing"
+                        className="bg-transparent text-accent-orange-soft border border-[rgba(248,181,86,0.95)] shadow-[0_0_0_1px_rgba(248,181,86,0.4)] rounded-full text-[13px] font-semibold px-6 py-3 inline-flex items-center justify-center gap-2 transition-all duration-[0.18s] ease-out hover:bg-[radial-gradient(circle_at_top_left,rgba(255,138,31,0.16),transparent_70%)] hover:border-[rgba(248,181,86,1)]"
+                      >
+                        Voir les packs
+                      </Link>
+                    </>
+                  ) : (
+                    <Link
+                      href="/pricing"
+                      className="relative overflow-hidden bg-transparent text-[#111827] shadow-[0_18px_45px_rgba(0,0,0,0.75)] z-0 rounded-full border-none text-[13px] font-semibold px-6 py-3 inline-flex items-center justify-center gap-2 transition-all duration-[0.18s] ease-out hover:-translate-y-px hover:shadow-[0_22px_60px_rgba(0,0,0,0.95)]"
+                      style={{
+                        position: 'relative',
+                      }}
+                    >
+                      <span className="absolute inset-0 -z-10 rounded-full" style={{
+                        backgroundImage: 'linear-gradient(90deg, #ff6b00 0%, #ffd700 25%, #ff4b2b 50%, #ffd700 75%, #ff6b00 100%)',
+                        backgroundSize: '220% 100%',
+                        animation: 'flazyTopbar 10s ease-in-out infinite alternate'
+                      }}></span>
+                      Choisir un pack
+                    </Link>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className={`grid md:grid-cols-[1.1fr_0.9fr] gap-8 items-start ${isLocked ? 'pointer-events-none opacity-80' : ''}`}>
+            <div
+              id="prompt-zone"
+              className="rounded-[22px] p-6 border border-[rgba(252,211,77,0.75)] shadow-[0_18px_40px_rgba(0,0,0,0.8)]"
+              style={{
+                background: `
+                  radial-gradient(circle at top, rgba(255, 138, 31, 0.22), transparent 60%),
+                  rgba(6, 9, 22, 0.98)
+                `
+              }}
+            >
             <div className="text-xs text-text-soft mb-4 flex items-center gap-2">
               <Video className="w-4 h-4 text-accent-orange-soft" />
               <span className="font-semibold">Votre prompt</span>
@@ -803,23 +1046,11 @@ function FormSection() {
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
                   rows={6}
-                  className="w-full min-h-[160px] resize-y rounded-2xl border border-[rgba(75,85,99,0.95)] bg-[rgba(15,23,42,0.96)] text-text-main px-4 py-3 text-[13px] outline-none transition-all duration-[0.18s] ease-out placeholder:text-text-muted focus:border-accent-orange-soft focus:shadow-[0_0_0_1px_rgba(248,181,86,0.6)] focus:bg-[rgba(15,23,42,0.98)]"
+                  disabled={isLocked}
+                  className="w-full min-h-[160px] resize-y rounded-2xl border border-[rgba(75,85,99,0.95)] bg-[rgba(15,23,42,0.96)] text-text-main px-4 py-3 text-[13px] outline-none transition-all duration-[0.18s] ease-out placeholder:text-text-muted focus:border-accent-orange-soft focus:shadow-[0_0_0_1px_rgba(248,181,86,0.6)] focus:bg-[rgba(15,23,42,0.98)] disabled:opacity-50 disabled:cursor-not-allowed"
                   placeholder="« Une femme élégante explique comment elle a augmenté ses ventes grâce aux vidéos courtes générées par l'IA. »"
                   required
                 />
-              </div>
-
-              <div className="flex items-center gap-3">
-                <input
-                  type="checkbox"
-                  id="allowPublic"
-                  checked={allowPublic}
-                  onChange={(e) => setAllowPublic(e.target.checked)}
-                  className="w-4 h-4 rounded border-[rgba(75,85,99,0.95)] bg-[rgba(15,23,42,0.96)] text-accent-orange focus:ring-accent-orange"
-                />
-                <label htmlFor="allowPublic" className="text-xs text-text-soft leading-relaxed">
-                  J'autorise ma vidéo à être publiée dans le carrousel public de FLAZY.
-                </label>
               </div>
 
             </div>
@@ -865,6 +1096,7 @@ function FormSection() {
             </div>
           </div>
         </form>
+        </div>
       </div>
     </section>
   )
@@ -1372,6 +1604,59 @@ function Footer() {
 
 // Main Page Component
 export default function Home() {
+  const [isChecking, setIsChecking] = useState(true)
+
+  useEffect(() => {
+    // Check if user is logged in and has 0 credits, redirect to pricing
+    const checkAndRedirect = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        
+        if (session?.user && session?.access_token) {
+          // Fetch credits
+          const response = await fetch('/api/me', {
+            headers: {
+              'Authorization': `Bearer ${session.access_token}`,
+            },
+          })
+
+          if (response.ok) {
+            const data = await response.json()
+            const userCredits = data.credits ?? 0
+
+            // If user has 0 credits, redirect to pricing
+            if (userCredits === 0) {
+              window.location.href = '/pricing'
+              return
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error checking credits for redirect:', error)
+      } finally {
+        setIsChecking(false)
+      }
+    }
+
+    checkAndRedirect()
+  }, [])
+
+  // Show loading state while checking
+  if (isChecking) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{
+        background: `
+          radial-gradient(circle at top right, rgba(255, 138, 31, 0.4), transparent 58%),
+          radial-gradient(circle at bottom left, rgba(56, 189, 248, 0.22), transparent 60%),
+          radial-gradient(circle at bottom right, rgba(129, 140, 248, 0.4), transparent 58%),
+          #020314
+        `
+      }}>
+        <Loader2 className="w-8 h-8 text-accent-orange-soft animate-spin" />
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen" style={{
       background: `
@@ -1388,7 +1673,6 @@ export default function Home() {
         <FormSection />
         <ExamplesSection />
         <CarouselSection />
-        <PricingSection />
         <FAQSection />
         <HowItWorksSection />
       </main>

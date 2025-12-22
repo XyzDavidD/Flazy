@@ -1,10 +1,17 @@
 import { NextResponse } from 'next/server'
 import { headers } from 'next/headers'
 import Stripe from 'stripe'
-import { supabase } from '@/lib/supabaseClient'
-import { sendAdminNotification } from '@/lib/email'
+import { createSupabaseServer } from '@/lib/supabaseServer'
 
 export const runtime = 'nodejs'
+
+// Map price IDs to token amounts
+const PRICE_TO_TOKENS: Record<string, number> = {
+  [process.env.STRIPE_PRICE_STARTER || '']: 5,
+  [process.env.STRIPE_PRICE_CREATOR || '']: 10,
+  [process.env.STRIPE_PRICE_PRO || '']: 25,
+  [process.env.STRIPE_PRICE_BOOST || '']: 50,
+}
 
 export async function POST(req: Request) {
   try {
@@ -44,61 +51,71 @@ export async function POST(req: Request) {
 
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object as Stripe.Checkout.Session
-      const submissionId = session.metadata?.submissionId
+      const userId = session.metadata?.userId
+      const priceId = session.metadata?.priceId
 
-      if (submissionId) {
-        // Update payment status to paid
-        const { data: updateData, error: updateError } = await supabase
-          .from('submissions')
-          .update({ payment_status: 'paid' })
-          .eq('id', submissionId)
+      if (!userId || !priceId) {
+        console.warn('Missing userId or priceId in session metadata:', { userId, priceId })
+        return NextResponse.json({ received: true }, { status: 200 })
+      }
 
-        console.log('Supabase update result:', { data: updateData, error: updateError })
+      // Determine tokens granted
+      const tokens = PRICE_TO_TOKENS[priceId] || 0
 
-        if (updateError) {
-          console.error('Error updating submission:', updateError)
-        } else {
-          // Fetch the submission to get all details for email
-          const { data: submission, error: fetchError } = await supabase
-            .from('submissions')
-            .select('id, name, email, prompt, allow_public, video_path')
-            .eq('id', submissionId)
-            .single()
+      if (tokens === 0) {
+        console.warn(`Unknown priceId: ${priceId}. No tokens granted.`)
+        return NextResponse.json({ received: true }, { status: 200 })
+      }
 
-          if (fetchError) {
-            console.error('Error fetching submission:', fetchError)
-          } else if (submission) {
-            // Compute videoUrl only if video_path exists and is not empty
-            let videoUrl: string | null = null
-            if (submission.video_path && submission.video_path.trim() !== '') {
-              if (submission.video_path.startsWith('http')) {
-                videoUrl = submission.video_path
-              } else {
-                const { data: urlData } = supabase.storage
-                  .from('videos')
-                  .getPublicUrl(submission.video_path)
-                videoUrl = urlData.publicUrl
-              }
-            }
+      const supabase = createSupabaseServer()
 
-            // Send admin notification email
-            try {
-              await sendAdminNotification({
-                submissionId: submission.id,
-                name: submission.name,
-                email: submission.email,
-                prompt: submission.prompt,
-                allowPublic: submission.allow_public || false,
-                videoUrl: videoUrl || '', // Pass empty string if no video
-              })
-            } catch (emailError) {
-              // Log error but don't fail the webhook
-              console.error('Error sending admin notification email:', emailError)
-            }
-          }
-        }
+      // Get current credits (or 0 if row doesn't exist)
+      const { data: creditsData } = await supabase
+        .from('user_credits')
+        .select('credits')
+        .eq('user_id', userId)
+        .single()
+
+      const currentCredits = creditsData?.credits ?? 0
+
+      // Upsert user_credits (increment by tokens)
+      const { error: creditsError } = await supabase
+        .from('user_credits')
+        .upsert({
+          user_id: userId,
+          credits: currentCredits + tokens,
+          updated_at: new Date().toISOString(),
+        }, {
+          onConflict: 'user_id',
+        })
+
+      if (creditsError) {
+        console.error('Error updating user_credits:', creditsError)
+        return NextResponse.json(
+          { error: 'Failed to update credits' },
+          { status: 500 }
+        )
+      }
+
+      console.log(`Granted ${tokens} tokens to user ${userId}. New total: ${currentCredits + tokens}`)
+
+      // Insert purchase record
+      const { error: purchaseError } = await supabase
+        .from('purchases')
+        .insert({
+          user_id: userId,
+          stripe_session_id: session.id,
+          price_id: priceId,
+          tokens: tokens,
+          amount_total: session.amount_total || 0,
+          currency: session.currency || 'eur',
+        })
+
+      if (purchaseError) {
+        console.error('Error inserting purchase record:', purchaseError)
+        // Don't fail the webhook if purchase record fails
       } else {
-        console.warn('No submissionId found in session metadata')
+        console.log(`Purchase record created for user ${userId}, session ${session.id}`)
       }
     }
 
