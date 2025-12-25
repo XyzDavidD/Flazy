@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { supabase } from '@/lib/supabaseClient'
+import { useCredits } from '@/hooks/useCredits'
 import {
   Zap,
   Lock,
@@ -82,80 +83,41 @@ function TopBar() {
 function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [user, setUser] = useState<any>(null)
-  const [credits, setCredits] = useState<number | null>(null)
   const [isLoadingAuth, setIsLoadingAuth] = useState(true)
   const [accountDropdownOpen, setAccountDropdownOpen] = useState(false)
+  
+  // Use new credits hook with realtime updates
+  const { credits, loading: creditsLoading } = useCredits()
 
   useEffect(() => {
-    // Check auth state
+    // Check auth state for user (for account dropdown)
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         setUser(session.user)
-        fetchCredits(session.access_token)
       } else {
-        setIsLoadingAuth(false)
+        setUser(null)
       }
+      setIsLoadingAuth(false)
     })
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
         setUser(session.user)
-        fetchCredits(session.access_token)
       } else {
         setUser(null)
-        setCredits(null)
-        setIsLoadingAuth(false)
       }
+      setIsLoadingAuth(false)
     })
-
-    // Listen for credits updates
-    const handleCreditsUpdate = (event: Event) => {
-      const customEvent = event as CustomEvent<number | undefined>
-      // If credits value is provided in event, use it directly (faster)
-      if (customEvent.detail !== undefined) {
-        setCredits(customEvent.detail)
-      } else {
-        // Otherwise, refetch from API
-        supabase.auth.getSession().then(({ data: { session } }) => {
-          if (session?.user && session?.access_token) {
-            fetchCredits(session.access_token)
-          }
-        })
-      }
-    }
-
-    window.addEventListener('credits-updated', handleCreditsUpdate as EventListener)
 
     return () => {
       subscription.unsubscribe()
-      window.removeEventListener('credits-updated', handleCreditsUpdate)
     }
   }, [])
-
-  const fetchCredits = async (accessToken: string) => {
-    try {
-      const response = await fetch('/api/me', {
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-        },
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        setCredits(data.credits)
-      }
-    } catch (error) {
-      console.error('Error fetching credits:', error)
-    } finally {
-      setIsLoadingAuth(false)
-    }
-  }
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
     setUser(null)
-    setCredits(null)
     setAccountDropdownOpen(false)
   }
 
@@ -220,7 +182,9 @@ function Header() {
               {user ? (
                 <>
                   <span className="hidden sm:inline-flex items-center gap-1.5 text-text-soft text-[12px] font-medium">
-                    <span className="text-accent-orange-soft font-semibold">{credits ?? 0}</span>
+                    <span className="text-accent-orange-soft font-semibold">
+                      {creditsLoading ? '—' : (credits ?? 0)}
+                    </span>
                     <span>crédits</span>
                   </span>
                   <div className="hidden sm:block relative">
@@ -302,7 +266,9 @@ function Header() {
           {user ? (
             <>
               <div className="px-4 py-2 flex items-center gap-1.5 text-text-soft text-sm">
-                <span className="text-accent-orange-soft font-semibold">{credits ?? 0}</span>
+                <span className="text-accent-orange-soft font-semibold">
+                  {creditsLoading ? '—' : (credits ?? 0)}
+                </span>
                 <span>crédits</span>
               </div>
               <button
@@ -797,55 +763,36 @@ function FormSection() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
   const [user, setUser] = useState<any>(null)
-  const [credits, setCredits] = useState<number | null>(null)
   const [isLoadingAuth, setIsLoadingAuth] = useState(true)
   const [displayedGenerations, setDisplayedGenerations] = useState(5)
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
   const isActiveRef = useRef(true)
 
-  // Check auth state and fetch credits
+  // Use new credits hook with realtime updates
+  const { credits, refresh: refreshCredits } = useCredits()
+
+  // Check auth state for user (for form gating)
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         setUser(session.user)
-        fetchCredits(session.access_token)
-      } else {
-        setIsLoadingAuth(false)
-      }
-    })
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session?.user) {
-        setUser(session.user)
-        fetchCredits(session.access_token)
       } else {
         setUser(null)
-        setCredits(null)
-        setIsLoadingAuth(false)
       }
+      setIsLoadingAuth(false)
+    })
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        setUser(session.user)
+      } else {
+        setUser(null)
+      }
+      setIsLoadingAuth(false)
     })
 
     return () => subscription.unsubscribe()
   }, [])
-
-  const fetchCredits = async (accessToken: string) => {
-    try {
-      const response = await fetch('/api/me', {
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-        },
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        setCredits(data.credits)
-      }
-    } catch (error) {
-      console.error('Error fetching credits:', error)
-    } finally {
-      setIsLoadingAuth(false)
-    }
-  }
 
   // Simulate dynamic activity indicator
   useEffect(() => {
@@ -910,10 +857,10 @@ function FormSection() {
 
       setSuccess(true)
       setPrompt('')
-      setCredits(data.remainingCredits)
       
-      // Update credits in header immediately (pass value directly)
-      window.dispatchEvent(new CustomEvent('credits-updated', { detail: data.remainingCredits }))
+      // Realtime subscription will update credits automatically
+      // Call refresh as fallback to ensure immediate update
+      await refreshCredits()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Une erreur est survenue. Veuillez réessayer.')
       console.error('Form submission error:', err)

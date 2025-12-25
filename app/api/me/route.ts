@@ -36,13 +36,20 @@ export async function GET(request: NextRequest) {
 
     const credits = creditsData?.credits ?? 0
 
-    return NextResponse.json({
-      user: {
-        id: user.id,
-        email: user.email,
+    return NextResponse.json(
+      {
+        user: {
+          id: user.id,
+          email: user.email,
+        },
+        credits,
       },
-      credits,
-    })
+      {
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        },
+      }
+    )
   } catch (error) {
     console.error('GET /api/me error:', error)
     return NextResponse.json(
