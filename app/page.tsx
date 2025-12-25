@@ -110,15 +110,22 @@ function Header() {
     })
 
     // Listen for credits updates
-    const handleCreditsUpdate = () => {
-      supabase.auth.getSession().then(({ data: { session } }) => {
-        if (session?.user && session?.access_token) {
-          fetchCredits(session.access_token)
-        }
-      })
+    const handleCreditsUpdate = (event: Event) => {
+      const customEvent = event as CustomEvent<number | undefined>
+      // If credits value is provided in event, use it directly (faster)
+      if (customEvent.detail !== undefined) {
+        setCredits(customEvent.detail)
+      } else {
+        // Otherwise, refetch from API
+        supabase.auth.getSession().then(({ data: { session } }) => {
+          if (session?.user && session?.access_token) {
+            fetchCredits(session.access_token)
+          }
+        })
+      }
     }
 
-    window.addEventListener('credits-updated', handleCreditsUpdate)
+    window.addEventListener('credits-updated', handleCreditsUpdate as EventListener)
 
     return () => {
       subscription.unsubscribe()
@@ -905,8 +912,8 @@ function FormSection() {
       setPrompt('')
       setCredits(data.remainingCredits)
       
-      // Refresh credits in header (trigger re-fetch)
-      window.dispatchEvent(new Event('credits-updated'))
+      // Update credits in header immediately (pass value directly)
+      window.dispatchEvent(new CustomEvent('credits-updated', { detail: data.remainingCredits }))
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Une erreur est survenue. Veuillez réessayer.')
       console.error('Form submission error:', err)
