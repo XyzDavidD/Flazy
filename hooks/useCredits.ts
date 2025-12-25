@@ -49,6 +49,21 @@ export function useCredits(): UseCreditsReturn {
     if (user) {
       setLoading(true)
       await fetchCredits(user.id)
+      // Dispatch global event so other instances can refresh too
+      window.dispatchEvent(new CustomEvent('credits-refresh'))
+    }
+  }, [user, fetchCredits])
+
+  // Listen for global refresh events from other instances
+  useEffect(() => {
+    const handleRefresh = () => {
+      if (user) {
+        fetchCredits(user.id)
+      }
+    }
+    window.addEventListener('credits-refresh', handleRefresh)
+    return () => {
+      window.removeEventListener('credits-refresh', handleRefresh)
     }
   }, [user, fetchCredits])
 
@@ -90,28 +105,44 @@ export function useCredits(): UseCreditsReturn {
     }
 
     const channel = supabase
-      .channel(`user_credits:${user.id}`)
+      .channel(`user_credits:${user.id}`, {
+        config: {
+          broadcast: { self: true },
+        },
+      })
       .on(
         'postgres_changes',
         {
-          event: 'UPDATE',
+          event: '*', // Listen to all events (INSERT, UPDATE, DELETE)
           schema: 'public',
           table: 'user_credits',
           filter: `user_id=eq.${user.id}`,
         },
         (payload) => {
+          console.log('Realtime credits update:', payload)
           // Update credits immediately when DB changes
-          const newCredits = (payload.new as { credits: number })?.credits ?? 0
-          setCredits(newCredits)
-          setLoading(false)
+          if (payload.eventType === 'UPDATE' || payload.eventType === 'INSERT') {
+            const newCredits = (payload.new as { credits: number })?.credits ?? 0
+            setCredits(newCredits)
+            setLoading(false)
+          } else if (payload.eventType === 'DELETE') {
+            setCredits(0)
+            setLoading(false)
+          }
         }
       )
-      .subscribe()
+      .subscribe((status) => {
+        console.log('Realtime subscription status:', status)
+        if (status === 'SUBSCRIBED') {
+          // Once subscribed, fetch current credits to ensure we have the latest
+          fetchCredits(user.id)
+        }
+      })
 
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [user])
+  }, [user, fetchCredits])
 
   return { credits, loading, error, refresh }
 }

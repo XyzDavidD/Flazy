@@ -131,7 +131,7 @@ function Header() {
 
   return (
     <header className="sticky top-0 z-40 backdrop-blur-[18px] bg-gradient-to-b from-[rgba(5,6,18,0.96)] to-[rgba(5,6,18,0.9)] border-b border-[rgba(51,65,85,0.85)]">
-      <nav className="relative flex items-center justify-between py-[14px] px-5 max-w-[1120px] mx-auto">
+      <nav className="relative flex items-center justify-between py-[14px] px-5 max-w-[1120px] mx-auto flex-wrap">
         <div className="flex items-center gap-3">
           <Link href="/" className="flex items-center gap-3">
             <Image
@@ -229,7 +229,8 @@ function Header() {
           )}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="lg:hidden p-2 text-text-soft"
+            className="lg:hidden p-2 text-text-soft touch-manipulation z-50 relative"
+            aria-label="Toggle menu"
           >
             {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
@@ -237,29 +238,41 @@ function Header() {
       </nav>
 
       {mobileMenuOpen && (
-        <div className="lg:hidden pb-4 px-5 space-y-2 border-t border-[rgba(51,65,85,0.5)] pt-4">
+        <div className="lg:hidden pb-4 px-5 space-y-2 border-t border-[rgba(51,65,85,0.5)] pt-4 relative z-50">
           <button
-            onClick={() => scrollToSection('prompt-zone')}
-            className="block w-full text-left px-4 py-2 text-sm text-text-soft hover:text-text-main transition-colors"
+            onClick={() => {
+              scrollToSection('prompt-zone')
+              setMobileMenuOpen(false)
+            }}
+            className="block w-full text-left px-4 py-2 text-sm text-text-soft hover:text-text-main transition-colors touch-manipulation"
           >
             Créer
           </button>
           <button
-            onClick={() => scrollToSection('examples')}
-            className="block w-full text-left px-4 py-2 text-sm text-text-soft hover:text-text-main transition-colors"
+            onClick={() => {
+              scrollToSection('examples')
+              setMobileMenuOpen(false)
+            }}
+            className="block w-full text-left px-4 py-2 text-sm text-text-soft hover:text-text-main transition-colors touch-manipulation"
           >
             Exemples
           </button>
           <Link
             href="/pricing"
-            className="block w-full text-left px-4 py-2 text-sm text-text-soft hover:text-text-main transition-colors"
-            onClick={() => setMobileMenuOpen(false)}
+            className="block w-full text-left px-4 py-2 text-sm text-text-soft hover:text-text-main transition-colors touch-manipulation"
+            onClick={(e) => {
+              setMobileMenuOpen(false)
+              e.stopPropagation()
+            }}
           >
             Tarifs
           </Link>
           <button
-            onClick={() => scrollToSection('faq')}
-            className="block w-full text-left px-4 py-2 text-sm text-text-soft hover:text-text-main transition-colors"
+            onClick={() => {
+              scrollToSection('faq')
+              setMobileMenuOpen(false)
+            }}
+            className="block w-full text-left px-4 py-2 text-sm text-text-soft hover:text-text-main transition-colors touch-manipulation"
           >
             FAQ
           </button>
@@ -276,7 +289,7 @@ function Header() {
                   handleLogout()
                   setMobileMenuOpen(false)
                 }}
-                className="block w-full text-left px-4 py-2 text-sm text-text-soft hover:text-text-main transition-colors flex items-center gap-2"
+                className="block w-full text-left px-4 py-2 text-sm text-text-soft hover:text-text-main transition-colors flex items-center gap-2 touch-manipulation"
               >
                 <LogOut className="w-4 h-4" />
                 Se déconnecter
@@ -286,15 +299,23 @@ function Header() {
             <>
               <Link
                 href="/auth/login"
-                className="block w-full text-left px-4 py-2 text-sm text-text-soft hover:text-text-main transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
+                className="block w-full text-left px-4 py-2 text-sm text-text-soft hover:text-text-main transition-colors touch-manipulation"
+                onClick={(e) => {
+                  setMobileMenuOpen(false)
+                  // Ensure navigation happens
+                  e.stopPropagation()
+                }}
               >
                 Se connecter
               </Link>
               <Link
                 href="/auth/signup"
-                className="block w-full text-left px-4 py-2 text-sm text-text-soft hover:text-text-main transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
+                className="block w-full text-left px-4 py-2 text-sm text-text-soft hover:text-text-main transition-colors touch-manipulation"
+                onClick={(e) => {
+                  setMobileMenuOpen(false)
+                  // Ensure navigation happens
+                  e.stopPropagation()
+                }}
               >
                 S'inscrire
               </Link>
@@ -859,8 +880,11 @@ function FormSection() {
       setPrompt('')
       
       // Realtime subscription will update credits automatically
-      // Call refresh as fallback to ensure immediate update
-      await refreshCredits()
+      // Call refresh immediately as fallback (realtime might have a small delay)
+      // Small delay ensures DB write is complete before refetching
+      setTimeout(() => {
+        refreshCredits().catch(console.error)
+      }, 300)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Une erreur est survenue. Veuillez réessayer.')
       console.error('Form submission error:', err)
