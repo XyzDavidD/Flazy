@@ -150,30 +150,18 @@ function Header() {
         </div>
 
         <div className="hidden lg:flex items-center gap-[18px] text-[13px] text-text-muted absolute left-1/2 -translate-x-1/2">
-          <button
-            onClick={() => scrollToSection('prompt-zone')}
-            className="relative cursor-pointer transition-colors duration-[0.18s] ease-out hover:text-text-main after:content-[''] after:absolute after:left-0 after:-bottom-[6px] after:w-0 after:h-0.5 after:rounded-full after:bg-gradient-to-r after:from-[#ffb347] after:via-[#ff8a1f] after:to-[#ff4b2b] after:transition-all after:duration-[0.18s] after:ease-out hover:after:w-[18px]"
-          >
-            Créer
-          </button>
-          <button
-            onClick={() => scrollToSection('examples')}
-            className="relative cursor-pointer transition-colors duration-[0.18s] ease-out hover:text-text-main after:content-[''] after:absolute after:left-0 after:-bottom-[6px] after:w-0 after:h-0.5 after:rounded-full after:bg-gradient-to-r after:from-[#ffb347] after:via-[#ff8a1f] after:to-[#ff4b2b] after:transition-all after:duration-[0.18s] after:ease-out hover:after:w-[18px]"
-          >
-            Exemples
-          </button>
           <Link
             href="/pricing"
             className="relative cursor-pointer transition-colors duration-[0.18s] ease-out hover:text-text-main after:content-[''] after:absolute after:left-0 after:-bottom-[6px] after:w-0 after:h-0.5 after:rounded-full after:bg-gradient-to-r after:from-[#ffb347] after:via-[#ff8a1f] after:to-[#ff4b2b] after:transition-all after:duration-[0.18s] after:ease-out hover:after:w-[18px]"
           >
             Tarifs
           </Link>
-          <button
-            onClick={() => scrollToSection('faq')}
+          <Link
+            href="/faq"
             className="relative cursor-pointer transition-colors duration-[0.18s] ease-out hover:text-text-main after:content-[''] after:absolute after:left-0 after:-bottom-[6px] after:w-0 after:h-0.5 after:rounded-full after:bg-gradient-to-r after:from-[#ffb347] after:via-[#ff8a1f] after:to-[#ff4b2b] after:transition-all after:duration-[0.18s] after:ease-out hover:after:w-[18px]"
           >
             FAQ
-          </button>
+          </Link>
         </div>
 
         <div className="flex items-center gap-3">
@@ -238,89 +226,75 @@ function Header() {
       </nav>
 
       {mobileMenuOpen && (
-        <div className="lg:hidden pb-4 px-5 space-y-2 border-t border-[rgba(51,65,85,0.5)] pt-4 relative z-50">
-          <button
-            onClick={() => {
-              scrollToSection('prompt-zone')
-              setMobileMenuOpen(false)
-            }}
-            className="block w-full text-left px-4 py-2 text-sm text-text-soft hover:text-text-main transition-colors touch-manipulation"
-          >
-            Créer
-          </button>
-          <button
-            onClick={() => {
-              scrollToSection('examples')
-              setMobileMenuOpen(false)
-            }}
-            className="block w-full text-left px-4 py-2 text-sm text-text-soft hover:text-text-main transition-colors touch-manipulation"
-          >
-            Exemples
-          </button>
-          <Link
-            href="/pricing"
-            className="block w-full text-left px-4 py-2 text-sm text-text-soft hover:text-text-main transition-colors touch-manipulation"
-            onClick={(e) => {
-              setMobileMenuOpen(false)
-              e.stopPropagation()
-            }}
-          >
-            Tarifs
-          </Link>
-          <button
-            onClick={() => {
-              scrollToSection('faq')
-              setMobileMenuOpen(false)
-            }}
-            className="block w-full text-left px-4 py-2 text-sm text-text-soft hover:text-text-main transition-colors touch-manipulation"
-          >
-            FAQ
-          </button>
-          {user ? (
-            <>
-              <div className="px-4 py-2 flex items-center gap-1.5 text-text-soft text-sm">
-                <span className="text-accent-orange-soft font-semibold">
-                  {creditsLoading ? '—' : (credits ?? 0)}
-                </span>
-                <span>crédits</span>
+        <div className="lg:hidden pb-4 px-5 space-y-1 border-t border-[rgba(51,65,85,0.5)] pt-4 relative z-50">
+          <div className="space-y-1 mb-3">
+            <Link
+              href="/pricing"
+              className="block w-full text-left px-4 py-2.5 text-sm text-text-soft hover:text-text-main hover:bg-[rgba(15,23,42,0.5)] rounded-lg transition-colors touch-manipulation"
+              onClick={(e) => {
+                setMobileMenuOpen(false)
+                e.stopPropagation()
+              }}
+            >
+              Tarifs
+            </Link>
+            <Link
+              href="/faq"
+              className="block w-full text-left px-4 py-2.5 text-sm text-text-soft hover:text-text-main hover:bg-[rgba(15,23,42,0.5)] rounded-lg transition-colors touch-manipulation"
+              onClick={(e) => {
+                setMobileMenuOpen(false)
+                e.stopPropagation()
+              }}
+            >
+              FAQ
+            </Link>
+          </div>
+          
+          <div className="border-t border-[rgba(51,65,85,0.5)] pt-3 mt-3">
+            {user ? (
+              <>
+                <div className="px-4 py-2 flex items-center gap-1.5 text-text-soft text-sm mb-2">
+                  <span className="text-accent-orange-soft font-semibold">
+                    {creditsLoading ? '—' : (credits ?? 0)}
+                  </span>
+                  <span>crédits</span>
+                </div>
+                <button
+                  onClick={() => {
+                    handleLogout()
+                    setMobileMenuOpen(false)
+                  }}
+                  className="block w-full text-left px-4 py-2.5 text-sm text-text-soft hover:text-text-main hover:bg-[rgba(15,23,42,0.5)] rounded-lg transition-colors flex items-center gap-2 touch-manipulation"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Se déconnecter
+                </button>
+              </>
+            ) : (
+              <div className="space-y-1">
+                <Link
+                  href="/auth/login"
+                  className="block w-full text-left px-4 py-2.5 text-sm text-text-soft hover:text-text-main hover:bg-[rgba(15,23,42,0.5)] rounded-lg transition-colors touch-manipulation"
+                  onClick={(e) => {
+                    setMobileMenuOpen(false)
+                    e.stopPropagation()
+                  }}
+                >
+                  Se connecter
+                </Link>
+                <Link
+                  href="/auth/signup"
+                  className="block w-full text-left px-4 py-2.5 text-sm text-text-soft hover:text-text-main hover:bg-[rgba(15,23,42,0.5)] rounded-lg transition-colors touch-manipulation"
+                  onClick={(e) => {
+                    setMobileMenuOpen(false)
+                    e.stopPropagation()
+                  }}
+                >
+                  S'inscrire
+                </Link>
               </div>
-              <button
-                onClick={() => {
-                  handleLogout()
-                  setMobileMenuOpen(false)
-                }}
-                className="block w-full text-left px-4 py-2 text-sm text-text-soft hover:text-text-main transition-colors flex items-center gap-2 touch-manipulation"
-              >
-                <LogOut className="w-4 h-4" />
-                Se déconnecter
-              </button>
-            </>
-          ) : (
-            <>
-              <Link
-                href="/auth/login"
-                className="block w-full text-left px-4 py-2 text-sm text-text-soft hover:text-text-main transition-colors touch-manipulation"
-                onClick={(e) => {
-                  setMobileMenuOpen(false)
-                  // Ensure navigation happens
-                  e.stopPropagation()
-                }}
-              >
-                Se connecter
-              </Link>
-              <Link
-                href="/auth/signup"
-                className="block w-full text-left px-4 py-2 text-sm text-text-soft hover:text-text-main transition-colors touch-manipulation"
-                onClick={(e) => {
-                  setMobileMenuOpen(false)
-                  // Ensure navigation happens
-                  e.stopPropagation()
-                }}
-              >
-                S'inscrire
-              </Link>
-            </>
-          )}
+            )}
+          </div>
         </div>
       )}
     </header>
@@ -1091,40 +1065,28 @@ function ExamplesSection() {
 
   const examples = [
     {
-      title: 'Vidéos Viralité',
-      tag: 'Interview / plateau / info',
-      desc: 'Formats TV, interviews ou témoignages pensés pour crédibiliser votre message et maximiser la viralité.',
-      icon: TrendingUp,
-    },
-    {
-      title: 'Vidéos Boost',
-      tag: 'Publicité et retours clients',
-      desc: 'Vidéos orientées conversion pour promouvoir une offre et booster vos ventes.',
-      icon: Rocket,
-    },
-    {
-      title: 'Motivation et Vibes',
-      tag: 'Mindset et lifestyle',
-      desc: 'Scènes premium (luxe, skyline, Dubaï) avec messages motivants et citations impactantes.',
-      icon: Sparkles,
-    },
-    {
-      title: 'Divertissement',
-      tag: 'Humour et insolite',
-      desc: 'Contenus fun et décalés pour engager votre audience et publier régulièrement.',
+      title: 'Interviews & News',
+      tag: 'Médias et actualités',
+      desc: 'Formats inspirés des médias, interviews, segments d\'actualité et reportages. Idéal pour créer du réalisme, de la crédibilité et capturer l\'attention dès les premières secondes.',
       icon: Video,
     },
     {
-      title: 'Détente',
-      tag: 'ASMR, animaux et paysages',
-      desc: 'Vidéos relaxantes et apaisantes pour une ambiance zen et chill.',
-      icon: CheckCircle2,
+      title: 'UGC & Témoignages Clients',
+      tag: 'Avis authentiques',
+      desc: 'Vidéos style UGC et témoignages authentiques. Parfait pour renforcer la confiance, mettre en avant des avis crédibles et renforcer l\'impact marketing.',
+      icon: Users,
     },
     {
-      title: 'Mystère et Frisson',
-      tag: 'Caméra de surveillance',
-      desc: 'Vidéos intrigantes et légères pour créer de la tension sans choquer.',
-      icon: Shield,
+      title: 'Boost & Publicité',
+      tag: 'Conversion et ventes',
+      desc: 'Vidéos orientées conversion pour promouvoir une offre, un produit ou un service. Conçues pour attirer, convaincre et booster les ventes.',
+      icon: Rocket,
+    },
+    {
+      title: 'Viral & Divertissement',
+      tag: 'Créativité et viralité',
+      desc: 'Concepts créatifs, décalés, intrigants ou surprenants. Formats pensés pour générer de la viralité, capturer l\'attention et maximiser la rétention.',
+      icon: Sparkles,
     },
   ]
 
@@ -1162,13 +1124,13 @@ function ExamplesSection() {
           </p>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3">
           {examples.map((example, i) => {
             const Icon = example.icon
             return (
               <div
               key={i}
-              className="rounded-[16px] p-3 border border-[rgba(252,211,77,0.85)] shadow-[0_8px_24px_rgba(0,0,0,0.6)] text-xs text-text-soft hover:border-[rgba(252,211,77,1)] transition-all duration-300 flex flex-col"
+              className="rounded-[16px] p-3 border border-[rgba(252,211,77,0.85)] shadow-[0_8px_24px_rgba(0,0,0,0.6)] text-xs text-text-soft hover:border-[rgba(252,211,77,1)] transition-all duration-300 flex flex-col h-full"
               style={{
                 background: `
                   radial-gradient(circle at top, rgba(255, 138, 31, 0.16), transparent 60%),
@@ -1177,7 +1139,7 @@ function ExamplesSection() {
               }}
             >
                 <div
-                  className="relative rounded-xl overflow-hidden border border-[rgba(252,211,77,0.7)] aspect-[9/16] w-full mb-2 bg-[#020617] cursor-pointer group"
+                  className="relative rounded-xl overflow-hidden border border-[rgba(252,211,77,0.7)] aspect-[9/16] w-full mb-2 bg-[#020617] cursor-pointer group flex-shrink-0"
                   onClick={() => handleVideoClick(i)}
                 >
                   <video
@@ -1222,13 +1184,13 @@ function ExamplesSection() {
                     </div>
                   </div>
                 </div>
-                <div className="flex items-start gap-2 mb-1.5">
+                <div className="flex items-start gap-2 mb-1.5 flex-shrink-0">
                   <Icon className="w-3.5 h-3.5 text-accent-orange-soft mt-0.5 flex-shrink-0" />
                   <div className="flex-1 min-w-0">
                     <div className="text-[12px] font-semibold text-text-main leading-tight">{example.title}</div>
                   </div>
                 </div>
-                <p className="text-[10px] text-text-soft leading-relaxed m-0">{example.desc}</p>
+                <p className="text-[10px] text-text-soft leading-relaxed m-0 flex-grow">{example.desc}</p>
               </div>
             )
           })}
@@ -1526,7 +1488,7 @@ function HowItWorksSection() {
             return (
               <div
                 key={index}
-                className="relative rounded-[16px] p-4 border border-[rgba(252,211,77,0.7)] shadow-[0_8px_24px_rgba(0,0,0,0.6)] hover:border-[rgba(252,211,77,0.9)] transition-all duration-300"
+                className="relative rounded-[16px] p-4 border border-[rgba(252,211,77,0.7)] shadow-[0_8px_24px_rgba(0,0,0,0.6)] hover:border-[rgba(252,211,77,0.9)] transition-all duration-300 h-full flex flex-col"
                 style={{
                   background: `
                     radial-gradient(circle at top, rgba(255, 138, 31, 0.16), transparent 60%),
@@ -1538,7 +1500,7 @@ function HowItWorksSection() {
                   <Icon className="w-5 h-5 text-accent-orange-soft flex-shrink-0" />
                   <h3 className="text-sm font-bold text-text-main leading-tight">{step.title}</h3>
                 </div>
-                <p className="text-[11px] text-text-soft leading-relaxed">{step.description}</p>
+                <p className="text-[11px] text-text-soft leading-relaxed flex-grow">{step.description}</p>
               </div>
             )
           })}
@@ -1649,10 +1611,22 @@ export default function Home() {
       <main className="py-6 pb-0">
         <Hero />
         <FormSection />
+        <HowItWorksSection />
         <ExamplesSection />
         <CarouselSection />
-        <FAQSection />
-        <HowItWorksSection />
+        <div className="py-8 md:py-10 pb-2 md:pb-4">
+          <div className="max-w-[1120px] mx-auto px-5">
+            <div className="text-center">
+              <Link
+                href="/pricing"
+                className="inline-flex items-center gap-2 text-text-soft hover:text-text-main transition-colors text-sm"
+              >
+                <span>Découvrir nos tarifs</span>
+                <ChevronRight className="w-4 h-4" />
+              </Link>
+            </div>
+          </div>
+        </div>
       </main>
       <Footer />
     </div>
