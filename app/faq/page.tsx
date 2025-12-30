@@ -12,6 +12,7 @@ import {
   User,
   LogOut,
   ChevronRight,
+  ChevronLeft,
 } from 'lucide-react'
 
 // Header Component (simplified for FAQ page)
@@ -306,10 +307,20 @@ export default function FAQPage() {
       `
     }}>
       <Header />
+      <div className="max-w-[1120px] mx-auto px-5 pt-4 pb-2">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full border border-[rgba(148,163,184,0.7)] bg-[rgba(15,23,42,0.5)] backdrop-blur-sm text-text-soft hover:text-text-main hover:bg-[rgba(15,23,42,0.8)] hover:border-[rgba(203,213,225,0.9)] transition-all duration-[0.18s] ease-out text-sm font-semibold group touch-manipulation"
+        >
+          <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+          <span className="hidden sm:inline">Retour à l'accueil</span>
+          <span className="sm:hidden">Retour</span>
+        </Link>
+      </div>
       <main className="py-8 md:py-12">
         <div className="max-w-[1120px] mx-auto px-5">
           <div className="text-left mb-8 md:mb-10">
-            <div className="text-[11px] uppercase tracking-[0.16em] mb-1.5 font-semibold bg-gradient-to-r from-[#ffb347] via-[#ff8a1f] to-[#ff4b2b] bg-clip-text text-transparent">
+            <div className="text-[11px] uppercase tracking-[0.16em] mb-1.5 font-semibold text-[#ff8a1f]">
               Questions fréquentes
             </div>
             <h1 className="text-[32px] lg:text-[42px] mb-3 font-extrabold leading-tight">
@@ -356,9 +367,17 @@ export default function FAQPage() {
           <div className="mt-12 text-center">
             <Link
               href="/pricing"
-              className="inline-flex items-center gap-2 text-text-soft hover:text-text-main transition-colors text-sm"
+              className="relative overflow-hidden bg-transparent text-[#111827] shadow-[0_18px_45px_rgba(0,0,0,0.75)] z-0 rounded-full border-none text-[13px] font-semibold px-6 py-3 cursor-pointer inline-flex items-center gap-2 transition-all duration-[0.18s] ease-out hover:-translate-y-px hover:shadow-[0_22px_60px_rgba(0,0,0,0.95)]"
+              style={{
+                position: 'relative',
+              }}
             >
-              <span>Découvrir nos tarifs</span>
+              <span className="absolute inset-0 -z-10 rounded-full" style={{
+                backgroundImage: 'linear-gradient(90deg, #ff6b00 0%, #ffd700 25%, #ff4b2b 50%, #ffd700 75%, #ff6b00 100%)',
+                backgroundSize: '220% 100%',
+                animation: 'flazyTopbar 10s ease-in-out infinite alternate'
+              }}></span>
+              <span>Découvrez nos tarifs</span>
               <ChevronRight className="w-4 h-4" />
             </Link>
           </div>

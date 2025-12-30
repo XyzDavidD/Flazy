@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
+import { useCredits } from '@/hooks/useCredits'
 import {
   Sparkles,
   Users,
@@ -13,7 +14,224 @@ import {
   Lock,
   Shield,
   Loader2,
+  ChevronDown,
+  Menu,
+  X,
+  User,
+  LogOut,
+  ChevronLeft,
 } from 'lucide-react'
+
+// Header Component (same as FAQ page)
+function Header() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [user, setUser] = useState<any>(null)
+  const [isLoadingAuth, setIsLoadingAuth] = useState(true)
+  const [accountDropdownOpen, setAccountDropdownOpen] = useState(false)
+  
+  const { credits, loading: creditsLoading } = useCredits()
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        setUser(session.user)
+      } else {
+        setUser(null)
+      }
+      setIsLoadingAuth(false)
+    })
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        setUser(session.user)
+      } else {
+        setUser(null)
+      }
+      setIsLoadingAuth(false)
+    })
+
+    return () => {
+      subscription.unsubscribe()
+    }
+  }, [])
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut()
+    setUser(null)
+    setAccountDropdownOpen(false)
+  }
+
+  return (
+    <header className="sticky top-0 z-40 backdrop-blur-[18px] bg-gradient-to-b from-[rgba(5,6,18,0.96)] to-[rgba(5,6,18,0.9)] border-b border-[rgba(51,65,85,0.85)]">
+      <nav className="relative flex items-center justify-between py-[14px] px-5 max-w-[1120px] mx-auto flex-wrap">
+        <div className="flex items-center gap-3">
+          <Link href="/" className="flex items-center gap-3">
+            <Image
+              src="/logo.png"
+              alt="FLAZY Logo"
+              width={48}
+              height={48}
+              className="w-10 h-10 md:w-12 md:h-12"
+              priority
+            />
+            <div>
+              <div className="font-extrabold tracking-[0.08em] uppercase text-[15px]">FLAZY</div>
+              <div className="text-[11px] text-text-muted">Vidéos IA virales prêtes à poster</div>
+            </div>
+          </Link>
+        </div>
+
+        <div className="hidden lg:flex items-center gap-[18px] text-[13px] text-text-muted absolute left-1/2 -translate-x-1/2">
+          <Link
+            href="/pricing"
+            className="relative cursor-pointer transition-colors duration-[0.18s] ease-out hover:text-text-main after:content-[''] after:absolute after:left-0 after:-bottom-[6px] after:w-0 after:h-0.5 after:rounded-full after:bg-gradient-to-r after:from-[#ffb347] after:via-[#ff8a1f] after:to-[#ff4b2b] after:transition-all after:duration-[0.18s] after:ease-out hover:after:w-[18px]"
+          >
+            Tarifs
+          </Link>
+          <Link
+            href="/faq"
+            className="relative cursor-pointer transition-colors duration-[0.18s] ease-out hover:text-text-main after:content-[''] after:absolute after:left-0 after:-bottom-[6px] after:w-0 after:h-0.5 after:rounded-full after:bg-gradient-to-r after:from-[#ffb347] after:via-[#ff8a1f] after:to-[#ff4b2b] after:transition-all after:duration-[0.18s] after:ease-out hover:after:w-[18px]"
+          >
+            FAQ
+          </Link>
+        </div>
+
+        <div className="flex items-center gap-3">
+          {!isLoadingAuth && (
+            <>
+              {user ? (
+                <>
+                  <span className="hidden sm:inline-flex items-center gap-1.5 text-text-soft text-[12px] font-medium">
+                    <span className="text-accent-orange-soft font-semibold">
+                      {creditsLoading ? '—' : (credits ?? 0)}
+                    </span>
+                    <span>crédits</span>
+                  </span>
+                  <div className="hidden sm:block relative">
+                    <button
+                      onClick={() => setAccountDropdownOpen(!accountDropdownOpen)}
+                      className="flex items-center gap-2 px-4 py-2 rounded-full border border-[rgba(148,163,184,0.7)] bg-transparent text-text-soft text-[13px] font-semibold transition-all duration-[0.18s] ease-out hover:bg-[rgba(15,23,42,0.9)] hover:text-text-main hover:border-[rgba(203,213,225,0.9)]"
+                    >
+                      <User className="w-4 h-4" />
+                      Mon compte
+                      <ChevronDown className={`w-3 h-3 transition-transform ${accountDropdownOpen ? 'rotate-180' : ''}`} />
+                    </button>
+                    {accountDropdownOpen && (
+                      <div className="absolute right-0 mt-2 w-48 rounded-xl bg-[rgba(6,9,22,0.98)] border border-[rgba(252,211,77,0.75)] shadow-lg overflow-hidden z-50">
+                        <button
+                          onClick={handleLogout}
+                          className="w-full text-left px-4 py-3 text-sm text-text-soft hover:bg-[rgba(15,23,42,0.5)] transition-colors flex items-center gap-2"
+                        >
+                          <LogOut className="w-4 h-4" />
+                          Se déconnecter
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/auth/login"
+                    className="hidden sm:flex items-center justify-center px-4 py-2 rounded-full border border-[rgba(148,163,184,0.7)] bg-transparent text-text-soft text-[13px] font-semibold transition-all duration-[0.18s] ease-out hover:bg-[rgba(15,23,42,0.9)] hover:text-text-main hover:border-[rgba(203,213,225,0.9)]"
+                  >
+                    Se connecter
+                  </Link>
+                  <Link
+                    href="/auth/signup"
+                    className="hidden sm:flex items-center justify-center px-4 py-2 rounded-full border border-[rgba(148,163,184,0.7)] bg-transparent text-text-soft text-[13px] font-semibold transition-all duration-[0.18s] ease-out hover:bg-[rgba(15,23,42,0.9)] hover:text-text-main hover:border-[rgba(203,213,225,0.9)]"
+                  >
+                    S'inscrire
+                  </Link>
+                </>
+              )}
+            </>
+          )}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="lg:hidden p-2 text-text-soft touch-manipulation z-50 relative"
+            aria-label="Toggle menu"
+          >
+            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
+        </div>
+      </nav>
+
+      {mobileMenuOpen && (
+        <div className="lg:hidden pb-4 px-5 space-y-1 border-t border-[rgba(51,65,85,0.5)] pt-4 relative z-50">
+          <div className="space-y-1 mb-3">
+            <Link
+              href="/pricing"
+              className="block w-full text-left px-4 py-2.5 text-sm text-text-soft hover:text-text-main hover:bg-[rgba(15,23,42,0.5)] rounded-lg transition-colors touch-manipulation"
+              onClick={(e) => {
+                setMobileMenuOpen(false)
+                e.stopPropagation()
+              }}
+            >
+              Tarifs
+            </Link>
+            <Link
+              href="/faq"
+              className="block w-full text-left px-4 py-2.5 text-sm text-text-soft hover:text-text-main hover:bg-[rgba(15,23,42,0.5)] rounded-lg transition-colors touch-manipulation"
+              onClick={(e) => {
+                setMobileMenuOpen(false)
+                e.stopPropagation()
+              }}
+            >
+              FAQ
+            </Link>
+          </div>
+          
+          <div className="border-t border-[rgba(51,65,85,0.5)] pt-3 mt-3">
+            {user ? (
+              <>
+                <div className="px-4 py-2 flex items-center gap-1.5 text-text-soft text-sm mb-2">
+                  <span className="text-accent-orange-soft font-semibold">
+                    {creditsLoading ? '—' : (credits ?? 0)}
+                  </span>
+                  <span>crédits</span>
+                </div>
+                <button
+                  onClick={() => {
+                    handleLogout()
+                    setMobileMenuOpen(false)
+                  }}
+                  className="block w-full text-left px-4 py-2.5 text-sm text-text-soft hover:text-text-main hover:bg-[rgba(15,23,42,0.5)] rounded-lg transition-colors flex items-center gap-2 touch-manipulation"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Se déconnecter
+                </button>
+              </>
+            ) : (
+              <div className="space-y-1">
+                <Link
+                  href="/auth/login"
+                  className="block w-full text-left px-4 py-2.5 text-sm text-text-soft hover:text-text-main hover:bg-[rgba(15,23,42,0.5)] rounded-lg transition-colors touch-manipulation"
+                  onClick={(e) => {
+                    setMobileMenuOpen(false)
+                    e.stopPropagation()
+                  }}
+                >
+                  Se connecter
+                </Link>
+                <Link
+                  href="/auth/signup"
+                  className="block w-full text-left px-4 py-2.5 text-sm text-text-soft hover:text-text-main hover:bg-[rgba(15,23,42,0.5)] rounded-lg transition-colors touch-manipulation"
+                  onClick={(e) => {
+                    setMobileMenuOpen(false)
+                    e.stopPropagation()
+                  }}
+                >
+                  S'inscrire
+                </Link>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </header>
+  )
+}
 
 export default function PricingPage() {
   const router = useRouter()
@@ -138,42 +356,22 @@ export default function PricingPage() {
         #020314
       `
     }}>
-      {/* Header */}
-      <header className="sticky top-0 z-40 backdrop-blur-[18px] bg-gradient-to-b from-[rgba(5,6,18,0.96)] to-[rgba(5,6,18,0.9)] border-b border-[rgba(51,65,85,0.85)]">
-        <nav className="relative flex items-center justify-between py-[14px] px-5 max-w-[1120px] mx-auto">
-          <div className="flex items-center gap-3">
-            <Link href="/" className="flex items-center gap-3">
-              <Image
-                src="/logo.png"
-                alt="FLAZY Logo"
-                width={48}
-                height={48}
-                className="w-10 h-10 md:w-12 md:h-12"
-                priority
-              />
-              <div>
-                <div className="font-extrabold tracking-[0.08em] uppercase text-[15px]">FLAZY</div>
-                <div className="text-[11px] text-text-muted">Vidéos IA virales prêtes à poster</div>
-              </div>
-            </Link>
-          </div>
-
-          <div className="flex items-center gap-2.5">
-            <Link
-              href="/auth/signup"
-              className="hidden sm:flex items-center justify-center px-4 py-2 rounded-full border border-[rgba(148,163,184,0.7)] bg-transparent text-text-soft text-[13px] font-semibold transition-all duration-[0.18s] ease-out hover:bg-[rgba(15,23,42,0.9)] hover:text-text-main hover:border-[rgba(203,213,225,0.9)]"
-            >
-              S'inscrire
-            </Link>
-          </div>
-        </nav>
-      </header>
-
+      <Header />
+      <div className="max-w-[1120px] mx-auto px-5 pt-4 pb-2">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full border border-[rgba(148,163,184,0.7)] bg-[rgba(15,23,42,0.5)] backdrop-blur-sm text-text-soft hover:text-text-main hover:bg-[rgba(15,23,42,0.8)] hover:border-[rgba(203,213,225,0.9)] transition-all duration-[0.18s] ease-out text-sm font-semibold group touch-manipulation"
+        >
+          <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+          <span className="hidden sm:inline">Retour à l'accueil</span>
+          <span className="sm:hidden">Retour</span>
+        </Link>
+      </div>
       {/* Main Content */}
       <main className="py-12 md:py-16">
         <div className="max-w-[1120px] mx-auto px-5">
           <div className="text-center mb-8 md:mb-12">
-            <div className="text-[11px] uppercase tracking-[0.16em] mb-1.5 font-semibold bg-gradient-to-r from-[#ffb347] via-[#ff8a1f] to-[#ff4b2b] bg-clip-text text-transparent">
+            <div className="text-[11px] uppercase tracking-[0.16em] mb-1.5 font-semibold text-[#ff8a1f]">
               Tarifs
             </div>
             <h1 className="text-[32px] lg:text-[42px] mb-4 font-extrabold leading-tight">

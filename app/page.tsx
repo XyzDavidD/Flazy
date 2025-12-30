@@ -24,6 +24,7 @@ import {
   VolumeX,
   ChevronLeft,
   ChevronRight,
+  ChevronUp,
   Loader2,
   LogOut,
   User,
@@ -391,14 +392,21 @@ function Hero() {
   )
 }
 
-// Carousel Component - EXACT LOGIC FROM CAROUSEL PAGE
+// Carousel Component - TikTok/Instagram Reels Style
 function CarouselSection() {
   const [videos, setVideos] = useState<VideoData[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isPlaying, setIsPlaying] = useState(true)
   const [isMuted, setIsMuted] = useState(true)
+  const [isTransitioning, setIsTransitioning] = useState(false)
   const videoRef = useRef<HTMLVideoElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+  
+  // Swipe gesture state
+  const touchStartY = useRef<number>(0)
+  const touchEndY = useRef<number>(0)
+  const minSwipeDistance = 50
 
   interface VideoData {
     id: string
@@ -411,7 +419,6 @@ function CarouselSection() {
       try {
         setIsLoading(true)
 
-        // Fetch published videos from carousel_videos table
         const { data, error } = await supabase
           .from('carousel_videos')
           .select('id, video_path')
@@ -428,11 +435,9 @@ function CarouselSection() {
           return
         }
 
-        // Map the data to VideoData format and build public URLs
         const mappedVideos: VideoData[] = data
           .filter((video) => video.video_path && video.video_path.trim() !== '')
           .map((video) => {
-            // Get public URL from Supabase Storage
             const { data: urlData } = supabase.storage
               .from('videos')
               .getPublicUrl(video.video_path)
@@ -456,21 +461,25 @@ function CarouselSection() {
 
   const currentVideo = videos[currentIndex]
 
-  // Navigate to previous video
+  // Navigate to previous video (up)
   const goToPrevious = useCallback(() => {
-    if (videos.length === 0) return
+    if (videos.length === 0 || isTransitioning) return
+    setIsTransitioning(true)
     setCurrentIndex((prev) => (prev === 0 ? videos.length - 1 : prev - 1))
     setIsPlaying(true)
-  }, [videos.length])
+    setTimeout(() => setIsTransitioning(false), 300)
+  }, [videos.length, isTransitioning])
 
-  // Navigate to next video
+  // Navigate to next video (down)
   const goToNext = useCallback(() => {
-    if (videos.length === 0) return
+    if (videos.length === 0 || isTransitioning) return
+    setIsTransitioning(true)
     setCurrentIndex((prev) => (prev === videos.length - 1 ? 0 : prev + 1))
     setIsPlaying(true)
-  }, [videos.length])
+    setTimeout(() => setIsTransitioning(false), 300)
+  }, [videos.length, isTransitioning])
 
-  // Handle video play/pause
+  // Handle video play/pause (click/tap on video)
   const togglePlayPause = useCallback(() => {
     if (videoRef.current) {
       if (isPlaying) {
@@ -483,7 +492,8 @@ function CarouselSection() {
   }, [isPlaying])
 
   // Handle mute/unmute
-  const toggleMute = useCallback(() => {
+  const toggleMute = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation()
     if (videoRef.current) {
       videoRef.current.muted = !isMuted
       setIsMuted(!isMuted)
@@ -518,10 +528,37 @@ function CarouselSection() {
     }
   }, [currentVideo])
 
+  // Touch handlers for swipe gestures
+  const onTouchStart = (e: React.TouchEvent) => {
+    touchStartY.current = e.targetTouches[0].clientY
+  }
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    touchEndY.current = e.targetTouches[0].clientY
+  }
+
+  const onTouchEnd = () => {
+    if (!touchStartY.current || !touchEndY.current) return
+    
+    const distance = touchStartY.current - touchEndY.current
+    
+    if (Math.abs(distance) > minSwipeDistance) {
+      if (distance > 0) {
+        // Swiped up - next video
+        goToNext()
+      } else {
+        // Swiped down - previous video
+        goToPrevious()
+      }
+    }
+    
+    touchStartY.current = 0
+    touchEndY.current = 0
+  }
+
   // Keyboard navigation
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
-      // Only handle keyboard events when carousel is in view
       const carouselSection = document.getElementById('carousel')
       if (!carouselSection) return
       
@@ -530,8 +567,14 @@ function CarouselSection() {
       
       if (!isInView) return
       
-      if (e.key === 'ArrowLeft') goToPrevious()
-      if (e.key === 'ArrowRight') goToNext()
+      if (e.key === 'ArrowUp') {
+        e.preventDefault()
+        goToPrevious()
+      }
+      if (e.key === 'ArrowDown') {
+        e.preventDefault()
+        goToNext()
+      }
       if (e.key === ' ') {
         e.preventDefault()
         togglePlayPause()
@@ -546,7 +589,7 @@ function CarouselSection() {
     <section id="carousel" className="py-8 md:py-10 pb-2 md:pb-4">
       <div className="max-w-[1120px] mx-auto px-5">
         <div className="text-left mb-6 md:mb-8">
-          <div className="text-[11px] uppercase tracking-[0.16em] mb-1.5 font-semibold bg-gradient-to-r from-[#ffb347] via-[#ff8a1f] to-[#ff4b2b] bg-clip-text text-transparent">
+          <div className="text-[11px] uppercase tracking-[0.16em] mb-1.5 font-semibold text-[#ff8a1f]">
             Carrousel public
           </div>
           <h2 className="text-[28px] lg:text-[32px] mb-3 font-extrabold leading-tight">
@@ -569,91 +612,82 @@ function CarouselSection() {
             <p className="text-text-soft text-sm">Revenez bientôt pour découvrir de nouvelles vidéos !</p>
           </div>
         ) : (
-          <div className="flex flex-col items-center space-y-6">
-            <div className="relative group w-full max-w-md">
-              <div className="relative rounded-3xl overflow-hidden bg-[rgba(6,9,22,0.8)] backdrop-blur-sm border border-[rgba(252,211,77,0.3)] shadow-2xl aspect-[9/16]">
-                <div className="absolute -inset-1 bg-gradient-to-r from-accent-orange/20 via-accent-red/20 to-accent-orange/20 rounded-3xl blur-xl opacity-50"></div>
+          <div className="flex flex-col items-center">
+            <div 
+              ref={containerRef}
+              className="relative w-full max-w-md aspect-[9/16] bg-black rounded-2xl overflow-hidden cursor-pointer"
+              onTouchStart={onTouchStart}
+              onTouchMove={onTouchMove}
+              onTouchEnd={onTouchEnd}
+              onClick={togglePlayPause}
+            >
+              <video
+                ref={videoRef}
+                src={currentVideo?.videoUrl}
+                muted={isMuted}
+                loop
+                playsInline
+                autoPlay
+                className={`w-full h-full object-cover transition-opacity duration-300 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}
+              />
 
-                <video
-                  ref={videoRef}
-                  src={currentVideo?.videoUrl}
-                  muted={isMuted}
-                  loop
-                  playsInline
-                  autoPlay
-                  className="relative z-10 w-full h-full object-cover"
-                />
+              {/* Mute button - bottom right, always visible */}
+              <button
+                onClick={toggleMute}
+                className="absolute bottom-4 right-4 z-20 w-10 h-10 rounded-full bg-black/50 backdrop-blur-sm border border-white/20 flex items-center justify-center hover:bg-black/70 transition-all duration-200"
+                aria-label={isMuted ? 'Activer le son' : 'Désactiver le son'}
+              >
+                {isMuted ? (
+                  <VolumeX className="w-5 h-5 text-white" />
+                ) : (
+                  <Volume2 className="w-5 h-5 text-white" />
+                )}
+              </button>
 
-                <div className="absolute inset-0 z-20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <div className="flex items-center gap-4">
-                    <button
-                      onClick={togglePlayPause}
-                      className="relative w-16 h-16 rounded-full flex items-center justify-center"
-                    >
-                      <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[#ff8a1f] via-[#ffd700] to-[#ff4b2b] opacity-60 blur-md"></div>
-                      <div className="relative w-14 h-14 rounded-full bg-gradient-to-br from-[rgba(15,23,42,0.98)] via-[rgba(15,23,42,0.95)] to-[rgba(6,9,22,0.98)] border-2 border-[rgba(252,211,77,0.8)] backdrop-blur-sm flex items-center justify-center shadow-[0_8px_32px_rgba(0,0,0,0.9),0_0_0_1px_rgba(252,211,77,0.3),inset_0_1px_0_rgba(255,255,255,0.1)]">
-                        {isPlaying ? (
-                          <svg className="w-7 h-7" viewBox="0 0 24 24" fill="none">
-                            <defs>
-                              <linearGradient id="carouselPauseGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="0%" stopColor="#ffd700" />
-                                <stop offset="50%" stopColor="#ff8a1f" />
-                                <stop offset="100%" stopColor="#ffffff" />
-                              </linearGradient>
-                            </defs>
-                            <rect x="6" y="4" width="4" height="16" rx="1" fill="url(#carouselPauseGradient)" />
-                            <rect x="14" y="4" width="4" height="16" rx="1" fill="url(#carouselPauseGradient)" />
-                          </svg>
-                        ) : (
-                          <svg className="w-7 h-7 ml-0.5" viewBox="0 0 24 24" fill="none">
-                            <defs>
-                              <linearGradient id="carouselPlayGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="0%" stopColor="#ffd700" />
-                                <stop offset="50%" stopColor="#ff8a1f" />
-                                <stop offset="100%" stopColor="#ffffff" />
-                              </linearGradient>
-                            </defs>
-                            <path d="M8 5v14l11-7z" fill="url(#carouselPlayGradient)" />
-                          </svg>
-                        )}
-                      </div>
-                    </button>
-
-                    <button
-                      onClick={toggleMute}
-                      className="relative w-16 h-16 rounded-full flex items-center justify-center"
-                    >
-                      <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[#ff8a1f] via-[#ffd700] to-[#ff4b2b] opacity-60 blur-md"></div>
-                      <div className="relative w-14 h-14 rounded-full bg-gradient-to-br from-[rgba(15,23,42,0.98)] via-[rgba(15,23,42,0.95)] to-[rgba(6,9,22,0.98)] border-2 border-[rgba(252,211,77,0.8)] backdrop-blur-sm flex items-center justify-center shadow-[0_8px_32px_rgba(0,0,0,0.9),0_0_0_1px_rgba(252,211,77,0.3),inset_0_1px_0_rgba(255,255,255,0.1)]">
-                        {isMuted ? (
-                          <VolumeX className="w-6 h-6 text-white drop-shadow-lg" />
-                        ) : (
-                          <Volume2 className="w-6 h-6 text-white drop-shadow-lg" />
-                        )}
-                      </div>
-                    </button>
+              {/* Play/Pause indicator - center, shows briefly on click */}
+              {!isPlaying && (
+                <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
+                  <div className="w-20 h-20 rounded-full bg-black/50 backdrop-blur-sm border border-white/20 flex items-center justify-center">
+                    <Pause className="w-10 h-10 text-white" />
                   </div>
                 </div>
-              </div>
+              )}
 
+              {/* Desktop navigation arrows - right side */}
               {videos.length > 1 && (
-                <>
+                <div className="hidden md:flex flex-col gap-4 absolute right-4 top-1/2 -translate-y-1/2 z-20">
                   <button
-                    onClick={goToPrevious}
-                    className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 lg:-translate-x-12 w-12 h-12 lg:w-14 lg:h-14 rounded-full bg-[rgba(15,23,42,0.95)] backdrop-blur-sm border-2 border-[rgba(252,211,77,0.5)] flex items-center justify-center shadow-2xl transition-all duration-300 hover:scale-110 hover:border-[rgba(252,211,77,0.9)] hover:bg-[rgba(15,23,42,1)] z-30"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      goToPrevious()
+                    }}
+                    className="w-12 h-12 rounded-full bg-black/50 backdrop-blur-sm border border-white/20 flex items-center justify-center hover:bg-black/70 hover:scale-110 transition-all duration-200"
                     aria-label="Vidéo précédente"
                   >
-                    <ChevronLeft className="w-6 h-6 text-accent-orange-soft" />
+                    <ChevronUp className="w-6 h-6 text-white" />
                   </button>
-
                   <button
-                    onClick={goToNext}
-                    className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 lg:translate-x-12 w-12 h-12 lg:w-14 lg:h-14 rounded-full bg-[rgba(15,23,42,0.95)] backdrop-blur-sm border-2 border-[rgba(252,211,77,0.5)] flex items-center justify-center shadow-2xl transition-all duration-300 hover:scale-110 hover:border-[rgba(252,211,77,0.9)] hover:bg-[rgba(15,23,42,1)] z-30"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      goToNext()
+                    }}
+                    className="w-12 h-12 rounded-full bg-black/50 backdrop-blur-sm border border-white/20 flex items-center justify-center hover:bg-black/70 hover:scale-110 transition-all duration-200"
                     aria-label="Vidéo suivante"
                   >
-                    <ChevronRight className="w-6 h-6 text-accent-orange-soft" />
+                    <ChevronDown className="w-6 h-6 text-white" />
                   </button>
-                </>
+                </div>
+              )}
+
+              {/* Mobile swipe indicator - subtle hint */}
+              {videos.length > 1 && (
+                <div className="md:hidden absolute top-4 left-1/2 -translate-x-1/2 z-10">
+                  <div className="px-3 py-1.5 rounded-full bg-black/50 backdrop-blur-sm border border-white/20">
+                    <p className="text-white text-xs font-medium">
+                      {currentIndex + 1} / {videos.length}
+                    </p>
+                  </div>
+                </div>
               )}
             </div>
           </div>
@@ -669,7 +703,7 @@ function FeaturesSection() {
     <section id="features" className="py-8 md:py-10 pb-2 md:pb-4">
       <div className="max-w-[1120px] mx-auto px-5">
         <div className="text-left mb-6 md:mb-8">
-          <div className="text-[11px] uppercase tracking-[0.16em] mb-1.5 font-semibold bg-gradient-to-r from-[#ffb347] via-[#ff8a1f] to-[#ff4b2b] bg-clip-text text-transparent">
+          <div className="text-[11px] uppercase tracking-[0.16em] mb-1.5 font-semibold text-[#ff8a1f]">
             Pourquoi choisir FLAZY
           </div>
           <h2 className="text-[28px] lg:text-[32px] mb-3 font-extrabold leading-tight">
@@ -691,7 +725,7 @@ function StepsSection() {
     <section id="steps" className="steps pt-8 md:pt-10 pb-2 md:pb-4">
       <div className="max-w-[1120px] mx-auto px-5">
         <div className="text-left mb-6 md:mb-8">
-          <div className="text-[11px] uppercase tracking-[0.16em] mb-1.5 font-semibold bg-gradient-to-r from-[#ffb347] via-[#ff8a1f] to-[#ff4b2b] bg-clip-text text-transparent">
+          <div className="text-[11px] uppercase tracking-[0.16em] mb-1.5 font-semibold text-[#ff8a1f]">
             Comment ça marche
           </div>
           <h2 className="text-[28px] lg:text-[32px] mb-3 font-extrabold leading-tight">
@@ -876,7 +910,7 @@ function FormSection() {
     <section className="prompt-section pt-10 md:pt-12 pb-2 md:pb-4">
       <div className="max-w-[1120px] mx-auto px-5">
         <div className="text-left mb-6 md:mb-8">
-          <div className="text-[11px] uppercase tracking-[0.16em] mb-1.5 font-semibold bg-gradient-to-r from-[#ffb347] via-[#ff8a1f] to-[#ff4b2b] bg-clip-text text-transparent">
+          <div className="text-[11px] uppercase tracking-[0.16em] mb-1.5 font-semibold text-[#ff8a1f]">
             Décrivez la vidéo que vous voulez
           </div>
           <h2 className="text-[28px] lg:text-[32px] mb-3 font-extrabold leading-tight">
@@ -1066,26 +1100,22 @@ function ExamplesSection() {
   const examples = [
     {
       title: 'Interviews & News',
-      tag: 'Médias et actualités',
-      desc: 'Formats inspirés des médias, interviews, segments d\'actualité et reportages. Idéal pour créer du réalisme, de la crédibilité et capturer l\'attention dès les premières secondes.',
+      desc: 'Formats réalistes inspirés des médias et de l\'actualité.',
       icon: Video,
     },
     {
-      title: 'UGC & Témoignages Clients',
-      tag: 'Avis authentiques',
-      desc: 'Vidéos style UGC et témoignages authentiques. Parfait pour renforcer la confiance, mettre en avant des avis crédibles et renforcer l\'impact marketing.',
+      title: 'UGC & Témoignages',
+      desc: 'Vidéos UGC et témoignages authentiques.',
       icon: Users,
     },
     {
       title: 'Boost & Publicité',
-      tag: 'Conversion et ventes',
-      desc: 'Vidéos orientées conversion pour promouvoir une offre, un produit ou un service. Conçues pour attirer, convaincre et booster les ventes.',
+      desc: 'Vidéos publicitaires orientées conversion.',
       icon: Rocket,
     },
     {
       title: 'Viral & Divertissement',
-      tag: 'Créativité et viralité',
-      desc: 'Concepts créatifs, décalés, intrigants ou surprenants. Formats pensés pour générer de la viralité, capturer l\'attention et maximiser la rétention.',
+      desc: 'Formats créatifs pensés pour la viralité.',
       icon: Sparkles,
     },
   ]
@@ -1113,7 +1143,7 @@ function ExamplesSection() {
     <section id="examples" className="py-8 md:py-10 pb-2 md:pb-4">
       <div className="max-w-[1120px] mx-auto px-5">
         <div className="text-left mb-6 md:mb-8">
-          <div className="text-[11px] uppercase tracking-[0.16em] mb-1.5 font-semibold bg-gradient-to-r from-[#ffb347] via-[#ff8a1f] to-[#ff4b2b] bg-clip-text text-transparent">
+          <div className="text-[11px] uppercase tracking-[0.16em] mb-1.5 font-semibold text-[#ff8a1f]">
             Exemples de vidéos virales
           </div>
           <h2 className="text-[28px] lg:text-[32px] mb-3 font-extrabold leading-tight">
@@ -1139,7 +1169,7 @@ function ExamplesSection() {
               }}
             >
                 <div
-                  className="relative rounded-xl overflow-hidden border border-[rgba(252,211,77,0.7)] aspect-[9/16] w-full mb-2 bg-[#020617] cursor-pointer group flex-shrink-0"
+                  className="relative rounded-xl overflow-hidden border border-[rgba(252,211,77,0.7)] aspect-[9/16] w-full mb-2.5 bg-[#020617] cursor-pointer group flex-shrink-0"
                   onClick={() => handleVideoClick(i)}
                 >
                   <video
@@ -1184,13 +1214,13 @@ function ExamplesSection() {
                     </div>
                   </div>
                 </div>
-                <div className="flex items-start gap-2 mb-1.5 flex-shrink-0">
-                  <Icon className="w-3.5 h-3.5 text-accent-orange-soft mt-0.5 flex-shrink-0" />
+                <div className="flex items-center gap-2 mb-2 flex-shrink-0">
+                  <Icon className="w-3.5 h-3.5 text-accent-orange-soft flex-shrink-0" />
                   <div className="flex-1 min-w-0">
                     <div className="text-[12px] font-semibold text-text-main leading-tight">{example.title}</div>
                   </div>
                 </div>
-                <p className="text-[10px] text-text-soft leading-relaxed m-0 flex-grow">{example.desc}</p>
+                <p className="text-[11px] text-text-soft leading-snug m-0">{example.desc}</p>
               </div>
             )
           })}
@@ -1392,7 +1422,7 @@ function FAQSection() {
     <section id="faq" className="py-8 md:py-10 pb-2 md:pb-4">
       <div className="max-w-[1120px] mx-auto px-5">
         <div className="text-left mb-6 md:mb-8">
-          <div className="text-[11px] uppercase tracking-[0.16em] mb-1.5 font-semibold bg-gradient-to-r from-[#ffb347] via-[#ff8a1f] to-[#ff4b2b] bg-clip-text text-transparent">
+          <div className="text-[11px] uppercase tracking-[0.16em] mb-1.5 font-semibold text-[#ff8a1f]">
             Questions fréquentes
           </div>
           <h2 className="text-[28px] lg:text-[32px] mb-3 font-extrabold leading-tight">
@@ -1474,7 +1504,7 @@ function HowItWorksSection() {
     <section className="py-8 md:py-10 pb-2 md:pb-4">
       <div className="max-w-[1120px] mx-auto px-5">
         <div className="text-center mb-6">
-          <div className="text-[11px] uppercase tracking-[0.16em] mb-1.5 font-semibold bg-gradient-to-r from-[#ffb347] via-[#ff8a1f] to-[#ff4b2b] bg-clip-text text-transparent">
+          <div className="text-[11px] uppercase tracking-[0.16em] mb-1.5 font-semibold text-[#ff8a1f]">
             Comment ça fonctionne
           </div>
           <h2 className="text-[28px] lg:text-[32px] mb-3 font-extrabold leading-tight">
@@ -1619,9 +1649,17 @@ export default function Home() {
             <div className="text-center">
               <Link
                 href="/pricing"
-                className="inline-flex items-center gap-2 text-text-soft hover:text-text-main transition-colors text-sm"
+                className="relative overflow-hidden bg-transparent text-[#111827] shadow-[0_18px_45px_rgba(0,0,0,0.75)] z-0 rounded-full border-none text-[13px] font-semibold px-6 py-3 cursor-pointer inline-flex items-center gap-2 transition-all duration-[0.18s] ease-out hover:-translate-y-px hover:shadow-[0_22px_60px_rgba(0,0,0,0.95)]"
+                style={{
+                  position: 'relative',
+                }}
               >
-                <span>Découvrir nos tarifs</span>
+                <span className="absolute inset-0 -z-10 rounded-full" style={{
+                  backgroundImage: 'linear-gradient(90deg, #ff6b00 0%, #ffd700 25%, #ff4b2b 50%, #ffd700 75%, #ff6b00 100%)',
+                  backgroundSize: '220% 100%',
+                  animation: 'flazyTopbar 10s ease-in-out infinite alternate'
+                }}></span>
+                <span>Découvrez nos tarifs</span>
                 <ChevronRight className="w-4 h-4" />
               </Link>
             </div>
