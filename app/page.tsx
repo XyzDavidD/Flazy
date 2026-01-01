@@ -528,9 +528,10 @@ function CarouselSection() {
     }
   }, [currentVideo])
 
-  // Touch handlers for swipe gestures
+  // Touch handlers for swipe gestures - improved for better detection
   const onTouchStart = (e: React.TouchEvent) => {
     touchStartY.current = e.targetTouches[0].clientY
+    touchEndY.current = e.targetTouches[0].clientY
   }
 
   const onTouchMove = (e: React.TouchEvent) => {
@@ -586,10 +587,10 @@ function CarouselSection() {
   }, [goToPrevious, goToNext, togglePlayPause])
 
   return (
-    <section id="carousel" className="py-8 md:py-10 pb-2 md:pb-4">
-      <div className="max-w-[1120px] mx-auto px-5">
-        <div className="text-left mb-6 md:mb-8">
-          <div className="text-[11px] uppercase tracking-[0.16em] mb-1.5 font-semibold text-[#ff8a1f]">
+    <section id="carousel" className="py-4 md:py-10 pb-2 md:pb-4">
+      <div className="max-w-[1120px] mx-auto px-0 md:px-5">
+        <div className="text-left mb-4 md:mb-8 px-5 md:px-0">
+          <div className="text-[11px] uppercase tracking-[0.16em] mb-1.5 font-semibold text-accent-orange">
             Carrousel public
           </div>
           <h2 className="text-[28px] lg:text-[32px] mb-3 font-extrabold leading-tight">
@@ -612,24 +613,35 @@ function CarouselSection() {
             <p className="text-text-soft text-sm">Revenez bientôt pour découvrir de nouvelles vidéos !</p>
           </div>
         ) : (
-          <div className="flex flex-col items-center">
+          <div className="flex flex-col items-center w-full">
             <div 
               ref={containerRef}
-              className="relative w-full max-w-md aspect-[9/16] bg-black rounded-2xl overflow-hidden cursor-pointer"
+              className="relative w-full md:max-w-md bg-black md:rounded-2xl overflow-hidden cursor-pointer"
+              style={{
+                aspectRatio: '9/16',
+                minHeight: 'calc(100vh - 250px)',
+                maxHeight: '80vh',
+              }}
               onTouchStart={onTouchStart}
               onTouchMove={onTouchMove}
               onTouchEnd={onTouchEnd}
               onClick={togglePlayPause}
             >
-              <video
-                ref={videoRef}
-                src={currentVideo?.videoUrl}
-                muted={isMuted}
-                loop
-                playsInline
-                autoPlay
-                className={`w-full h-full object-cover transition-opacity duration-300 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}
-              />
+              {videos.map((video, index) => (
+                <video
+                  key={video.id}
+                  ref={index === currentIndex ? videoRef : null}
+                  src={video.videoUrl}
+                  muted={isMuted}
+                  loop
+                  playsInline
+                  autoPlay={index === currentIndex}
+                  preload="auto"
+                  className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ease-in-out ${
+                    index === currentIndex && !isTransitioning ? 'opacity-100 z-10' : 'opacity-0 z-0'
+                  }`}
+                />
+              ))}
 
               {/* Mute button - bottom right, always visible */}
               <button
@@ -661,8 +673,9 @@ function CarouselSection() {
                       e.stopPropagation()
                       goToPrevious()
                     }}
-                    className="w-12 h-12 rounded-full bg-black/50 backdrop-blur-sm border border-white/20 flex items-center justify-center hover:bg-black/70 hover:scale-110 transition-all duration-200"
+                    className="w-12 h-12 rounded-full bg-black/70 backdrop-blur-sm border-2 border-white/30 flex items-center justify-center hover:bg-black/90 hover:scale-110 hover:border-white/50 transition-all duration-200 shadow-lg"
                     aria-label="Vidéo précédente"
+                    title="Vidéo précédente (↑)"
                   >
                     <ChevronUp className="w-6 h-6 text-white" />
                   </button>
@@ -671,20 +684,21 @@ function CarouselSection() {
                       e.stopPropagation()
                       goToNext()
                     }}
-                    className="w-12 h-12 rounded-full bg-black/50 backdrop-blur-sm border border-white/20 flex items-center justify-center hover:bg-black/70 hover:scale-110 transition-all duration-200"
+                    className="w-12 h-12 rounded-full bg-black/70 backdrop-blur-sm border-2 border-white/30 flex items-center justify-center hover:bg-black/90 hover:scale-110 hover:border-white/50 transition-all duration-200 shadow-lg"
                     aria-label="Vidéo suivante"
+                    title="Vidéo suivante (↓)"
                   >
                     <ChevronDown className="w-6 h-6 text-white" />
                   </button>
                 </div>
               )}
 
-              {/* Mobile swipe indicator - subtle hint */}
+              {/* Desktop keyboard hint */}
               {videos.length > 1 && (
-                <div className="md:hidden absolute top-4 left-1/2 -translate-x-1/2 z-10">
-                  <div className="px-3 py-1.5 rounded-full bg-black/50 backdrop-blur-sm border border-white/20">
-                    <p className="text-white text-xs font-medium">
-                      {currentIndex + 1} / {videos.length}
+                <div className="hidden md:block absolute bottom-20 left-1/2 -translate-x-1/2 z-10">
+                  <div className="px-4 py-2 rounded-full bg-black/50 backdrop-blur-sm border border-white/20">
+                    <p className="text-white text-[10px] font-medium text-center">
+                      ↑ ↓ pour naviguer • Espace pour pause
                     </p>
                   </div>
                 </div>
@@ -703,7 +717,7 @@ function FeaturesSection() {
     <section id="features" className="py-8 md:py-10 pb-2 md:pb-4">
       <div className="max-w-[1120px] mx-auto px-5">
         <div className="text-left mb-6 md:mb-8">
-          <div className="text-[11px] uppercase tracking-[0.16em] mb-1.5 font-semibold text-[#ff8a1f]">
+          <div className="text-[11px] uppercase tracking-[0.16em] mb-1.5 font-semibold text-accent-orange">
             Pourquoi choisir FLAZY
           </div>
           <h2 className="text-[28px] lg:text-[32px] mb-3 font-extrabold leading-tight">
@@ -725,7 +739,7 @@ function StepsSection() {
     <section id="steps" className="steps pt-8 md:pt-10 pb-2 md:pb-4">
       <div className="max-w-[1120px] mx-auto px-5">
         <div className="text-left mb-6 md:mb-8">
-          <div className="text-[11px] uppercase tracking-[0.16em] mb-1.5 font-semibold text-[#ff8a1f]">
+          <div className="text-[11px] uppercase tracking-[0.16em] mb-1.5 font-semibold text-accent-orange">
             Comment ça marche
           </div>
           <h2 className="text-[28px] lg:text-[32px] mb-3 font-extrabold leading-tight">
@@ -910,7 +924,7 @@ function FormSection() {
     <section className="prompt-section pt-10 md:pt-12 pb-2 md:pb-4">
       <div className="max-w-[1120px] mx-auto px-5">
         <div className="text-left mb-6 md:mb-8">
-          <div className="text-[11px] uppercase tracking-[0.16em] mb-1.5 font-semibold text-[#ff8a1f]">
+          <div className="text-[11px] uppercase tracking-[0.16em] mb-1.5 font-semibold text-accent-orange">
             Décrivez la vidéo que vous voulez
           </div>
           <h2 className="text-[28px] lg:text-[32px] mb-3 font-extrabold leading-tight">
@@ -1091,32 +1105,114 @@ function FormSection() {
 // Examples Section with Playable Videos
 function ExamplesSection() {
   const [playingIndex, setPlayingIndex] = useState<number | null>(null)
+  const [exampleVideos, setExampleVideos] = useState<any[]>([])
+  const [isLoadingExamples, setIsLoadingExamples] = useState(true)
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([])
 
   const setVideoRef = (index: number) => (el: HTMLVideoElement | null) => {
     videoRefs.current[index] = el
   }
 
-  const examples = [
+  // Fetch example videos from database - same pattern as carousel
+  useEffect(() => {
+    const fetchExampleVideos = async () => {
+      try {
+        setIsLoadingExamples(true)
+
+        const { data, error } = await supabase
+          .from('example_videos')
+          .select('*')
+          .order('position', { ascending: true })
+
+        if (error) {
+          console.error('Error fetching example videos:', error)
+          // Fallback to defaults on error
+          setExampleVideos([
+            { title: 'Interviews & News', desc: 'Formats réalistes inspirés des médias et de l\'actualité.', videoUrl: '/placeholder.mp4', icon: Video },
+            { title: 'UGC & Témoignages', desc: 'Vidéos UGC et témoignages authentiques.', videoUrl: '/placeholder.mp4', icon: Users },
+            { title: 'Boost & Publicité', desc: 'Vidéos publicitaires orientées conversion.', videoUrl: '/placeholder.mp4', icon: Rocket },
+            { title: 'Viral & Divertissement', desc: 'Formats créatifs pensés pour la viralité.', videoUrl: '/placeholder.mp4', icon: Sparkles },
+          ])
+          return
+        }
+
+        // Create array with 4 positions, fill with defaults if missing
+        const defaultTitles = ['Interviews & News', 'UGC & Témoignages', 'Boost & Publicité', 'Viral & Divertissement']
+        const defaultDescs = [
+          'Formats réalistes inspirés des médias et de l\'actualité.',
+          'Vidéos UGC et témoignages authentiques.',
+          'Vidéos publicitaires orientées conversion.',
+          'Formats créatifs pensés pour la viralité.',
+        ]
+        const defaultIcons = [Video, Users, Rocket, Sparkles]
+
+        const videosByPosition: any[] = []
+        for (let i = 0; i < 4; i++) {
+          const video = data?.find((v: any) => v.position === i + 1)
+          if (video && video.video_path) {
+            const { data: urlData } = supabase.storage
+              .from('videos')
+              .getPublicUrl(video.video_path)
+            
+            videosByPosition.push({
+              title: video.title || defaultTitles[i],
+              desc: video.description || defaultDescs[i],
+              videoUrl: urlData.publicUrl,
+              icon: defaultIcons[i] || Video,
+            })
+          } else {
+            // Fallback to default if no video at this position
+            videosByPosition.push({
+              title: defaultTitles[i],
+              desc: defaultDescs[i],
+              videoUrl: '/placeholder.mp4',
+              icon: defaultIcons[i] || Video,
+            })
+          }
+        }
+
+        setExampleVideos(videosByPosition)
+      } catch (error) {
+        console.error('Error fetching example videos:', error)
+        // Fallback to defaults on error
+        setExampleVideos([
+          { title: 'Interviews & News', desc: 'Formats réalistes inspirés des médias et de l\'actualité.', videoUrl: '/placeholder.mp4', icon: Video },
+          { title: 'UGC & Témoignages', desc: 'Vidéos UGC et témoignages authentiques.', videoUrl: '/placeholder.mp4', icon: Users },
+          { title: 'Boost & Publicité', desc: 'Vidéos publicitaires orientées conversion.', videoUrl: '/placeholder.mp4', icon: Rocket },
+          { title: 'Viral & Divertissement', desc: 'Formats créatifs pensés pour la viralité.', videoUrl: '/placeholder.mp4', icon: Sparkles },
+        ])
+      } finally {
+        setIsLoadingExamples(false)
+      }
+    }
+
+    fetchExampleVideos()
+  }, [])
+
+  const examples = exampleVideos.length > 0 ? exampleVideos : [
     {
       title: 'Interviews & News',
       desc: 'Formats réalistes inspirés des médias et de l\'actualité.',
       icon: Video,
+      videoUrl: '/placeholder.mp4',
     },
     {
       title: 'UGC & Témoignages',
       desc: 'Vidéos UGC et témoignages authentiques.',
       icon: Users,
+      videoUrl: '/placeholder.mp4',
     },
     {
       title: 'Boost & Publicité',
       desc: 'Vidéos publicitaires orientées conversion.',
       icon: Rocket,
+      videoUrl: '/placeholder.mp4',
     },
     {
       title: 'Viral & Divertissement',
       desc: 'Formats créatifs pensés pour la viralité.',
       icon: Sparkles,
+      videoUrl: '/placeholder.mp4',
     },
   ]
 
@@ -1143,7 +1239,7 @@ function ExamplesSection() {
     <section id="examples" className="py-8 md:py-10 pb-2 md:pb-4">
       <div className="max-w-[1120px] mx-auto px-5">
         <div className="text-left mb-6 md:mb-8">
-          <div className="text-[11px] uppercase tracking-[0.16em] mb-1.5 font-semibold text-[#ff8a1f]">
+          <div className="text-[11px] uppercase tracking-[0.16em] mb-1.5 font-semibold text-accent-orange">
             Exemples de vidéos virales
           </div>
           <h2 className="text-[28px] lg:text-[32px] mb-3 font-extrabold leading-tight">
@@ -1154,13 +1250,13 @@ function ExamplesSection() {
           </p>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
           {examples.map((example, i) => {
             const Icon = example.icon
             return (
               <div
               key={i}
-              className="rounded-[16px] p-3 border border-[rgba(252,211,77,0.85)] shadow-[0_8px_24px_rgba(0,0,0,0.6)] text-xs text-text-soft hover:border-[rgba(252,211,77,1)] transition-all duration-300 flex flex-col h-full"
+              className="rounded-[16px] p-3 border border-[rgba(252,211,77,0.85)] shadow-[0_8px_24px_rgba(0,0,0,0.6)] text-xs text-text-soft hover:border-[rgba(252,211,77,1)] transition-all duration-300 flex flex-col"
               style={{
                 background: `
                   radial-gradient(circle at top, rgba(255, 138, 31, 0.16), transparent 60%),
@@ -1174,7 +1270,7 @@ function ExamplesSection() {
                 >
                   <video
                     ref={setVideoRef(i)}
-                    src="/placeholder.mp4"
+                    src={example.videoUrl || '/placeholder.mp4'}
                     muted
                     loop
                     playsInline
@@ -1214,13 +1310,10 @@ function ExamplesSection() {
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 mb-2 flex-shrink-0">
+                <div className="flex items-center gap-2">
                   <Icon className="w-3.5 h-3.5 text-accent-orange-soft flex-shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <div className="text-[12px] font-semibold text-text-main leading-tight">{example.title}</div>
-                  </div>
+                  <h3 className="text-[12px] font-semibold text-text-main leading-tight m-0">{example.title}</h3>
                 </div>
-                <p className="text-[11px] text-text-soft leading-snug m-0">{example.desc}</p>
               </div>
             )
           })}
@@ -1246,7 +1339,6 @@ function PricingSection() {
       oldPrice: '',
       price: '€19.90',
       offer: '',
-      desc: 'Idéal pour tester la plateforme et générer vos premières vidéos IA.',
       icon: Sparkles,
       recommended: false,
     },
@@ -1256,7 +1348,6 @@ function PricingSection() {
       oldPrice: '',
       price: '€34.90',
       offer: '',
-      desc: 'Parfait pour publier régulièrement et tester différents formats.',
       icon: Users,
       recommended: true,
     },
@@ -1266,7 +1357,6 @@ function PricingSection() {
       oldPrice: '',
       price: '€74.90',
       offer: '',
-      desc: 'Conçu pour les créateurs avancés, les entreprises et les agences.',
       icon: TrendingUp,
       recommended: false,
     },
@@ -1276,7 +1366,6 @@ function PricingSection() {
       oldPrice: '',
       offer: '',
       price: '€139.90',
-      desc: 'Meilleur rapport qualité-prix pour les créateurs à fort volume et les équipes.',
       icon: Rocket,
       recommended: false,
     },
@@ -1307,7 +1396,7 @@ function PricingSection() {
                   </div>
                 )}
                 <div
-                  className={`rounded-[22px] p-5 border shadow-[0_18px_40px_rgba(0,0,0,0.8)] flex flex-col gap-3 h-full hover:border-[rgba(252,211,77,1)] transition-all duration-300 ${
+                  className={`rounded-[22px] p-4 md:p-5 border shadow-[0_18px_40px_rgba(0,0,0,0.8)] flex flex-col gap-2.5 h-full hover:border-[rgba(252,211,77,1)] transition-all duration-300 ${
                     plan.recommended 
                       ? 'border-2 border-[rgba(252,211,77,1)] pt-7' 
                       : 'border border-[rgba(252,211,77,0.95)]'
@@ -1325,13 +1414,6 @@ function PricingSection() {
                     </div>
                     <Icon className="w-5 h-5 text-accent-orange-soft opacity-60 flex-shrink-0" />
                   </div>
-                  <div className="text-[13px] text-text-soft">{plan.name}</div>
-                  <div className="text-[10px] text-text-muted italic">
-                    1 token = 1 génération
-                  </div>
-                  {plan.oldPrice && (
-                    <div className="text-xs text-text-muted line-through">{plan.oldPrice}</div>
-                  )}
                   <div className="flex items-baseline justify-between gap-2">
                     <span className="text-2xl font-bold text-text-main">{plan.price}</span>
                     {plan.offer && (
@@ -1340,7 +1422,8 @@ function PricingSection() {
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-text-soft flex-grow leading-relaxed">{plan.desc}</p>
+                  <div className="text-[13px] text-text-soft font-medium">{plan.name}</div>
+                  <div className="text-[11px] text-text-muted">Pas d'abonnement</div>
                   <div className="mt-auto pt-2">
                     <button
                       onClick={scrollToForm}
@@ -1422,7 +1505,7 @@ function FAQSection() {
     <section id="faq" className="py-8 md:py-10 pb-2 md:pb-4">
       <div className="max-w-[1120px] mx-auto px-5">
         <div className="text-left mb-6 md:mb-8">
-          <div className="text-[11px] uppercase tracking-[0.16em] mb-1.5 font-semibold text-[#ff8a1f]">
+          <div className="text-[11px] uppercase tracking-[0.16em] mb-1.5 font-semibold text-accent-orange">
             Questions fréquentes
           </div>
           <h2 className="text-[28px] lg:text-[32px] mb-3 font-extrabold leading-tight">
@@ -1504,7 +1587,7 @@ function HowItWorksSection() {
     <section className="py-8 md:py-10 pb-2 md:pb-4">
       <div className="max-w-[1120px] mx-auto px-5">
         <div className="text-center mb-6">
-          <div className="text-[11px] uppercase tracking-[0.16em] mb-1.5 font-semibold text-[#ff8a1f]">
+          <div className="text-[11px] uppercase tracking-[0.16em] mb-1.5 font-semibold text-accent-orange">
             Comment ça fonctionne
           </div>
           <h2 className="text-[28px] lg:text-[32px] mb-3 font-extrabold leading-tight">

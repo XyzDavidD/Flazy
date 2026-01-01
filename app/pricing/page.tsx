@@ -259,7 +259,6 @@ export default function PricingPage() {
       oldPrice: '',
       price: '€19.90',
       offer: '',
-      desc: 'Idéal pour tester la plateforme et générer vos premières vidéos IA.',
       icon: Sparkles,
       recommended: false,
       pack: 'starter' as const,
@@ -270,7 +269,6 @@ export default function PricingPage() {
       oldPrice: '',
       price: '€34.90',
       offer: '',
-      desc: 'Parfait pour publier régulièrement et tester différents formats.',
       icon: Users,
       recommended: true,
       pack: 'creator' as const,
@@ -281,7 +279,6 @@ export default function PricingPage() {
       oldPrice: '',
       price: '€74.90',
       offer: '',
-      desc: 'Conçu pour les créateurs avancés, les entreprises et les agences.',
       icon: TrendingUp,
       recommended: false,
       pack: 'pro' as const,
@@ -292,7 +289,6 @@ export default function PricingPage() {
       oldPrice: '',
       offer: '',
       price: '€139.90',
-      desc: 'Meilleur rapport qualité-prix pour les créateurs à fort volume et les équipes.',
       icon: Rocket,
       recommended: false,
       pack: 'boost' as const,
@@ -371,7 +367,7 @@ export default function PricingPage() {
       <main className="py-12 md:py-16">
         <div className="max-w-[1120px] mx-auto px-5">
           <div className="text-center mb-8 md:mb-12">
-            <div className="text-[11px] uppercase tracking-[0.16em] mb-1.5 font-semibold text-[#ff8a1f]">
+            <div className="text-[11px] uppercase tracking-[0.16em] mb-1.5 font-semibold text-accent-orange">
               Tarifs
             </div>
             <h1 className="text-[32px] lg:text-[42px] mb-4 font-extrabold leading-tight">
@@ -395,7 +391,7 @@ export default function PricingPage() {
                     </div>
                   )}
                   <div
-                    className={`rounded-[22px] p-5 border shadow-[0_18px_40px_rgba(0,0,0,0.8)] flex flex-col gap-3 h-full hover:border-[rgba(252,211,77,1)] transition-all duration-300 ${
+                    className={`rounded-[22px] p-4 md:p-5 border shadow-[0_18px_40px_rgba(0,0,0,0.8)] flex flex-col gap-2.5 h-full hover:border-[rgba(252,211,77,1)] transition-all duration-300 ${
                       plan.recommended 
                         ? 'border-2 border-[rgba(252,211,77,1)] pt-7' 
                         : 'border border-[rgba(252,211,77,0.95)]'
@@ -413,13 +409,6 @@ export default function PricingPage() {
                       </div>
                       <Icon className="w-5 h-5 text-accent-orange-soft opacity-60 flex-shrink-0" />
                     </div>
-                    <div className="text-[13px] text-text-soft">{plan.name}</div>
-                    <div className="text-[10px] text-text-muted italic">
-                      1 token = 1 génération
-                    </div>
-                    {plan.oldPrice && (
-                      <div className="text-xs text-text-muted line-through">{plan.oldPrice}</div>
-                    )}
                     <div className="flex items-baseline justify-between gap-2">
                       <span className="text-2xl font-bold text-text-main">{plan.price}</span>
                       {plan.offer && (
@@ -428,7 +417,8 @@ export default function PricingPage() {
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-text-soft flex-grow leading-relaxed">{plan.desc}</p>
+                    <div className="text-[13px] text-text-soft font-medium">{plan.name}</div>
+                    <div className="text-[11px] text-text-muted">Pas d'abonnement</div>
                     <div className="mt-auto pt-2">
                       <button
                         onClick={() => handleChoosePack(plan.pack)}
