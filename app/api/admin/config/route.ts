@@ -1,11 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
+
 function getSupabaseClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
   if (!supabaseUrl || !supabaseServiceKey) {
+    console.error('Missing Supabase environment variables:', {
+      hasUrl: !!supabaseUrl,
+      hasServiceKey: !!supabaseServiceKey,
+    })
     throw new Error('Missing Supabase environment variables')
   }
 
@@ -20,7 +27,16 @@ function getSupabaseClient() {
 // GET: Fetch admin password from Supabase
 export async function GET(request: NextRequest) {
   try {
-    const client = getSupabaseClient()
+    let client
+    try {
+      client = getSupabaseClient()
+    } catch (error) {
+      console.error('Failed to create Supabase client:', error)
+      return NextResponse.json(
+        { error: 'Server configuration error', details: error instanceof Error ? error.message : 'Unknown error' },
+        { status: 500 }
+      )
+    }
     
     const { data, error } = await client
       .from('admin_config')
