@@ -23,6 +23,7 @@ export default function CarouselPage() {
   const [isMuted, setIsMuted] = useState(true)
   const [isTransitioning, setIsTransitioning] = useState(false)
   const videoRef = useRef<HTMLVideoElement>(null)
+  const videoRefs = useRef<(HTMLVideoElement | null)[]>([])
   const containerRef = useRef<HTMLDivElement>(null)
   
   // Swipe gesture state
@@ -83,23 +84,38 @@ export default function CarouselPage() {
 
   const currentVideo = videos[currentIndex]
 
+  // Pause and mute all videos except the current one
+  const pauseAllVideos = useCallback((currentIdx: number) => {
+    videoRefs.current.forEach((video, index) => {
+      if (video && index !== currentIdx) {
+        video.pause()
+        video.muted = true
+        video.currentTime = 0
+      }
+    })
+  }, [])
+
   // Navigate to previous video (up)
   const goToPrevious = useCallback(() => {
     if (videos.length === 0 || isTransitioning) return
     setIsTransitioning(true)
-    setCurrentIndex((prev) => (prev === 0 ? videos.length - 1 : prev - 1))
+    const newIndex = currentIndex === 0 ? videos.length - 1 : currentIndex - 1
+    pauseAllVideos(newIndex)
+    setCurrentIndex(newIndex)
     setIsPlaying(true)
     setTimeout(() => setIsTransitioning(false), 300)
-  }, [videos.length, isTransitioning])
+  }, [videos.length, isTransitioning, currentIndex, pauseAllVideos])
 
   // Navigate to next video (down)
   const goToNext = useCallback(() => {
     if (videos.length === 0 || isTransitioning) return
     setIsTransitioning(true)
-    setCurrentIndex((prev) => (prev === videos.length - 1 ? 0 : prev + 1))
+    const newIndex = currentIndex === videos.length - 1 ? 0 : currentIndex + 1
+    pauseAllVideos(newIndex)
+    setCurrentIndex(newIndex)
     setIsPlaying(true)
     setTimeout(() => setIsTransitioning(false), 300)
-  }, [videos.length, isTransitioning])
+  }, [videos.length, isTransitioning, currentIndex, pauseAllVideos])
 
   // Handle video play/pause (click/tap on video)
   const togglePlayPause = useCallback(() => {
@@ -125,13 +141,20 @@ export default function CarouselPage() {
   // Reset video when index changes
   useEffect(() => {
     if (videoRef.current && currentVideo) {
+      // Pause all other videos first
+      pauseAllVideos(currentIndex)
+      
+      // Set mute state for current video
+      videoRef.current.muted = isMuted
+      
+      // Load and play current video
       videoRef.current.load()
       videoRef.current.play().catch(() => {
         // Autoplay might fail, handle silently
       })
       setIsPlaying(true)
     }
-  }, [currentIndex, currentVideo])
+  }, [currentIndex, currentVideo, isMuted, pauseAllVideos])
 
   // Sync state with video events
   useEffect(() => {
@@ -260,14 +283,19 @@ export default function CarouselPage() {
             {videos.map((video, index) => (
               <video
                 key={video.id}
-                ref={index === currentIndex ? videoRef : null}
+                ref={(el) => {
+                  videoRefs.current[index] = el
+                  if (index === currentIndex) {
+                    videoRef.current = el
+                  }
+                }}
                 src={video.videoUrl}
-                muted={isMuted}
+                muted={index === currentIndex ? isMuted : true}
                 loop
                 playsInline
                 autoPlay={index === currentIndex}
                 preload="auto"
-                className={`absolute inset-0 w-full h-full object-cover md:object-contain transition-opacity duration-300 ease-in-out ${
+                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ease-in-out ${
                   index === currentIndex && !isTransitioning ? 'opacity-100 z-10' : 'opacity-0 z-0'
                 }`}
               />
