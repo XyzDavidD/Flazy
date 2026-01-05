@@ -163,6 +163,12 @@ function Header() {
           >
             FAQ
           </Link>
+          <Link
+            href="/carousel"
+            className="relative cursor-pointer transition-colors duration-[0.18s] ease-out hover:text-text-main after:content-[''] after:absolute after:left-0 after:-bottom-[6px] after:w-0 after:h-0.5 after:rounded-full after:bg-gradient-to-r after:from-[#ffb347] after:via-[#ff8a1f] after:to-[#ff4b2b] after:transition-all after:duration-[0.18s] after:ease-out hover:after:w-[18px]"
+          >
+            Carrousel
+          </Link>
         </div>
 
         <div className="flex items-center gap-3">
@@ -248,6 +254,16 @@ function Header() {
               }}
             >
               FAQ
+            </Link>
+            <Link
+              href="/carousel"
+              className="block w-full text-left px-4 py-2.5 text-sm text-text-soft hover:text-text-main hover:bg-[rgba(15,23,42,0.5)] rounded-lg transition-colors touch-manipulation"
+              onClick={(e) => {
+                setMobileMenuOpen(false)
+                e.stopPropagation()
+              }}
+            >
+              Carrousel
             </Link>
           </div>
           
@@ -387,325 +403,6 @@ function Hero() {
             </div>
           </div>
         </div>
-      </div>
-    </section>
-  )
-}
-
-// Carousel Component - TikTok/Instagram Reels Style
-function CarouselSection() {
-  const [videos, setVideos] = useState<VideoData[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [currentIndex, setCurrentIndex] = useState(0)
-  const [isPlaying, setIsPlaying] = useState(true)
-  const [isMuted, setIsMuted] = useState(true)
-  const [isTransitioning, setIsTransitioning] = useState(false)
-  const videoRef = useRef<HTMLVideoElement>(null)
-  const containerRef = useRef<HTMLDivElement>(null)
-  
-  // Swipe gesture state
-  const touchStartY = useRef<number>(0)
-  const touchEndY = useRef<number>(0)
-  const minSwipeDistance = 50
-
-  interface VideoData {
-    id: string
-    videoUrl: string
-  }
-
-  // Fetch videos from carousel_videos table
-  useEffect(() => {
-    const fetchVideos = async () => {
-      try {
-        setIsLoading(true)
-
-        const { data, error } = await supabase
-          .from('carousel_videos')
-          .select('id, video_path')
-          .eq('is_published', true)
-          .order('created_at', { ascending: false })
-
-        if (error) {
-          console.error('Error fetching videos:', error)
-          return
-        }
-
-        if (!data || data.length === 0) {
-          setVideos([])
-          return
-        }
-
-        const mappedVideos: VideoData[] = data
-          .filter((video) => video.video_path && video.video_path.trim() !== '')
-          .map((video) => {
-            const { data: urlData } = supabase.storage
-              .from('videos')
-              .getPublicUrl(video.video_path)
-            
-            return {
-              id: video.id,
-              videoUrl: urlData.publicUrl,
-            }
-          })
-
-        setVideos(mappedVideos)
-      } catch (error) {
-        console.error('Error fetching videos:', error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    fetchVideos()
-  }, [])
-
-  const currentVideo = videos[currentIndex]
-
-  // Navigate to previous video (up)
-  const goToPrevious = useCallback(() => {
-    if (videos.length === 0 || isTransitioning) return
-    setIsTransitioning(true)
-    setCurrentIndex((prev) => (prev === 0 ? videos.length - 1 : prev - 1))
-    setIsPlaying(true)
-    setTimeout(() => setIsTransitioning(false), 300)
-  }, [videos.length, isTransitioning])
-
-  // Navigate to next video (down)
-  const goToNext = useCallback(() => {
-    if (videos.length === 0 || isTransitioning) return
-    setIsTransitioning(true)
-    setCurrentIndex((prev) => (prev === videos.length - 1 ? 0 : prev + 1))
-    setIsPlaying(true)
-    setTimeout(() => setIsTransitioning(false), 300)
-  }, [videos.length, isTransitioning])
-
-  // Handle video play/pause (click/tap on video)
-  const togglePlayPause = useCallback(() => {
-    if (videoRef.current) {
-      if (isPlaying) {
-        videoRef.current.pause()
-      } else {
-        videoRef.current.play()
-      }
-      setIsPlaying(!isPlaying)
-    }
-  }, [isPlaying])
-
-  // Handle mute/unmute
-  const toggleMute = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation()
-    if (videoRef.current) {
-      videoRef.current.muted = !isMuted
-      setIsMuted(!isMuted)
-    }
-  }, [isMuted])
-
-  // Reset video when index changes
-  useEffect(() => {
-    if (videoRef.current && currentVideo) {
-      videoRef.current.load()
-      videoRef.current.play().catch(() => {
-        // Autoplay might fail, handle silently
-      })
-      setIsPlaying(true)
-    }
-  }, [currentIndex, currentVideo])
-
-  // Sync state with video events
-  useEffect(() => {
-    const video = videoRef.current
-    if (video) {
-      const handlePlay = () => setIsPlaying(true)
-      const handlePause = () => setIsPlaying(false)
-
-      video.addEventListener('play', handlePlay)
-      video.addEventListener('pause', handlePause)
-
-      return () => {
-        video.removeEventListener('play', handlePlay)
-        video.removeEventListener('pause', handlePause)
-      }
-    }
-  }, [currentVideo])
-
-  // Touch handlers for swipe gestures - improved for better detection
-  const onTouchStart = (e: React.TouchEvent) => {
-    touchStartY.current = e.targetTouches[0].clientY
-    touchEndY.current = e.targetTouches[0].clientY
-  }
-
-  const onTouchMove = (e: React.TouchEvent) => {
-    touchEndY.current = e.targetTouches[0].clientY
-  }
-
-  const onTouchEnd = () => {
-    if (!touchStartY.current || !touchEndY.current) return
-    
-    const distance = touchStartY.current - touchEndY.current
-    
-    if (Math.abs(distance) > minSwipeDistance) {
-      if (distance > 0) {
-        // Swiped up - next video
-        goToNext()
-      } else {
-        // Swiped down - previous video
-        goToPrevious()
-      }
-    }
-    
-    touchStartY.current = 0
-    touchEndY.current = 0
-  }
-
-  // Keyboard navigation
-  useEffect(() => {
-    const handleKeyPress = (e: KeyboardEvent) => {
-      const carouselSection = document.getElementById('carousel')
-      if (!carouselSection) return
-      
-      const rect = carouselSection.getBoundingClientRect()
-      const isInView = rect.top < window.innerHeight && rect.bottom > 0
-      
-      if (!isInView) return
-      
-      if (e.key === 'ArrowUp') {
-        e.preventDefault()
-        goToPrevious()
-      }
-      if (e.key === 'ArrowDown') {
-        e.preventDefault()
-        goToNext()
-      }
-      if (e.key === ' ') {
-        e.preventDefault()
-        togglePlayPause()
-      }
-    }
-
-    window.addEventListener('keydown', handleKeyPress)
-    return () => window.removeEventListener('keydown', handleKeyPress)
-  }, [goToPrevious, goToNext, togglePlayPause])
-
-  return (
-    <section id="carousel" className="py-4 md:py-10 pb-2 md:pb-4">
-      <div className="max-w-[1120px] mx-auto px-0 md:px-5">
-        <div className="text-left mb-4 md:mb-8 px-5 md:px-0">
-          <div className="text-[11px] uppercase tracking-[0.16em] mb-1.5 font-semibold text-accent-orange">
-            Carrousel public
-          </div>
-          <h2 className="text-[28px] lg:text-[32px] mb-3 font-extrabold leading-tight">
-            Découvrez les vidéos créées par la communauté FLAZY
-          </h2>
-          <p className="text-[14px] lg:text-[15px] text-text-soft max-w-[600px] leading-relaxed">
-            Découvrez les dernières vidéos ajoutées au carrousel.
-          </p>
-        </div>
-
-        {isLoading ? (
-          <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-6">
-            <div className="w-16 h-16 border-4 border-[rgba(252,211,77,0.3)] border-t-accent-orange-soft rounded-full animate-spin"></div>
-            <p className="text-text-soft text-lg">Chargement des vidéos...</p>
-          </div>
-        ) : videos.length === 0 ? (
-          <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
-            <Video className="w-16 h-16 text-text-muted mb-4" />
-            <p className="text-text-main text-xl font-semibold">Aucune vidéo disponible pour le moment.</p>
-            <p className="text-text-soft text-sm">Revenez bientôt pour découvrir de nouvelles vidéos !</p>
-          </div>
-        ) : (
-          <div className="flex flex-col items-center w-full">
-            <div 
-              ref={containerRef}
-              className="relative w-full md:max-w-md bg-black md:rounded-2xl overflow-hidden cursor-pointer"
-              style={{
-                aspectRatio: '9/16',
-                minHeight: 'calc(100vh - 250px)',
-                maxHeight: '80vh',
-              }}
-              onTouchStart={onTouchStart}
-              onTouchMove={onTouchMove}
-              onTouchEnd={onTouchEnd}
-              onClick={togglePlayPause}
-            >
-              {videos.map((video, index) => (
-                <video
-                  key={video.id}
-                  ref={index === currentIndex ? videoRef : null}
-                  src={video.videoUrl}
-                  muted={isMuted}
-                  loop
-                  playsInline
-                  autoPlay={index === currentIndex}
-                  preload="auto"
-                  className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ease-in-out ${
-                    index === currentIndex && !isTransitioning ? 'opacity-100 z-10' : 'opacity-0 z-0'
-                  }`}
-                />
-              ))}
-
-              {/* Mute button - bottom right, always visible */}
-              <button
-                onClick={toggleMute}
-                className="absolute bottom-4 right-4 z-20 w-10 h-10 rounded-full bg-black/50 backdrop-blur-sm border border-white/20 flex items-center justify-center hover:bg-black/70 transition-all duration-200"
-                aria-label={isMuted ? 'Activer le son' : 'Désactiver le son'}
-              >
-                {isMuted ? (
-                  <VolumeX className="w-5 h-5 text-white" />
-                ) : (
-                  <Volume2 className="w-5 h-5 text-white" />
-                )}
-              </button>
-
-              {/* Play/Pause indicator - center, shows briefly on click */}
-              {!isPlaying && (
-                <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
-                  <div className="w-20 h-20 rounded-full bg-black/50 backdrop-blur-sm border border-white/20 flex items-center justify-center">
-                    <Pause className="w-10 h-10 text-white" />
-                  </div>
-                </div>
-              )}
-
-              {/* Desktop navigation arrows - right side */}
-              {videos.length > 1 && (
-                <div className="hidden md:flex flex-col gap-4 absolute right-4 top-1/2 -translate-y-1/2 z-20">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      goToPrevious()
-                    }}
-                    className="w-12 h-12 rounded-full bg-black/70 backdrop-blur-sm border-2 border-white/30 flex items-center justify-center hover:bg-black/90 hover:scale-110 hover:border-white/50 transition-all duration-200 shadow-lg"
-                    aria-label="Vidéo précédente"
-                    title="Vidéo précédente (↑)"
-                  >
-                    <ChevronUp className="w-6 h-6 text-white" />
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      goToNext()
-                    }}
-                    className="w-12 h-12 rounded-full bg-black/70 backdrop-blur-sm border-2 border-white/30 flex items-center justify-center hover:bg-black/90 hover:scale-110 hover:border-white/50 transition-all duration-200 shadow-lg"
-                    aria-label="Vidéo suivante"
-                    title="Vidéo suivante (↓)"
-                  >
-                    <ChevronDown className="w-6 h-6 text-white" />
-                  </button>
-                </div>
-              )}
-
-              {/* Desktop keyboard hint */}
-              {videos.length > 1 && (
-                <div className="hidden md:block absolute bottom-20 left-1/2 -translate-x-1/2 z-10">
-                  <div className="px-4 py-2 rounded-full bg-black/50 backdrop-blur-sm border border-white/20">
-                    <p className="text-white text-[10px] font-medium text-center">
-                      ↑ ↓ pour naviguer • Espace pour pause
-                    </p>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
       </div>
     </section>
   )
@@ -883,19 +580,52 @@ function FormSection() {
         throw new Error('Session expirée. Veuillez vous reconnecter.')
       }
 
-      const res = await fetch('/api/generate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({ prompt: prompt.trim() }),
-      })
+      // Add timeout to prevent hanging requests
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 30000) // 30 second timeout
 
-      const data = await res.json()
+      let res: Response
+      try {
+        res = await fetch('/api/generate', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({ prompt: prompt.trim() }),
+          signal: controller.signal,
+        })
+        clearTimeout(timeoutId)
+      } catch (fetchError: any) {
+        clearTimeout(timeoutId)
+        if (fetchError.name === 'AbortError') {
+          throw new Error('La requête a pris trop de temps. Vérifiez votre connexion internet et réessayez.')
+        }
+        if (fetchError.message?.includes('Failed to fetch') || fetchError.message?.includes('NetworkError')) {
+          throw new Error('Erreur de connexion. Vérifiez votre connexion internet et réessayez.')
+        }
+        throw new Error('Erreur réseau. Veuillez réessayer dans quelques instants.')
+      }
+
+      // Check content type before parsing JSON
+      const contentType = res.headers.get('content-type')
+      if (!contentType || !contentType.includes('application/json')) {
+        const text = await res.text()
+        console.error('Non-JSON response:', text.substring(0, 200))
+        throw new Error('Erreur serveur inattendue. Veuillez réessayer ou contacter le support.')
+      }
+
+      let data: any
+      try {
+        data = await res.json()
+      } catch (jsonError) {
+        console.error('JSON parse error:', jsonError)
+        throw new Error('Erreur lors de la lecture de la réponse. Veuillez réessayer.')
+      }
 
       if (!res.ok) {
-        throw new Error(data.error || 'Erreur lors de la génération.')
+        const errorMessage = data?.error || `Erreur ${res.status}: ${res.statusText}`
+        throw new Error(errorMessage)
       }
 
       setSuccess(true)
@@ -908,7 +638,10 @@ function FormSection() {
         refreshCredits().catch(console.error)
       }, 300)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Une erreur est survenue. Veuillez réessayer.')
+      const errorMessage = err instanceof Error 
+        ? err.message 
+        : 'Une erreur est survenue. Veuillez réessayer.'
+      setError(errorMessage)
       console.error('Form submission error:', err)
     } finally {
       setIsLoading(false)
@@ -1423,7 +1156,7 @@ function PricingSection() {
                     )}
                   </div>
                   <div className="text-[13px] text-text-soft font-medium">{plan.name}</div>
-                  <div className="text-[11px] text-text-muted">Pas d'abonnement</div>
+                  <div className="text-[11px] text-text-muted">Aucun abonnement requis</div>
                   <div className="mt-auto pt-2">
                     <button
                       onClick={scrollToForm}
@@ -1595,7 +1328,7 @@ function HowItWorksSection() {
           </h2>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {steps.map((step, index) => {
             const Icon = step.icon
             return (
@@ -1699,11 +1432,12 @@ export default function Home() {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{
         background: `
-          radial-gradient(circle at top right, rgba(255, 138, 31, 0.4), transparent 58%),
-          radial-gradient(circle at bottom left, rgba(56, 189, 248, 0.22), transparent 60%),
-          radial-gradient(circle at bottom right, rgba(129, 140, 248, 0.4), transparent 58%),
+          radial-gradient(circle 800px at top right, rgba(255, 138, 31, 0.4), transparent),
+          radial-gradient(circle 600px at bottom left, rgba(56, 189, 248, 0.22), transparent),
+          radial-gradient(circle 800px at bottom right, rgba(129, 140, 248, 0.4), transparent),
           #020314
-        `
+        `,
+        backgroundAttachment: 'fixed'
       }}>
         <Loader2 className="w-8 h-8 text-accent-orange-soft animate-spin" />
       </div>
@@ -1713,11 +1447,12 @@ export default function Home() {
   return (
     <div className="min-h-screen" style={{
       background: `
-        radial-gradient(circle at top right, rgba(255, 138, 31, 0.4), transparent 58%),
-        radial-gradient(circle at bottom left, rgba(56, 189, 248, 0.22), transparent 60%),
-        radial-gradient(circle at bottom right, rgba(129, 140, 248, 0.4), transparent 58%),
+        radial-gradient(circle 800px at top right, rgba(255, 138, 31, 0.4), transparent),
+        radial-gradient(circle 600px at bottom left, rgba(56, 189, 248, 0.22), transparent),
+        radial-gradient(circle 800px at bottom right, rgba(129, 140, 248, 0.4), transparent),
         #020314
-      `
+      `,
+      backgroundAttachment: 'fixed'
     }}>
       <TopBar />
       <Header />
@@ -1726,25 +1461,33 @@ export default function Home() {
         <FormSection />
         <HowItWorksSection />
         <ExamplesSection />
-        <CarouselSection />
         <div className="py-8 md:py-10 pb-2 md:pb-4">
           <div className="max-w-[1120px] mx-auto px-5">
-            <div className="text-center">
-              <Link
-                href="/pricing"
-                className="relative overflow-hidden bg-transparent text-[#111827] shadow-[0_18px_45px_rgba(0,0,0,0.75)] z-0 rounded-full border-none text-[13px] font-semibold px-6 py-3 cursor-pointer inline-flex items-center gap-2 transition-all duration-[0.18s] ease-out hover:-translate-y-px hover:shadow-[0_22px_60px_rgba(0,0,0,0.95)]"
-                style={{
-                  position: 'relative',
-                }}
-              >
-                <span className="absolute inset-0 -z-10 rounded-full" style={{
-                  backgroundImage: 'linear-gradient(90deg, #ff6b00 0%, #ffd700 25%, #ff4b2b 50%, #ffd700 75%, #ff6b00 100%)',
-                  backgroundSize: '220% 100%',
-                  animation: 'flazyTopbar 10s ease-in-out infinite alternate'
-                }}></span>
-                <span>Découvrez nos tarifs</span>
-                <ChevronRight className="w-4 h-4" />
-              </Link>
+            <div className="text-center space-y-4">
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <Link
+                  href="/pricing"
+                  className="relative overflow-hidden bg-transparent text-[#111827] shadow-[0_18px_45px_rgba(0,0,0,0.75)] z-0 rounded-full border-none text-[13px] font-semibold px-6 py-3 cursor-pointer inline-flex items-center gap-2 transition-all duration-[0.18s] ease-out hover:-translate-y-px hover:shadow-[0_22px_60px_rgba(0,0,0,0.95)]"
+                  style={{
+                    position: 'relative',
+                  }}
+                >
+                  <span className="absolute inset-0 -z-10 rounded-full" style={{
+                    backgroundImage: 'linear-gradient(90deg, #ff6b00 0%, #ffd700 25%, #ff4b2b 50%, #ffd700 75%, #ff6b00 100%)',
+                    backgroundSize: '220% 100%',
+                    animation: 'flazyTopbar 10s ease-in-out infinite alternate'
+                  }}></span>
+                  <span>Découvrez nos tarifs</span>
+                  <ChevronRight className="w-4 h-4" />
+                </Link>
+                <Link
+                  href="/carousel"
+                  className="bg-transparent text-accent-orange-soft border border-[rgba(248,181,86,0.95)] shadow-[0_0_0_1px_rgba(248,181,86,0.4)] rounded-full text-[13px] font-semibold px-6 py-3 inline-flex items-center justify-center gap-2 transition-all duration-[0.18s] ease-out hover:bg-[radial-gradient(circle_at_top_left,rgba(255,138,31,0.16),transparent_70%)] hover:border-[rgba(248,181,86,1)]"
+                >
+                  <Video className="w-4 h-4" />
+                  <span>Voir le carrousel</span>
+                </Link>
+              </div>
             </div>
           </div>
         </div>

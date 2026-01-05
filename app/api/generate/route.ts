@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseServer } from '@/lib/supabaseServer'
 import { Resend } from 'resend'
 
+export const dynamic = 'force-dynamic'
+
 const resend = new Resend(process.env.RESEND_API_KEY)
 
 export async function POST(request: NextRequest) {
@@ -28,7 +30,17 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const body = await request.json()
+    let body: any
+    try {
+      body = await request.json()
+    } catch (jsonError) {
+      console.error('JSON parse error in /api/generate:', jsonError)
+      return NextResponse.json(
+        { error: 'Invalid request body. Please provide a valid JSON payload.' },
+        { status: 400 }
+      )
+    }
+
     const { prompt } = body
 
     if (!prompt || typeof prompt !== 'string' || prompt.trim() === '') {

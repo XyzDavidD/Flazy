@@ -346,11 +346,12 @@ export default function PricingPage() {
   return (
     <div className="min-h-screen" style={{
       background: `
-        radial-gradient(circle at top right, rgba(255, 138, 31, 0.4), transparent 58%),
-        radial-gradient(circle at bottom left, rgba(56, 189, 248, 0.22), transparent 60%),
-        radial-gradient(circle at bottom right, rgba(129, 140, 248, 0.4), transparent 58%),
+        radial-gradient(circle 800px at top right, rgba(255, 138, 31, 0.4), transparent),
+        radial-gradient(circle 600px at bottom left, rgba(56, 189, 248, 0.22), transparent),
+        radial-gradient(circle 800px at bottom right, rgba(129, 140, 248, 0.4), transparent),
         #020314
-      `
+      `,
+      backgroundAttachment: 'fixed'
     }}>
       <Header />
       <div className="max-w-[1120px] mx-auto px-5 pt-4 pb-2">
@@ -418,7 +419,7 @@ export default function PricingPage() {
                       )}
                     </div>
                     <div className="text-[13px] text-text-soft font-medium">{plan.name}</div>
-                    <div className="text-[11px] text-text-muted">Pas d'abonnement</div>
+                    <div className="text-[11px] text-text-muted">Aucun abonnement requis</div>
                     <div className="mt-auto pt-2">
                       <button
                         onClick={() => handleChoosePack(plan.pack)}
