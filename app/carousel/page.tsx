@@ -22,7 +22,7 @@ export default function CarouselPage() {
   const [isPlaying, setIsPlaying] = useState(true)
   const [isMuted, setIsMuted] = useState(true)
   const [isTransitioning, setIsTransitioning] = useState(false)
-  const videoRef = useRef<HTMLVideoElement>(null)
+  const videoRef = useRef<HTMLVideoElement | null>(null)
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([])
   const containerRef = useRef<HTMLDivElement>(null)
   
@@ -286,7 +286,7 @@ export default function CarouselPage() {
                 ref={(el) => {
                   videoRefs.current[index] = el
                   if (index === currentIndex) {
-                    videoRef.current = el
+                    (videoRef as React.MutableRefObject<HTMLVideoElement | null>).current = el
                   }
                 }}
                 src={video.videoUrl}
