@@ -3,6 +3,8 @@ import { createClient } from '@supabase/supabase-js'
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
+export const maxDuration = 300 // 5 minutes for large file uploads
 
 function getSupabaseClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -128,13 +130,17 @@ export async function PUT(request: NextRequest) {
     const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_')
     const videoPath = `examples/${timestamp}-${sanitizedFileName}`
 
-    // Upload new video to Supabase Storage
-    const fileBuffer = await file.arrayBuffer()
+    // Convert File to Blob for streaming upload
+    // This handles large files better than arrayBuffer()
+    const fileBlob = file instanceof Blob ? file : new Blob([await file.arrayBuffer()], { type: file.type })
+
+    // Upload new video to Supabase Storage using Blob
     const { data: uploadData, error: uploadError } = await client.storage
       .from('videos')
-      .upload(videoPath, fileBuffer, {
+      .upload(videoPath, fileBlob, {
         contentType: file.type,
         upsert: false,
+        cacheControl: '3600',
       })
 
     if (uploadError) {

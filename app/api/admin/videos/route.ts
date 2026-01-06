@@ -4,6 +4,7 @@ import { createClient } from '@supabase/supabase-js'
 // Force dynamic rendering and ensure Node.js runtime
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
+export const maxDuration = 300 // 5 minutes for large file uploads
 
 function getSupabaseClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -64,22 +65,77 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const formData = await request.formData()
-    const file = formData.get('file') as File
+    // Support both old formData format and new JSON format (for direct client uploads)
+    const contentType = request.headers.get('content-type') || ''
+    
+    let videoPath: string
+    
+    if (contentType.includes('application/json')) {
+      // New format: client uploads directly, we just save the record
+      const body = await request.json()
+      videoPath = body.video_path
+      
+      if (!videoPath) {
+        return NextResponse.json(
+          { error: 'video_path is required' },
+          { status: 400 }
+        )
+      }
+    } else {
+      // Old format: upload file through API (for backwards compatibility)
+      const formData = await request.formData()
+      const file = formData.get('file') as File
 
-    if (!file) {
-      return NextResponse.json(
-        { error: 'No file provided' },
-        { status: 400 }
-      )
-    }
+      if (!file) {
+        return NextResponse.json(
+          { error: 'No file provided' },
+          { status: 400 }
+        )
+      }
 
-    // Validate file type
-    if (!file.type.startsWith('video/')) {
-      return NextResponse.json(
-        { error: 'File must be a video' },
-        { status: 400 }
-      )
+      // Validate file type
+      if (!file.type.startsWith('video/')) {
+        return NextResponse.json(
+          { error: 'File must be a video' },
+          { status: 400 }
+        )
+      }
+
+      let client
+      try {
+        client = getSupabaseClient()
+      } catch (error) {
+        console.error('Failed to create Supabase client:', error)
+        return NextResponse.json(
+          { error: 'Server configuration error', details: error instanceof Error ? error.message : 'Unknown error' },
+          { status: 500 }
+        )
+      }
+      
+      // Generate unique filename
+      const timestamp = Date.now()
+      const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_')
+      videoPath = `admin/${timestamp}-${sanitizedFileName}`
+
+      // Convert File to Blob for streaming upload
+      const fileBlob = file instanceof Blob ? file : new Blob([await file.arrayBuffer()], { type: file.type })
+
+      // Upload to Supabase Storage using Blob
+      const { data: uploadData, error: uploadError } = await client.storage
+        .from('videos')
+        .upload(videoPath, fileBlob, {
+          contentType: file.type,
+          upsert: false,
+          cacheControl: '3600',
+        })
+
+      if (uploadError) {
+        console.error('Error uploading video:', uploadError)
+        return NextResponse.json(
+          { error: 'Failed to upload video', details: uploadError.message },
+          { status: 500 }
+        )
+      }
     }
 
     let client
@@ -89,28 +145,6 @@ export async function POST(request: NextRequest) {
       console.error('Failed to create Supabase client:', error)
       return NextResponse.json(
         { error: 'Server configuration error', details: error instanceof Error ? error.message : 'Unknown error' },
-        { status: 500 }
-      )
-    }
-    
-    // Generate unique filename
-    const timestamp = Date.now()
-    const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_')
-    const videoPath = `admin/${timestamp}-${sanitizedFileName}`
-
-    // Upload to Supabase Storage
-    const fileBuffer = await file.arrayBuffer()
-    const { data: uploadData, error: uploadError } = await client.storage
-      .from('videos')
-      .upload(videoPath, fileBuffer, {
-        contentType: file.type,
-        upsert: false,
-      })
-
-    if (uploadError) {
-      console.error('Error uploading video:', uploadError)
-      return NextResponse.json(
-        { error: 'Failed to upload video', details: uploadError.message },
         { status: 500 }
       )
     }

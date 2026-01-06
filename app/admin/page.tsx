@@ -120,18 +120,68 @@ export default function AdminPage() {
     setMessage(null)
 
     try {
-      const formData = new FormData()
-      formData.append('file', file)
+      // For large files, upload directly to Supabase Storage from client
+      // This bypasses Vercel's function payload limit
+      const timestamp = Date.now()
+      const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_')
+      const videoPath = `admin/${timestamp}-${sanitizedFileName}`
 
+      // Try uploading directly to Supabase Storage from client
+      // If this fails due to permissions, fall back to API upload
+      let uploadError = null
+      const { error: directUploadError } = await supabase.storage
+        .from('videos')
+        .upload(videoPath, file, {
+          contentType: file.type,
+          upsert: false,
+          cacheControl: '3600',
+        })
+
+      if (directUploadError) {
+        // If direct upload fails (likely due to RLS), fall back to API upload
+        console.log('Direct upload failed, falling back to API upload:', directUploadError)
+        
+        const formData = new FormData()
+        formData.append('file', file)
+
+        const response = await fetch('/api/admin/videos', {
+          method: 'POST',
+          body: formData,
+        })
+
+        const data = await response.json()
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to upload video')
+        }
+
+        // Success with API upload
+        setMessage({ type: 'success', text: 'Vidéo uploadée avec succès' })
+        setTimeout(() => setMessage(null), 3000)
+        await fetchVideos()
+        if (fileInputRef.current) {
+          fileInputRef.current.value = ''
+        }
+        return
+      }
+
+      // Direct upload succeeded, now save the record via API
       const response = await fetch('/api/admin/videos', {
         method: 'POST',
-        body: formData,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          video_path: videoPath,
+        }),
       })
 
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to upload video')
+        // Clean up uploaded file if record creation fails
+        await supabase.storage.from('videos').remove([videoPath])
+        throw new Error(data.error || 'Failed to save video record')
       }
 
       setMessage({ type: 'success', text: 'Vidéo uploadée avec succès' })
