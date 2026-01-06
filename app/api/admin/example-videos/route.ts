@@ -130,14 +130,11 @@ export async function PUT(request: NextRequest) {
     const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_')
     const videoPath = `examples/${timestamp}-${sanitizedFileName}`
 
-    // Convert File to Blob for streaming upload
-    // This handles large files better than arrayBuffer()
-    const fileBlob = file instanceof Blob ? file : new Blob([await file.arrayBuffer()], { type: file.type })
-
-    // Upload new video to Supabase Storage using Blob
+    // File already extends Blob, so we can use it directly
+    // Upload new video to Supabase Storage
     const { data: uploadData, error: uploadError } = await client.storage
       .from('videos')
-      .upload(videoPath, fileBlob, {
+      .upload(videoPath, file, {
         contentType: file.type,
         upsert: false,
         cacheControl: '3600',
