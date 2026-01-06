@@ -30,3 +30,4 @@ CREATE TRIGGER update_example_videos_updated_at_trigger
   FOR EACH ROW
   EXECUTE FUNCTION update_example_videos_updated_at();
 
+

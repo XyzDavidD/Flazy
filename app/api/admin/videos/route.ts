@@ -1,17 +1,41 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabaseClient'
+import { createClient } from '@supabase/supabase-js'
 
-// Helper to create server-side Supabase client with service role (if needed)
-// For now, using the regular client - adjust if you need admin privileges
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
+
 function getSupabaseClient() {
-  // If you have a service role key for admin operations, use it here
-  // For storage operations, the anon key should work if RLS policies allow
-  return supabase
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+  if (!supabaseUrl || !supabaseServiceKey) {
+    console.error('Missing Supabase environment variables:', {
+      hasUrl: !!supabaseUrl,
+      hasServiceKey: !!supabaseServiceKey,
+    })
+    throw new Error('Missing Supabase environment variables')
+  }
+
+  return createClient(supabaseUrl, supabaseServiceKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  })
 }
 
 export async function GET(request: NextRequest) {
   try {
-    const client = getSupabaseClient()
+    let client
+    try {
+      client = getSupabaseClient()
+    } catch (error) {
+      console.error('Failed to create Supabase client:', error)
+      return NextResponse.json(
+        { error: 'Server configuration error', details: error instanceof Error ? error.message : 'Unknown error' },
+        { status: 500 }
+      )
+    }
     
     const { data, error } = await client
       .from('carousel_videos')
@@ -57,7 +81,16 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const client = getSupabaseClient()
+    let client
+    try {
+      client = getSupabaseClient()
+    } catch (error) {
+      console.error('Failed to create Supabase client:', error)
+      return NextResponse.json(
+        { error: 'Server configuration error', details: error instanceof Error ? error.message : 'Unknown error' },
+        { status: 500 }
+      )
+    }
     
     // Generate unique filename
     const timestamp = Date.now()
@@ -126,7 +159,16 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
-    const client = getSupabaseClient()
+    let client
+    try {
+      client = getSupabaseClient()
+    } catch (error) {
+      console.error('Failed to create Supabase client:', error)
+      return NextResponse.json(
+        { error: 'Server configuration error', details: error instanceof Error ? error.message : 'Unknown error' },
+        { status: 500 }
+      )
+    }
 
     // Fetch the video record to get video_path
     const { data: videoData, error: fetchError } = await client
@@ -180,4 +222,5 @@ export async function DELETE(request: NextRequest) {
     )
   }
 }
+
 

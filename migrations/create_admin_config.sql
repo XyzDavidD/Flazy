@@ -36,3 +36,4 @@ CREATE TRIGGER update_admin_config_updated_at_trigger
 -- Add comment
 COMMENT ON TABLE admin_config IS 'Stores admin configuration values like passwords';
 
+

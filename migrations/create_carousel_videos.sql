@@ -12,3 +12,4 @@ CREATE INDEX IF NOT EXISTS idx_carousel_videos_published ON carousel_videos(is_p
 -- Add comment
 COMMENT ON TABLE carousel_videos IS 'Stores admin-uploaded videos for homepage carousel display';
 
+
