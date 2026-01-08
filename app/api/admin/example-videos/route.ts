@@ -87,31 +87,81 @@ export async function PUT(request: NextRequest) {
       )
     }
 
-    const formData = await request.formData()
-    const file = formData.get('file') as File
-    const positionStr = formData.get('position') as string
-    const title = formData.get('title') as string
-    const description = formData.get('description') as string
+    // Check if request is JSON (direct upload) or FormData (fallback)
+    const contentType = request.headers.get('content-type') || ''
+    let videoPath: string
+    let position: number
+    let title: string
+    let description: string
+    let file: File | null = null
 
-    if (!file || !positionStr || !title || !description) {
-      return NextResponse.json(
-        { error: 'Missing required fields: file, position, title, description' },
-        { status: 400 }
-      )
+    if (contentType.includes('application/json')) {
+      // Direct upload: video_path is provided, file already uploaded
+      const body = await request.json()
+      videoPath = body.video_path
+      const positionStr = body.position
+      title = body.title
+      description = body.description
+
+      if (!videoPath || !positionStr || !title || !description) {
+        return NextResponse.json(
+          { error: 'Missing required fields: video_path, position, title, description' },
+          { status: 400 }
+        )
+      }
+
+      position = typeof positionStr === 'number' ? positionStr : parseInt(positionStr, 10)
+    } else {
+      // Fallback: file is provided, need to upload
+      const formData = await request.formData()
+      file = formData.get('file') as File
+      const positionStr = formData.get('position') as string
+      title = formData.get('title') as string
+      description = formData.get('description') as string
+
+      if (!file || !positionStr || !title || !description) {
+        return NextResponse.json(
+          { error: 'Missing required fields: file, position, title, description' },
+          { status: 400 }
+        )
+      }
+
+      position = parseInt(positionStr, 10)
+
+      // Validate file type
+      if (!file.type.startsWith('video/')) {
+        return NextResponse.json(
+          { error: 'File must be a video' },
+          { status: 400 }
+        )
+      }
+
+      // Generate unique filename
+      const timestamp = Date.now()
+      const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_')
+      videoPath = `examples/${timestamp}-${sanitizedFileName}`
+
+      // Upload new video to Supabase Storage
+      const { data: uploadData, error: uploadError } = await client.storage
+        .from('videos')
+        .upload(videoPath, file, {
+          contentType: file.type,
+          upsert: false,
+          cacheControl: '3600',
+        })
+
+      if (uploadError) {
+        console.error('Error uploading video:', uploadError)
+        return NextResponse.json(
+          { error: 'Failed to upload video', details: uploadError.message },
+          { status: 500 }
+        )
+      }
     }
 
-    const position = parseInt(positionStr, 10)
     if (position < 1 || position > 4) {
       return NextResponse.json(
         { error: 'Position must be between 1 and 4' },
-        { status: 400 }
-      )
-    }
-
-    // Validate file type
-    if (!file.type.startsWith('video/')) {
-      return NextResponse.json(
-        { error: 'File must be a video' },
         { status: 400 }
       )
     }
@@ -124,29 +174,6 @@ export async function PUT(request: NextRequest) {
       .maybeSingle()
     
     const existingVideo = fetchError ? null : existingVideoData
-
-    // Generate unique filename
-    const timestamp = Date.now()
-    const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_')
-    const videoPath = `examples/${timestamp}-${sanitizedFileName}`
-
-    // File already extends Blob, so we can use it directly
-    // Upload new video to Supabase Storage
-    const { data: uploadData, error: uploadError } = await client.storage
-      .from('videos')
-      .upload(videoPath, file, {
-        contentType: file.type,
-        upsert: false,
-        cacheControl: '3600',
-      })
-
-    if (uploadError) {
-      console.error('Error uploading video:', uploadError)
-      return NextResponse.json(
-        { error: 'Failed to upload video', details: uploadError.message },
-        { status: 500 }
-      )
-    }
 
     // Delete old video from storage if it exists
     if (existingVideo && existingVideo.video_path) {

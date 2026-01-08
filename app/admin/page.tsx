@@ -290,21 +290,74 @@ export default function AdminPage() {
 
     try {
       const existingVideo = exampleVideos[position - 1]
-      const formData = new FormData()
-      formData.append('file', file)
-      formData.append('position', position.toString())
-      formData.append('title', existingVideo?.title || getDefaultTitle(position))
-      formData.append('description', existingVideo?.description || getDefaultDescription(position))
+      
+      // For large files, upload directly to Supabase Storage from client
+      // This bypasses Vercel's function payload limit
+      const timestamp = Date.now()
+      const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_')
+      const videoPath = `examples/${timestamp}-${sanitizedFileName}`
 
+      // Try uploading directly to Supabase Storage from client
+      // If this fails due to permissions, fall back to API upload
+      const { error: directUploadError } = await supabase.storage
+        .from('videos')
+        .upload(videoPath, file, {
+          contentType: file.type,
+          upsert: false,
+          cacheControl: '3600',
+        })
+
+      if (directUploadError) {
+        // If direct upload fails (likely due to RLS), fall back to API upload
+        console.log('Direct upload failed, falling back to API upload:', directUploadError)
+        
+        const formData = new FormData()
+        formData.append('file', file)
+        formData.append('position', position.toString())
+        formData.append('title', existingVideo?.title || getDefaultTitle(position))
+        formData.append('description', existingVideo?.description || getDefaultDescription(position))
+
+        const response = await fetch('/api/admin/example-videos', {
+          method: 'PUT',
+          body: formData,
+        })
+
+        const data = await response.json()
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to replace video')
+        }
+
+        setMessage({ type: 'success', text: `Vidéo d'exemple ${position} remplacée avec succès` })
+        setTimeout(() => setMessage(null), 3000)
+        
+        // Refresh example videos list - wait a bit for DB to be ready
+        setTimeout(async () => {
+          await fetchExampleVideos()
+        }, 500)
+        return
+      }
+
+      // Direct upload succeeded, now save the record via API
       const response = await fetch('/api/admin/example-videos', {
         method: 'PUT',
-        body: formData,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          video_path: videoPath,
+          position: position,
+          title: existingVideo?.title || getDefaultTitle(position),
+          description: existingVideo?.description || getDefaultDescription(position),
+        }),
       })
 
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to replace video')
+        // Clean up uploaded file if record creation fails
+        await supabase.storage.from('videos').remove([videoPath])
+        throw new Error(data.error || 'Failed to save video record')
       }
 
       setMessage({ type: 'success', text: `Vidéo d'exemple ${position} remplacée avec succès` })

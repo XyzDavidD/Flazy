@@ -13,6 +13,7 @@ import {
   Play,
   Video,
   Loader2,
+  Hand,
 } from 'lucide-react'
 
 export default function CarouselPage() {
@@ -20,8 +21,10 @@ export default function CarouselPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isPlaying, setIsPlaying] = useState(true)
-  const [isMuted, setIsMuted] = useState(true)
+  const [isMuted, setIsMuted] = useState(false)
   const [isTransitioning, setIsTransitioning] = useState(false)
+  const [showSwipeIndicator, setShowSwipeIndicator] = useState(true)
+  const [hasSwiped, setHasSwiped] = useState(false)
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([])
   const containerRef = useRef<HTMLDivElement>(null)
@@ -103,8 +106,13 @@ export default function CarouselPage() {
     pauseAllVideos(newIndex)
     setCurrentIndex(newIndex)
     setIsPlaying(true)
+    // Hide swipe indicator if user swipes
+    if (!hasSwiped) {
+      setHasSwiped(true)
+      setShowSwipeIndicator(false)
+    }
     setTimeout(() => setIsTransitioning(false), 300)
-  }, [videos.length, isTransitioning, currentIndex, pauseAllVideos])
+  }, [videos.length, isTransitioning, currentIndex, pauseAllVideos, hasSwiped])
 
   // Navigate to next video (down)
   const goToNext = useCallback(() => {
@@ -114,8 +122,13 @@ export default function CarouselPage() {
     pauseAllVideos(newIndex)
     setCurrentIndex(newIndex)
     setIsPlaying(true)
+    // Hide swipe indicator if user swipes
+    if (!hasSwiped) {
+      setHasSwiped(true)
+      setShowSwipeIndicator(false)
+    }
     setTimeout(() => setIsTransitioning(false), 300)
-  }, [videos.length, isTransitioning, currentIndex, pauseAllVideos])
+  }, [videos.length, isTransitioning, currentIndex, pauseAllVideos, hasSwiped])
 
   // Handle video play/pause (click/tap on video)
   const togglePlayPause = useCallback(() => {
@@ -189,6 +202,12 @@ export default function CarouselPage() {
     const distance = touchStartY.current - touchEndY.current
     
     if (Math.abs(distance) > minSwipeDistance) {
+      // Hide swipe indicator on any swipe
+      if (!hasSwiped) {
+        setHasSwiped(true)
+        setShowSwipeIndicator(false)
+      }
+      
       if (distance > 0) {
         // Swiped up - next video
         goToNext()
@@ -234,19 +253,75 @@ export default function CarouselPage() {
     }
   }, [])
 
+  // Auto-hide swipe indicator after 2 seconds
+  useEffect(() => {
+    if (showSwipeIndicator && currentIndex === 0 && !hasSwiped) {
+      const timer = setTimeout(() => {
+        setShowSwipeIndicator(false)
+        setHasSwiped(true)
+      }, 2000)
+      return () => clearTimeout(timer)
+    }
+  }, [showSwipeIndicator, currentIndex, hasSwiped])
+
+  // Reset indicator visibility when on first video and hasn't swiped yet
+  useEffect(() => {
+    if (currentIndex !== 0) {
+      setShowSwipeIndicator(false)
+    } else if (currentIndex === 0 && !hasSwiped && videos.length > 0) {
+      // Show indicator only on first video, first time
+      setShowSwipeIndicator(true)
+    }
+  }, [currentIndex, hasSwiped, videos.length])
+
+  // Inject swipe animation CSS
+  useEffect(() => {
+    const styleId = 'swipe-indicator-animation'
+    if (document.getElementById(styleId)) return // Already injected
+
+    const style = document.createElement('style')
+    style.id = styleId
+    style.textContent = `
+      @keyframes swipeUp {
+        0% {
+          transform: translateY(60px) rotate(90deg);
+          opacity: 0;
+        }
+        20% {
+          opacity: 0.3;
+        }
+        80% {
+          opacity: 0.3;
+        }
+        100% {
+          transform: translateY(-60px) rotate(90deg);
+          opacity: 0;
+        }
+      }
+    `
+    document.head.appendChild(style)
+
+    return () => {
+      const existingStyle = document.getElementById(styleId)
+      if (existingStyle) {
+        existingStyle.remove()
+      }
+    }
+  }, [])
+
   return (
     <div 
-      className="fixed inset-0 md:relative md:min-h-screen bg-black md:bg-[#020314]"
-      style={{
-        background: `
-          radial-gradient(circle 800px at top right, rgba(255, 138, 31, 0.4), transparent),
-          radial-gradient(circle 600px at bottom left, rgba(56, 189, 248, 0.22), transparent),
-          radial-gradient(circle 800px at bottom right, rgba(129, 140, 248, 0.4), transparent),
-          #020314
-        `,
-        backgroundAttachment: 'fixed'
-      }}
-    >
+        className="fixed inset-0 md:relative md:min-h-screen bg-black md:bg-[#020314]"
+        style={{
+          background: `
+            radial-gradient(circle 800px at top right, rgba(255, 138, 31, 0.4), transparent),
+            radial-gradient(circle 600px at bottom left, rgba(56, 189, 248, 0.22), transparent),
+            radial-gradient(circle 800px at bottom right, rgba(129, 140, 248, 0.4), transparent),
+            #020314
+          `,
+          backgroundAttachment: 'fixed'
+        }}
+      >
       {/* Back button - top left */}
       <Link
         href="/"
@@ -313,6 +388,23 @@ export default function CarouselPage() {
                 <Volume2 className="w-5 h-5 md:w-6 md:h-6 text-white" />
               )}
             </button>
+
+            {/* Swipe indicator - only on first video, onboarding */}
+            {showSwipeIndicator && currentIndex === 0 && !hasSwiped && (
+              <div className="absolute inset-0 z-[15] flex items-center justify-center pointer-events-none">
+                <div className="relative w-full h-full flex items-center justify-center">
+                  <div
+                    className="absolute text-white"
+                    style={{
+                      animation: 'swipeUp 1.5s ease-in-out infinite',
+                      opacity: 0.25,
+                    }}
+                  >
+                    <Hand className="w-8 h-8 md:w-10 md:h-10 rotate-90" />
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Play/Pause indicator - center, shows briefly on click */}
             {!isPlaying && (

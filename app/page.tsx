@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { supabase } from '@/lib/supabaseClient'
 import { useCredits } from '@/hooks/useCredits'
+import { useTranslation } from '@/lib/translations/context'
 import {
   Zap,
   Lock,
@@ -28,6 +29,7 @@ import {
   Loader2,
   LogOut,
   User,
+  Globe,
 } from 'lucide-react'
 
 // Top Bar Component
@@ -86,9 +88,42 @@ function Header() {
   const [user, setUser] = useState<any>(null)
   const [isLoadingAuth, setIsLoadingAuth] = useState(true)
   const [accountDropdownOpen, setAccountDropdownOpen] = useState(false)
+  const [languageDropdownOpen, setLanguageDropdownOpen] = useState(false)
   
   // Use new credits hook with realtime updates
   const { credits, loading: creditsLoading } = useCredits()
+  
+  // Use translation context
+  const { language: currentLanguage, setLanguage, isLoading: isTranslating } = useTranslation()
+
+  const languages = [
+    { code: 'fr', name: 'Français', flag: '🇫🇷' },
+    { code: 'en', name: 'English', flag: '🇬🇧' },
+    { code: 'es', name: 'Español', flag: '🇪🇸' },
+  ]
+
+  const currentLang = languages.find(lang => lang.code === currentLanguage) || languages[0]
+
+  const handleLanguageChange = (langCode: 'fr' | 'en' | 'es') => {
+    setLanguage(langCode)
+    setLanguageDropdownOpen(false)
+  }
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement
+      if (!target.closest('.language-dropdown') && !target.closest('.account-dropdown')) {
+        setLanguageDropdownOpen(false)
+        setAccountDropdownOpen(false)
+      }
+    }
+
+    if (languageDropdownOpen || accountDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+      return () => document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [languageDropdownOpen, accountDropdownOpen])
 
   useEffect(() => {
     // Check auth state for user (for account dropdown)
@@ -152,6 +187,12 @@ function Header() {
 
         <div className="hidden lg:flex items-center gap-[18px] text-[13px] text-text-muted absolute left-1/2 -translate-x-1/2">
           <Link
+            href="/carousel"
+            className="relative cursor-pointer transition-colors duration-[0.18s] ease-out hover:text-text-main after:content-[''] after:absolute after:left-0 after:-bottom-[6px] after:w-0 after:h-0.5 after:rounded-full after:bg-gradient-to-r after:from-[#ffb347] after:via-[#ff8a1f] after:to-[#ff4b2b] after:transition-all after:duration-[0.18s] after:ease-out hover:after:w-[18px]"
+          >
+            Carrousel
+          </Link>
+          <Link
             href="/pricing"
             className="relative cursor-pointer transition-colors duration-[0.18s] ease-out hover:text-text-main after:content-[''] after:absolute after:left-0 after:-bottom-[6px] after:w-0 after:h-0.5 after:rounded-full after:bg-gradient-to-r after:from-[#ffb347] after:via-[#ff8a1f] after:to-[#ff4b2b] after:transition-all after:duration-[0.18s] after:ease-out hover:after:w-[18px]"
           >
@@ -163,15 +204,52 @@ function Header() {
           >
             FAQ
           </Link>
-          <Link
-            href="/carousel"
-            className="relative cursor-pointer transition-colors duration-[0.18s] ease-out hover:text-text-main after:content-[''] after:absolute after:left-0 after:-bottom-[6px] after:w-0 after:h-0.5 after:rounded-full after:bg-gradient-to-r after:from-[#ffb347] after:via-[#ff8a1f] after:to-[#ff4b2b] after:transition-all after:duration-[0.18s] after:ease-out hover:after:w-[18px]"
-          >
-            Carrousel
-          </Link>
         </div>
 
         <div className="flex items-center gap-3">
+          {/* Language Selector */}
+          <div className="hidden sm:block relative language-dropdown" data-no-translate>
+            <button
+              onClick={() => {
+                setLanguageDropdownOpen(!languageDropdownOpen)
+                setAccountDropdownOpen(false)
+              }}
+              className="flex items-center gap-2 px-3 py-2 rounded-full border border-[rgba(148,163,184,0.7)] bg-transparent text-text-soft text-[13px] font-semibold transition-all duration-[0.18s] ease-out hover:bg-[rgba(15,23,42,0.9)] hover:text-text-main hover:border-[rgba(203,213,225,0.9)]"
+              aria-label="Select language"
+              disabled={isTranslating}
+            >
+              <Globe className="w-4 h-4" />
+              <span className="text-base">{currentLang.flag}</span>
+              {isTranslating ? (
+                <Loader2 className="w-3 h-3 animate-spin" />
+              ) : (
+                <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${languageDropdownOpen ? 'rotate-180' : ''}`} />
+              )}
+            </button>
+            {languageDropdownOpen && (
+              <div className="absolute right-0 mt-2 w-48 rounded-xl bg-[rgba(6,9,22,0.98)] border border-[rgba(252,211,77,0.75)] shadow-lg overflow-hidden z-50" data-no-translate>
+                {languages.map((lang) => (
+                  <button
+                    key={lang.code}
+                    onClick={() => handleLanguageChange(lang.code as 'fr' | 'en' | 'es')}
+                    disabled={isTranslating}
+                    className={`w-full text-left px-4 py-3 text-sm transition-colors flex items-center gap-3 ${
+                      currentLanguage === lang.code
+                        ? 'bg-[rgba(252,211,77,0.15)] text-text-main'
+                        : 'text-text-soft hover:bg-[rgba(15,23,42,0.5)]'
+                    } ${isTranslating ? 'opacity-50 cursor-wait' : ''}`}
+                  >
+                    <span className="text-lg">{lang.flag}</span>
+                    <span>{lang.name}</span>
+                    {currentLanguage === lang.code && (
+                      <CheckCircle2 className="w-4 h-4 ml-auto text-accent-orange-soft" />
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
           {!isLoadingAuth && (
             <>
               {user ? (
@@ -182,9 +260,12 @@ function Header() {
                     </span>
                     <span>crédits</span>
                   </span>
-                  <div className="hidden sm:block relative">
+                  <div className="hidden sm:block relative account-dropdown">
                     <button
-                      onClick={() => setAccountDropdownOpen(!accountDropdownOpen)}
+                      onClick={() => {
+                        setAccountDropdownOpen(!accountDropdownOpen)
+                        setLanguageDropdownOpen(false)
+                      }}
                       className="flex items-center gap-2 px-4 py-2 rounded-full border border-[rgba(148,163,184,0.7)] bg-transparent text-text-soft text-[13px] font-semibold transition-all duration-[0.18s] ease-out hover:bg-[rgba(15,23,42,0.9)] hover:text-text-main hover:border-[rgba(203,213,225,0.9)]"
                     >
                       <User className="w-4 h-4" />
@@ -236,6 +317,16 @@ function Header() {
         <div className="lg:hidden pb-4 px-5 space-y-1 border-t border-[rgba(51,65,85,0.5)] pt-4 relative z-50">
           <div className="space-y-1 mb-3">
             <Link
+              href="/carousel"
+              className="block w-full text-left px-4 py-2.5 text-sm text-text-soft hover:text-text-main hover:bg-[rgba(15,23,42,0.5)] rounded-lg transition-colors touch-manipulation"
+              onClick={(e) => {
+                setMobileMenuOpen(false)
+                e.stopPropagation()
+              }}
+            >
+              Carrousel
+            </Link>
+            <Link
               href="/pricing"
               className="block w-full text-left px-4 py-2.5 text-sm text-text-soft hover:text-text-main hover:bg-[rgba(15,23,42,0.5)] rounded-lg transition-colors touch-manipulation"
               onClick={(e) => {
@@ -255,16 +346,33 @@ function Header() {
             >
               FAQ
             </Link>
-            <Link
-              href="/carousel"
-              className="block w-full text-left px-4 py-2.5 text-sm text-text-soft hover:text-text-main hover:bg-[rgba(15,23,42,0.5)] rounded-lg transition-colors touch-manipulation"
-              onClick={(e) => {
-                setMobileMenuOpen(false)
-                e.stopPropagation()
-              }}
-            >
-              Carrousel
-            </Link>
+          </div>
+
+          {/* Language Selector - Mobile */}
+          <div className="border-t border-[rgba(51,65,85,0.5)] pt-3 mt-3">
+            <div className="px-4 py-2 text-xs text-text-muted mb-2">Langue / Language / Idioma</div>
+            <div className="space-y-1">
+              {languages.map((lang) => (
+                <button
+                  key={lang.code}
+                  onClick={() => {
+                    handleLanguageChange(lang.code as 'fr' | 'en' | 'es')
+                    setMobileMenuOpen(false)
+                  }}
+                  className={`w-full text-left px-4 py-2.5 text-sm rounded-lg transition-colors flex items-center gap-3 touch-manipulation ${
+                    currentLanguage === lang.code
+                      ? 'bg-[rgba(252,211,77,0.15)] text-text-main'
+                      : 'text-text-soft hover:text-text-main hover:bg-[rgba(15,23,42,0.5)]'
+                  }`}
+                >
+                  <span className="text-lg">{lang.flag}</span>
+                  <span>{lang.name}</span>
+                  {currentLanguage === lang.code && (
+                    <CheckCircle2 className="w-4 h-4 ml-auto text-accent-orange-soft" />
+                  )}
+                </button>
+              ))}
+            </div>
           </div>
           
           <div className="border-t border-[rgba(51,65,85,0.5)] pt-3 mt-3">
@@ -374,10 +482,10 @@ function Hero() {
               </button>
 
               <Link
-                href="/pricing"
+                href="/carousel"
                 className="bg-transparent text-white border border-[rgba(248,181,86,0.95)] shadow-[0_0_0_1px_rgba(248,181,86,0.4)] rounded-full text-[13px] font-semibold px-6 py-3 cursor-pointer inline-flex items-center gap-2 transition-all duration-[0.18s] ease-out hover:bg-[radial-gradient(circle_at_top_left,rgba(255,138,31,0.16),transparent_70%)] hover:border-[rgba(248,181,86,1)]"
               >
-                Voir les offres et les packs
+                Découvrir les créations
               </Link>
             </div>
 
