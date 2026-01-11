@@ -139,19 +139,18 @@ function Header() {
         </div>
 
         <div className="flex items-center gap-3">
-          {/* Language Selector */}
+          {/* Language Selector - Compact */}
           <div className="hidden sm:block relative language-dropdown" data-no-translate>
             <button
               onClick={() => {
                 setLanguageDropdownOpen(!languageDropdownOpen)
                 setAccountDropdownOpen(false)
               }}
-              className="flex items-center gap-2 px-3 py-2 rounded-full border border-[rgba(148,163,184,0.7)] bg-transparent text-text-soft text-[13px] font-semibold transition-all duration-[0.18s] ease-out hover:bg-[rgba(15,23,42,0.9)] hover:text-text-main hover:border-[rgba(203,213,225,0.9)]"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border border-[rgba(148,163,184,0.7)] bg-transparent text-text-soft text-[13px] font-medium transition-all duration-[0.18s] ease-out hover:bg-[rgba(15,23,42,0.9)] hover:text-text-main hover:border-[rgba(203,213,225,0.9)]"
               aria-label="Select language"
               disabled={isTranslating}
             >
-              <Globe className="w-4 h-4" />
-              <span className="text-base">{currentLang.flag}</span>
+              <span className="text-base leading-none">{currentLang.flag}</span>
               {isTranslating ? (
                 <Loader2 className="w-3 h-3 animate-spin" />
               ) : (
@@ -159,23 +158,18 @@ function Header() {
               )}
             </button>
             {languageDropdownOpen && (
-              <div className="absolute right-0 mt-2 w-48 rounded-xl bg-[rgba(6,9,22,0.98)] border border-[rgba(252,211,77,0.75)] shadow-lg overflow-hidden z-50" data-no-translate>
-                {languages.map((lang) => (
+              <div className="absolute right-0 mt-2 w-40 rounded-xl bg-[rgba(6,9,22,0.98)] border border-[rgba(252,211,77,0.75)] shadow-lg overflow-hidden z-50" data-no-translate>
+                {languages.filter(lang => lang.code !== currentLanguage).map((lang) => (
                   <button
                     key={lang.code}
                     onClick={() => handleLanguageChange(lang.code as 'fr' | 'en' | 'es')}
                     disabled={isTranslating}
-                    className={`w-full text-left px-4 py-3 text-sm transition-colors flex items-center gap-3 ${
-                      currentLanguage === lang.code
-                        ? 'bg-[rgba(252,211,77,0.15)] text-text-main'
-                        : 'text-text-soft hover:bg-[rgba(15,23,42,0.5)]'
+                    className={`w-full text-left px-4 py-2.5 text-sm transition-colors flex items-center gap-2.5 ${
+                      'text-text-soft hover:bg-[rgba(15,23,42,0.5)] hover:text-text-main'
                     } ${isTranslating ? 'opacity-50 cursor-wait' : ''}`}
                   >
-                    <span className="text-lg">{lang.flag}</span>
+                    <span className="text-base">{lang.flag}</span>
                     <span>{lang.name}</span>
-                    {currentLanguage === lang.code && (
-                      <CheckCircle2 className="w-4 h-4 ml-auto text-accent-orange-soft" />
-                    )}
                   </button>
                 ))}
               </div>

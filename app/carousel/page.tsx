@@ -25,6 +25,7 @@ export default function CarouselPage() {
   const [isTransitioning, setIsTransitioning] = useState(false)
   const [showSwipeIndicator, setShowSwipeIndicator] = useState(true)
   const [hasSwiped, setHasSwiped] = useState(false)
+  const [preloadedVideos, setPreloadedVideos] = useState<Set<number>>(new Set())
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([])
   const containerRef = useRef<HTMLDivElement>(null)
@@ -98,10 +99,9 @@ export default function CarouselPage() {
     })
   }, [])
 
-  // Navigate to previous video (up)
+  // Navigate to previous video (up) - smooth transition without delay
   const goToPrevious = useCallback(() => {
     if (videos.length === 0 || isTransitioning) return
-    setIsTransitioning(true)
     const newIndex = currentIndex === 0 ? videos.length - 1 : currentIndex - 1
     pauseAllVideos(newIndex)
     setCurrentIndex(newIndex)
@@ -111,13 +111,11 @@ export default function CarouselPage() {
       setHasSwiped(true)
       setShowSwipeIndicator(false)
     }
-    setTimeout(() => setIsTransitioning(false), 300)
   }, [videos.length, isTransitioning, currentIndex, pauseAllVideos, hasSwiped])
 
-  // Navigate to next video (down)
+  // Navigate to next video (down) - smooth transition without delay
   const goToNext = useCallback(() => {
     if (videos.length === 0 || isTransitioning) return
-    setIsTransitioning(true)
     const newIndex = currentIndex === videos.length - 1 ? 0 : currentIndex + 1
     pauseAllVideos(newIndex)
     setCurrentIndex(newIndex)
@@ -127,7 +125,6 @@ export default function CarouselPage() {
       setHasSwiped(true)
       setShowSwipeIndicator(false)
     }
-    setTimeout(() => setIsTransitioning(false), 300)
   }, [videos.length, isTransitioning, currentIndex, pauseAllVideos, hasSwiped])
 
   // Handle video play/pause (click/tap on video)
@@ -151,7 +148,40 @@ export default function CarouselPage() {
     }
   }, [isMuted])
 
-  // Reset video when index changes
+  // Preload videos (current, next, previous) for smooth transitions
+  useEffect(() => {
+    if (videos.length === 0) return
+
+    const indicesToPreload = new Set<number>()
+    
+    // Always preload current
+    indicesToPreload.add(currentIndex)
+    
+    // Preload next video
+    const nextIndex = currentIndex === videos.length - 1 ? 0 : currentIndex + 1
+    indicesToPreload.add(nextIndex)
+    
+    // Preload previous video
+    const prevIndex = currentIndex === 0 ? videos.length - 1 : currentIndex - 1
+    indicesToPreload.add(prevIndex)
+
+    // Preload videos - always ensure they're loaded for smooth transitions
+    indicesToPreload.forEach((index) => {
+      const video = videoRefs.current[index]
+      if (video) {
+        // Force reload to ensure video is ready
+        if (video.readyState < 3) {
+          video.load()
+        }
+        // Track preloaded videos
+        if (!preloadedVideos.has(index)) {
+          setPreloadedVideos((prev) => new Set([...prev, index]))
+        }
+      }
+    })
+  }, [currentIndex, videos.length, preloadedVideos])
+
+  // Reset video when index changes - optimized for instant playback
   useEffect(() => {
     if (videoRef.current && currentVideo) {
       // Pause all other videos first
@@ -160,12 +190,20 @@ export default function CarouselPage() {
       // Set mute state for current video
       videoRef.current.muted = isMuted
       
-      // Load and play current video
-      videoRef.current.load()
-      videoRef.current.play().catch(() => {
-        // Autoplay might fail, handle silently
-      })
-      setIsPlaying(true)
+      // If video is already loaded, play immediately
+      if (videoRef.current.readyState >= 3) {
+        videoRef.current.play().catch(() => {
+          // Autoplay might fail, handle silently
+        })
+        setIsPlaying(true)
+      } else {
+        // Otherwise load and play
+        videoRef.current.load()
+        videoRef.current.addEventListener('canplay', () => {
+          videoRef.current?.play().catch(() => {})
+        }, { once: true })
+        setIsPlaying(true)
+      }
     }
   }, [currentIndex, currentVideo, isMuted, pauseAllVideos])
 
@@ -242,14 +280,80 @@ export default function CarouselPage() {
     return () => window.removeEventListener('keydown', handleKeyPress)
   }, [goToPrevious, goToNext, togglePlayPause])
 
-  // Prevent body scroll on mobile only
+  // Prevent body scroll and enable fullscreen on mobile
   useEffect(() => {
     const isMobile = window.innerWidth < 768
     if (isMobile) {
+      // Prevent body scroll
       document.body.style.overflow = 'hidden'
-    }
-    return () => {
-      document.body.style.overflow = 'unset'
+      document.body.style.position = 'fixed'
+      document.body.style.width = '100%'
+      document.body.style.height = '100%'
+      
+      // Hide address bar by scrolling
+      const hideAddressBar = () => {
+        window.scrollTo(0, 1)
+        setTimeout(() => {
+          window.scrollTo(0, 0)
+        }, 0)
+      }
+      
+      // Hide address bar on load
+      hideAddressBar()
+      
+      // Hide address bar on orientation change
+      window.addEventListener('orientationchange', hideAddressBar)
+      
+      // Prevent address bar from showing on scroll
+      let lastScrollY = window.scrollY
+      const preventAddressBar = () => {
+        if (window.scrollY < lastScrollY) {
+          window.scrollTo(0, 1)
+        }
+        lastScrollY = window.scrollY
+      }
+      
+      window.addEventListener('scroll', preventAddressBar, { passive: false })
+      
+      // Try to enter fullscreen if supported
+      const enterFullscreen = async () => {
+        try {
+          const doc = document.documentElement as any
+          if (doc.requestFullscreen) {
+            await doc.requestFullscreen()
+          } else if ((doc as any).webkitRequestFullscreen) {
+            await (doc as any).webkitRequestFullscreen()
+          } else if ((doc as any).mozRequestFullScreen) {
+            await (doc as any).mozRequestFullScreen()
+          } else if ((doc as any).msRequestFullscreen) {
+            await (doc as any).msRequestFullscreen()
+          }
+        } catch (error) {
+          // Fullscreen API might not be available or user denied
+          console.log('Fullscreen not available:', error)
+        }
+      }
+      
+      // Attempt fullscreen on user interaction
+      const handleFirstInteraction = () => {
+        enterFullscreen()
+        document.removeEventListener('touchstart', handleFirstInteraction)
+        document.removeEventListener('click', handleFirstInteraction)
+      }
+      
+      document.addEventListener('touchstart', handleFirstInteraction, { once: true })
+      document.addEventListener('click', handleFirstInteraction, { once: true })
+      
+      return () => {
+        document.body.style.overflow = 'unset'
+        document.body.style.position = 'unset'
+        document.body.style.width = 'unset'
+        document.body.style.height = 'unset'
+        window.removeEventListener('orientationchange', hideAddressBar)
+        window.removeEventListener('scroll', preventAddressBar)
+        document.removeEventListener('touchstart', handleFirstInteraction)
+        document.removeEventListener('click', handleFirstInteraction)
+      }
     }
   }, [])
 
@@ -311,7 +415,7 @@ export default function CarouselPage() {
 
   return (
     <div 
-        className="fixed inset-0 md:relative md:min-h-screen bg-black md:bg-[#020314]"
+        className="fixed inset-0 md:relative md:min-h-screen bg-black md:bg-[#020314] carousel-fullscreen"
         style={{
           background: `
             radial-gradient(circle 800px at top right, rgba(255, 138, 31, 0.4), transparent),
@@ -319,7 +423,13 @@ export default function CarouselPage() {
             radial-gradient(circle 800px at bottom right, rgba(129, 140, 248, 0.4), transparent),
             #020314
           `,
-          backgroundAttachment: 'fixed'
+          backgroundAttachment: 'fixed',
+          // Fullscreen mobile support
+          minHeight: '100vh',
+          paddingTop: 'env(safe-area-inset-top)',
+          paddingBottom: 'env(safe-area-inset-bottom)',
+          paddingLeft: 'env(safe-area-inset-left)',
+          paddingRight: 'env(safe-area-inset-right)',
         }}
       >
       {/* Back button - top left */}
@@ -370,9 +480,15 @@ export default function CarouselPage() {
                 playsInline
                 autoPlay={index === currentIndex}
                 preload="auto"
-                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ease-in-out ${
-                  index === currentIndex && !isTransitioning ? 'opacity-100 z-10' : 'opacity-0 z-0'
+                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-200 ease-in-out ${
+                  index === currentIndex ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
                 }`}
+                onLoadedData={() => {
+                  // Ensure video is ready for smooth transition
+                  if (index === currentIndex && videoRefs.current[index]) {
+                    videoRefs.current[index]?.play().catch(() => {})
+                  }
+                }}
               />
             ))}
 
@@ -389,18 +505,18 @@ export default function CarouselPage() {
               )}
             </button>
 
-            {/* Swipe indicator - only on first video, onboarding */}
+            {/* Swipe indicator - only on first video, onboarding - discreet and semi-transparent */}
             {showSwipeIndicator && currentIndex === 0 && !hasSwiped && (
               <div className="absolute inset-0 z-[15] flex items-center justify-center pointer-events-none">
                 <div className="relative w-full h-full flex items-center justify-center">
                   <div
-                    className="absolute text-white"
+                    className="absolute"
                     style={{
                       animation: 'swipeUp 1.5s ease-in-out infinite',
-                      opacity: 0.25,
+                      opacity: 0.15,
                     }}
                   >
-                    <Hand className="w-8 h-8 md:w-10 md:h-10 rotate-90" />
+                    <Hand className="w-8 h-8 md:w-10 md:h-10 rotate-90 text-white" />
                   </div>
                 </div>
               </div>

@@ -166,16 +166,16 @@ async function translateBatch(
     return results
   }
 
-  // Translate uncached texts one by one to avoid rate limiting
-  // Smaller batches for better reliability
-  const batchSize = 1 // Process one at a time for better reliability
+  // Translate uncached texts with optimized batching for speed
+  // Process in parallel batches for faster translation
+  const batchSize = 3 // Process 3 at a time for better speed
   let processed = 0
 
   for (let i = 0; i < uncached.length; i += batchSize) {
     const batch = uncached.slice(i, i + batchSize)
     
-    // Process sequentially within batch
-    for (const text of batch) {
+    // Process batch in parallel for speed
+    const batchPromises = batch.map(async (text) => {
       try {
         const translated = await translateText(text, targetLang, sourceLang)
         results[text] = translated
@@ -184,16 +184,23 @@ async function translateBatch(
         if (onProgress) {
           onProgress(processed, uncached.length)
         }
+        return { text, translated }
       } catch (error) {
         console.error('Failed to translate:', text.substring(0, 50), error)
         results[text] = text // Fallback to original
         processed++
+        if (onProgress) {
+          onProgress(processed, uncached.length)
+        }
+        return { text, translated: text }
       }
-      
-      // Delay between translations to avoid rate limiting
-      if (i + batchSize < uncached.length) {
-        await new Promise(resolve => setTimeout(resolve, 300))
-      }
+    })
+    
+    await Promise.all(batchPromises)
+    
+    // Reduced delay between batches for faster overall translation
+    if (i + batchSize < uncached.length) {
+      await new Promise(resolve => setTimeout(resolve, 100))
     }
   }
   
@@ -248,8 +255,8 @@ export function TranslationProvider({ children }: { children: React.ReactNode })
           return
         }
 
-        // Wait for DOM to be ready after restoring French
-        await new Promise(resolve => setTimeout(resolve, 200))
+        // Wait for DOM to be ready after restoring French (reduced delay for speed)
+        await new Promise(resolve => setTimeout(resolve, 50))
 
         // Collect all text nodes to translate (now in French)
         const walker = document.createTreeWalker(
@@ -294,19 +301,21 @@ export function TranslationProvider({ children }: { children: React.ReactNode })
         let node
 
         while ((node = walker.nextNode())) {
-          const text = node.textContent?.trim() || ''
+          const fullText = node.textContent || ''
+          const text = fullText.trim()
           if (text && !uniqueTexts.has(text)) {
             uniqueTexts.add(text)
             textNodes.push(node)
-            // ALWAYS store the French original text
+            // ALWAYS store the French original text (preserve leading/trailing spaces)
             if (!originalTextsRef.current.has(node)) {
-              originalTextsRef.current.set(node, text)
+              // Store both trimmed (for translation) and full (for space preservation)
+              originalTextsRef.current.set(node, fullText)
             }
           }
         }
 
-        // Get unique texts to translate (these are in French)
-        const textsToTranslate = Array.from(uniqueTexts).slice(0, 50)
+        // Get unique texts to translate (these are in French) - increased limit for better coverage
+        const textsToTranslate = Array.from(uniqueTexts).slice(0, 100)
 
         console.log(`Translating ${textsToTranslate.length} French texts to ${language}...`)
 
@@ -323,9 +332,14 @@ export function TranslationProvider({ children }: { children: React.ReactNode })
         // Apply translations
         let appliedCount = 0
         textNodes.forEach((textNode) => {
-          const originalFrenchText = originalTextsRef.current.get(textNode) || textNode.textContent?.trim() || ''
-          if (translations[originalFrenchText] && translations[originalFrenchText] !== originalFrenchText) {
-            textNode.textContent = translations[originalFrenchText]
+          const originalFullText = originalTextsRef.current.get(textNode) || textNode.textContent || ''
+          const originalTrimmed = originalFullText.trim()
+          
+          if (translations[originalTrimmed] && translations[originalTrimmed] !== originalTrimmed) {
+            // Preserve leading and trailing spaces from original
+            const leadingSpaces = originalFullText.match(/^\s*/)?.[0] || ''
+            const trailingSpaces = originalFullText.match(/\s*$/)?.[0] || ''
+            textNode.textContent = leadingSpaces + translations[originalTrimmed] + trailingSpaces
             appliedCount++
           }
         })

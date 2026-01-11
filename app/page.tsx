@@ -207,19 +207,18 @@ function Header() {
         </div>
 
         <div className="flex items-center gap-3">
-          {/* Language Selector */}
+          {/* Language Selector - Compact */}
           <div className="hidden sm:block relative language-dropdown" data-no-translate>
             <button
               onClick={() => {
                 setLanguageDropdownOpen(!languageDropdownOpen)
                 setAccountDropdownOpen(false)
               }}
-              className="flex items-center gap-2 px-3 py-2 rounded-full border border-[rgba(148,163,184,0.7)] bg-transparent text-text-soft text-[13px] font-semibold transition-all duration-[0.18s] ease-out hover:bg-[rgba(15,23,42,0.9)] hover:text-text-main hover:border-[rgba(203,213,225,0.9)]"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border border-[rgba(148,163,184,0.7)] bg-transparent text-text-soft text-[13px] font-medium transition-all duration-[0.18s] ease-out hover:bg-[rgba(15,23,42,0.9)] hover:text-text-main hover:border-[rgba(203,213,225,0.9)]"
               aria-label="Select language"
               disabled={isTranslating}
             >
-              <Globe className="w-4 h-4" />
-              <span className="text-base">{currentLang.flag}</span>
+              <span className="text-base leading-none">{currentLang.flag}</span>
               {isTranslating ? (
                 <Loader2 className="w-3 h-3 animate-spin" />
               ) : (
@@ -227,23 +226,18 @@ function Header() {
               )}
             </button>
             {languageDropdownOpen && (
-              <div className="absolute right-0 mt-2 w-48 rounded-xl bg-[rgba(6,9,22,0.98)] border border-[rgba(252,211,77,0.75)] shadow-lg overflow-hidden z-50" data-no-translate>
-                {languages.map((lang) => (
+              <div className="absolute right-0 mt-2 w-40 rounded-xl bg-[rgba(6,9,22,0.98)] border border-[rgba(252,211,77,0.75)] shadow-lg overflow-hidden z-50" data-no-translate>
+                {languages.filter(lang => lang.code !== currentLanguage).map((lang) => (
                   <button
                     key={lang.code}
                     onClick={() => handleLanguageChange(lang.code as 'fr' | 'en' | 'es')}
                     disabled={isTranslating}
-                    className={`w-full text-left px-4 py-3 text-sm transition-colors flex items-center gap-3 ${
-                      currentLanguage === lang.code
-                        ? 'bg-[rgba(252,211,77,0.15)] text-text-main'
-                        : 'text-text-soft hover:bg-[rgba(15,23,42,0.5)]'
+                    className={`w-full text-left px-4 py-2.5 text-sm transition-colors flex items-center gap-2.5 ${
+                      'text-text-soft hover:bg-[rgba(15,23,42,0.5)] hover:text-text-main'
                     } ${isTranslating ? 'opacity-50 cursor-wait' : ''}`}
                   >
-                    <span className="text-lg">{lang.flag}</span>
+                    <span className="text-base">{lang.flag}</span>
                     <span>{lang.name}</span>
-                    {currentLanguage === lang.code && (
-                      <CheckCircle2 className="w-4 h-4 ml-auto text-accent-orange-soft" />
-                    )}
                   </button>
                 ))}
               </div>
@@ -780,7 +774,7 @@ function FormSection() {
               <div className="absolute w-2 h-2 bg-[#22c55e] rounded-full animate-ping opacity-75"></div>
             </div>
             <span className="text-[13px] text-text-soft font-medium ml-2.5">
-              <strong className="text-accent-orange-soft">{displayedGenerations}</strong> générations en cours
+              <strong className="text-accent-orange-soft">{displayedGenerations}</strong>{' '}générations en cours
             </span>
           </div>
         </div>
@@ -946,6 +940,7 @@ function FormSection() {
 // Examples Section with Playable Videos
 function ExamplesSection() {
   const [playingIndex, setPlayingIndex] = useState<number | null>(null)
+  const [pausedIndex, setPausedIndex] = useState<number | null>(null)
   const [exampleVideos, setExampleVideos] = useState<any[]>([])
   const [isLoadingExamples, setIsLoadingExamples] = useState(true)
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([])
@@ -953,6 +948,40 @@ function ExamplesSection() {
   const setVideoRef = (index: number) => (el: HTMLVideoElement | null) => {
     videoRefs.current[index] = el
   }
+
+  // Sync video play/pause state with video elements
+  useEffect(() => {
+    const videoElements = videoRefs.current
+    
+    const handlePlay = (index: number) => () => {
+      setPlayingIndex(index)
+      setPausedIndex(null)
+    }
+    
+    const handlePause = (index: number) => () => {
+      setPausedIndex(index)
+      setPlayingIndex(null)
+    }
+
+    const cleanupFunctions: (() => void)[] = []
+
+    videoElements.forEach((video, index) => {
+      if (video) {
+        const playHandler = handlePlay(index)
+        const pauseHandler = handlePause(index)
+        video.addEventListener('play', playHandler)
+        video.addEventListener('pause', pauseHandler)
+        cleanupFunctions.push(() => {
+          video.removeEventListener('play', playHandler)
+          video.removeEventListener('pause', pauseHandler)
+        })
+      }
+    })
+
+    return () => {
+      cleanupFunctions.forEach(cleanup => cleanup())
+    }
+  }, [exampleVideos.length])
 
   // Fetch example videos from database - same pattern as carousel
   useEffect(() => {
@@ -1061,18 +1090,27 @@ function ExamplesSection() {
     const video = videoRefs.current[index]
     if (!video) return
 
+    // If video is currently playing, pause it
     if (playingIndex === index) {
       video.pause()
-      setPlayingIndex(null)
+      // State will be updated by event listeners
     } else {
+      // Pause all other videos and reset their state
       videoRefs.current.forEach((v, i) => {
         if (v && i !== index) {
           v.pause()
           v.currentTime = 0
+          if (playingIndex === i) {
+            setPlayingIndex(null)
+          }
+          if (pausedIndex === i) {
+            setPausedIndex(null)
+          }
         }
       })
+      // Play the clicked video
       video.play()
-      setPlayingIndex(index)
+      // State will be updated by event listeners
     }
   }
 
@@ -1097,7 +1135,7 @@ function ExamplesSection() {
             return (
               <div
               key={i}
-              className="rounded-[16px] p-3 border border-[rgba(252,211,77,0.85)] shadow-[0_8px_24px_rgba(0,0,0,0.6)] text-xs text-text-soft hover:border-[rgba(252,211,77,1)] transition-all duration-300 flex flex-col"
+              className="rounded-[16px] p-2.5 border border-[rgba(252,211,77,0.85)] shadow-[0_8px_24px_rgba(0,0,0,0.6)] text-xs text-text-soft hover:border-[rgba(252,211,77,1)] transition-all duration-300 flex flex-col"
               style={{
                 background: `
                   radial-gradient(circle at top, rgba(255, 138, 31, 0.16), transparent 60%),
@@ -1106,36 +1144,24 @@ function ExamplesSection() {
               }}
             >
                 <div
-                  className="relative rounded-xl overflow-hidden border border-[rgba(252,211,77,0.7)] aspect-[9/16] w-full mb-2.5 bg-[#020617] cursor-pointer group flex-shrink-0"
+                  className="relative rounded-xl overflow-hidden border border-[rgba(252,211,77,0.7)] aspect-[9/16] w-full mb-2 bg-[#020617] cursor-pointer group flex-shrink-0"
                   onClick={() => handleVideoClick(i)}
                 >
                   <video
                     ref={setVideoRef(i)}
                     src={example.videoUrl || '/placeholder.mp4'}
-                    muted
                     loop
                     playsInline
                     className="w-full h-full block object-cover"
                   />
-                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
-                    <div className="relative w-10 h-10 rounded-full flex items-center justify-center">
-                      {/* Outer glow */}
-                      <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[#ff8a1f] via-[#ffd700] to-[#ff4b2b] opacity-50 blur-md"></div>
-                      {/* Main button */}
-                      <div className="relative w-8 h-8 rounded-full bg-gradient-to-br from-[rgba(15,23,42,0.98)] via-[rgba(15,23,42,0.95)] to-[rgba(6,9,22,0.98)] border-2 border-[rgba(252,211,77,0.8)] backdrop-blur-sm flex items-center justify-center shadow-[0_4px_16px_rgba(0,0,0,0.9),0_0_0_1px_rgba(252,211,77,0.3),inset_0_1px_0_rgba(255,255,255,0.1)]">
-                        {playingIndex === i ? (
-                          <svg className="w-4 h-4 drop-shadow-lg" viewBox="0 0 24 24" fill="none">
-                            <defs>
-                              <linearGradient id={`pauseGradient${i}`} x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="0%" stopColor="#ffd700" />
-                                <stop offset="50%" stopColor="#ff8a1f" />
-                                <stop offset="100%" stopColor="#ffffff" />
-                              </linearGradient>
-                            </defs>
-                            <rect x="6" y="4" width="4" height="16" rx="1" fill={`url(#pauseGradient${i})`} />
-                            <rect x="14" y="4" width="4" height="16" rx="1" fill={`url(#pauseGradient${i})`} />
-                          </svg>
-                        ) : (
+                  {/* Play icon - visible at start (when not playing) or when paused */}
+                  {playingIndex !== i && (
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                      <div className="relative w-10 h-10 rounded-full flex items-center justify-center">
+                        {/* Outer glow */}
+                        <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[#ff8a1f] via-[#ffd700] to-[#ff4b2b] opacity-50 blur-md"></div>
+                        {/* Main button */}
+                        <div className="relative w-8 h-8 rounded-full bg-gradient-to-br from-[rgba(15,23,42,0.98)] via-[rgba(15,23,42,0.95)] to-[rgba(6,9,22,0.98)] border-2 border-[rgba(252,211,77,0.8)] backdrop-blur-sm flex items-center justify-center shadow-[0_4px_16px_rgba(0,0,0,0.9),0_0_0_1px_rgba(252,211,77,0.3),inset_0_1px_0_rgba(255,255,255,0.1)]">
                           <svg className="w-4 h-4 ml-0.5 drop-shadow-lg" viewBox="0 0 24 24" fill="none">
                             <defs>
                               <linearGradient id={`playGradient${i}`} x1="0%" y1="0%" x2="100%" y2="100%">
@@ -1146,12 +1172,13 @@ function ExamplesSection() {
                             </defs>
                             <path d="M8 5v14l11-7z" fill={`url(#playGradient${i})`} />
                           </svg>
-                        )}
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  )}
+                  {/* No icon visible when video is playing (playingIndex === i) */}
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 mt-auto">
                   <Icon className="w-3.5 h-3.5 text-accent-orange-soft flex-shrink-0" />
                   <h3 className="text-[12px] font-semibold text-text-main leading-tight m-0">{example.title}</h3>
                 </div>
@@ -1467,12 +1494,12 @@ function HowItWorksSection() {
 // Footer Component
 function Footer() {
   const currentYear = new Date().getFullYear()
-
+  
   return (
     <footer className="py-6 border-t border-[rgba(30,41,59,0.9)] bg-[rgba(3,7,18,0.98)] text-[11px] text-text-muted mt-12">
       <div className="max-w-[1120px] mx-auto px-5">
         <div className="flex items-center justify-between gap-2.5 flex-wrap">
-          <div>© {currentYear} FLAZY. Tous droits réservés.</div>
+          <div>© {currentYear} FLAZY Tous droits réservés.</div>
           <div className="flex gap-3.5 flex-wrap">
             <Link href="/mentions-legales" className="text-text-muted hover:text-text-main transition-colors">
               Mentions légales
@@ -1567,8 +1594,8 @@ export default function Home() {
       <main className="py-6 pb-0">
         <Hero />
         <FormSection />
-        <HowItWorksSection />
         <ExamplesSection />
+        <HowItWorksSection />
         <div className="py-8 md:py-10 pb-2 md:pb-4">
           <div className="max-w-[1120px] mx-auto px-5">
             <div className="text-center space-y-4">
