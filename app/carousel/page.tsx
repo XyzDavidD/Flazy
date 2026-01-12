@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabaseClient'
+import Lottie from 'lottie-react'
 import {
   ChevronLeft,
   ChevronUp,
@@ -13,7 +14,6 @@ import {
   Play,
   Video,
   Loader2,
-  Hand,
 } from 'lucide-react'
 
 export default function CarouselPage() {
@@ -26,9 +26,13 @@ export default function CarouselPage() {
   const [showSwipeIndicator, setShowSwipeIndicator] = useState(true)
   const [hasSwiped, setHasSwiped] = useState(false)
   const [preloadedVideos, setPreloadedVideos] = useState<Set<number>>(new Set())
+  const [videoLoadingStates, setVideoLoadingStates] = useState<Map<number, 'loading' | 'ready' | 'error'>>(new Map())
+  const [videoErrors, setVideoErrors] = useState<Map<number, number>>(new Map()) // Track retry counts
+  const [swipeAnimationData, setSwipeAnimationData] = useState<any>(null)
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([])
   const containerRef = useRef<HTMLDivElement>(null)
+  const lottieRef = useRef<any>(null)
   
   // Swipe gesture state
   const touchStartY = useRef<number>(0)
@@ -39,6 +43,14 @@ export default function CarouselPage() {
     id: string
     videoUrl: string
   }
+
+  // Load Lottie animation
+  useEffect(() => {
+    fetch('/swipe.json')
+      .then((res) => res.json())
+      .then((data) => setSwipeAnimationData(data))
+      .catch((err) => console.error('Error loading animation:', err))
+  }, [])
 
   // Fetch videos from carousel_videos table
   useEffect(() => {
@@ -148,40 +160,61 @@ export default function CarouselPage() {
     }
   }, [isMuted])
 
-  // Preload videos (current, next, previous) for smooth transitions
+  // Smart preloading: only load current + adjacent videos, unload distant ones
   useEffect(() => {
     if (videos.length === 0) return
 
-    const indicesToPreload = new Set<number>()
+    const indicesToKeep = new Set<number>()
     
-    // Always preload current
-    indicesToPreload.add(currentIndex)
+    // Always keep current
+    indicesToKeep.add(currentIndex)
     
-    // Preload next video
+    // Keep next video
     const nextIndex = currentIndex === videos.length - 1 ? 0 : currentIndex + 1
-    indicesToPreload.add(nextIndex)
+    indicesToKeep.add(nextIndex)
     
-    // Preload previous video
+    // Keep previous video
     const prevIndex = currentIndex === 0 ? videos.length - 1 : currentIndex - 1
-    indicesToPreload.add(prevIndex)
+    indicesToKeep.add(prevIndex)
 
-    // Preload videos - always ensure they're loaded for smooth transitions
-    indicesToPreload.forEach((index) => {
+    // Unload videos that are far away to free memory
+    videoRefs.current.forEach((video, index) => {
+      if (video && !indicesToKeep.has(index)) {
+        // Unload distant videos
+        video.src = ''
+        video.load()
+        setPreloadedVideos((prev) => {
+          const newSet = new Set(prev)
+          newSet.delete(index)
+          return newSet
+        })
+        setVideoLoadingStates((prev) => {
+          const newMap = new Map(prev)
+          newMap.delete(index)
+          return newMap
+        })
+      }
+    })
+
+    // Load videos that should be kept
+    indicesToKeep.forEach((index) => {
       const video = videoRefs.current[index]
-      if (video) {
-        // Force reload to ensure video is ready
-        if (video.readyState < 3) {
+      if (video && videos[index]) {
+        // Only set src if not already set
+        if (!video.src || video.src !== videos[index].videoUrl) {
+          setVideoLoadingStates((prev) => {
+            const newMap = new Map(prev)
+            newMap.set(index, 'loading')
+            return newMap
+          })
+          video.src = videos[index].videoUrl
           video.load()
-        }
-        // Track preloaded videos
-        if (!preloadedVideos.has(index)) {
-          setPreloadedVideos((prev) => new Set([...prev, index]))
         }
       }
     })
-  }, [currentIndex, videos.length, preloadedVideos])
+  }, [currentIndex, videos])
 
-  // Reset video when index changes - optimized for instant playback
+  // Reset video when index changes - optimized for instant playback with better buffering
   useEffect(() => {
     if (videoRef.current && currentVideo) {
       // Pause all other videos first
@@ -190,19 +223,55 @@ export default function CarouselPage() {
       // Set mute state for current video
       videoRef.current.muted = isMuted
       
-      // If video is already loaded, play immediately
-      if (videoRef.current.readyState >= 3) {
-        videoRef.current.play().catch(() => {
-          // Autoplay might fail, handle silently
-        })
-        setIsPlaying(true)
+      // Disable remote playback (casting)
+      if ('disableRemotePlayback' in videoRef.current) {
+        (videoRef.current as any).disableRemotePlayback = true
+      }
+      
+      const playVideo = () => {
+        if (videoRef.current) {
+          videoRef.current.play().catch((err) => {
+            console.warn('Autoplay failed:', err)
+            setIsPlaying(false)
+          })
+          setIsPlaying(true)
+        }
+      }
+
+      // Check if video is ready
+      if (videoRef.current.readyState >= 4) { // HAVE_ENOUGH_DATA
+        playVideo()
+      } else if (videoRef.current.readyState >= 3) { // HAVE_FUTURE_DATA
+        // Wait for canplaythrough for better buffering
+        const handleCanPlayThrough = () => {
+          playVideo()
+          videoRef.current?.removeEventListener('canplaythrough', handleCanPlayThrough)
+        }
+        videoRef.current.addEventListener('canplaythrough', handleCanPlayThrough, { once: true })
+        
+        // Fallback to canplay if canplaythrough takes too long
+        const timeout = setTimeout(() => {
+          if (videoRef.current && videoRef.current.readyState >= 3) {
+            playVideo()
+          }
+          videoRef.current?.removeEventListener('canplaythrough', handleCanPlayThrough)
+        }, 2000)
+        
+        return () => {
+          clearTimeout(timeout)
+          videoRef.current?.removeEventListener('canplaythrough', handleCanPlayThrough)
+        }
       } else {
-        // Otherwise load and play
-        videoRef.current.load()
-        videoRef.current.addEventListener('canplay', () => {
-          videoRef.current?.play().catch(() => {})
-        }, { once: true })
-        setIsPlaying(true)
+        // Video not loaded yet, wait for loading
+        const handleCanPlay = () => {
+          playVideo()
+          videoRef.current?.removeEventListener('canplay', handleCanPlay)
+        }
+        videoRef.current.addEventListener('canplay', handleCanPlay, { once: true })
+        
+        return () => {
+          videoRef.current?.removeEventListener('canplay', handleCanPlay)
+        }
       }
     }
   }, [currentIndex, currentVideo, isMuted, pauseAllVideos])
@@ -216,6 +285,11 @@ export default function CarouselPage() {
 
       video.addEventListener('play', handlePlay)
       video.addEventListener('pause', handlePause)
+      
+      // Disable remote playback (casting)
+      if ('disableRemotePlayback' in video) {
+        (video as any).disableRemotePlayback = true
+      }
 
       return () => {
         video.removeEventListener('play', handlePlay)
@@ -223,6 +297,31 @@ export default function CarouselPage() {
       }
     }
   }, [currentVideo])
+  
+  // Prevent cast overlays from appearing
+  useEffect(() => {
+    const preventCastOverlay = () => {
+      // Remove any cast buttons that might appear
+      const castButtons = document.querySelectorAll('[data-cast-button], .cast-button, [aria-label*="Cast"]')
+      castButtons.forEach(btn => {
+        (btn as HTMLElement).style.display = 'none'
+      })
+      
+      // Prevent remote playback on all videos
+      const allVideos = document.querySelectorAll('video')
+      allVideos.forEach(video => {
+        if ('disableRemotePlayback' in video) {
+          (video as any).disableRemotePlayback = true
+        }
+      })
+    }
+    
+    // Run immediately and on interval to catch dynamically added elements
+    preventCastOverlay()
+    const interval = setInterval(preventCastOverlay, 500)
+    
+    return () => clearInterval(interval)
+  }, [])
 
   // Touch handlers for swipe gestures - improved for better detection
   const onTouchStart = (e: React.TouchEvent) => {
@@ -357,6 +456,22 @@ export default function CarouselPage() {
     }
   }, [])
 
+  // Ensure Lottie animation keeps playing when visible
+  useEffect(() => {
+    if (showSwipeIndicator && currentIndex === 0 && !hasSwiped && lottieRef.current && swipeAnimationData) {
+      // Small delay to ensure component is mounted
+      const timer = setTimeout(() => {
+        if (lottieRef.current) {
+          lottieRef.current.setSpeed(1)
+          lottieRef.current.play()
+          lottieRef.current.setLoop(true)
+        }
+      }, 100)
+      
+      return () => clearTimeout(timer)
+    }
+  }, [showSwipeIndicator, currentIndex, hasSwiped, swipeAnimationData])
+
   // Auto-hide swipe indicator after 2 seconds
   useEffect(() => {
     if (showSwipeIndicator && currentIndex === 0 && !hasSwiped) {
@@ -378,40 +493,6 @@ export default function CarouselPage() {
     }
   }, [currentIndex, hasSwiped, videos.length])
 
-  // Inject swipe animation CSS
-  useEffect(() => {
-    const styleId = 'swipe-indicator-animation'
-    if (document.getElementById(styleId)) return // Already injected
-
-    const style = document.createElement('style')
-    style.id = styleId
-    style.textContent = `
-      @keyframes swipeUp {
-        0% {
-          transform: translateY(60px) rotate(90deg);
-          opacity: 0;
-        }
-        20% {
-          opacity: 0.3;
-        }
-        80% {
-          opacity: 0.3;
-        }
-        100% {
-          transform: translateY(-60px) rotate(90deg);
-          opacity: 0;
-        }
-      }
-    `
-    document.head.appendChild(style)
-
-    return () => {
-      const existingStyle = document.getElementById(styleId)
-      if (existingStyle) {
-        existingStyle.remove()
-      }
-    }
-  }, [])
 
   return (
     <div 
@@ -465,32 +546,138 @@ export default function CarouselPage() {
             onTouchEnd={onTouchEnd}
             onClick={togglePlayPause}
           >
-            {videos.map((video, index) => (
-              <video
-                key={video.id}
-                ref={(el) => {
-                  videoRefs.current[index] = el
-                  if (index === currentIndex) {
-                    (videoRef as React.MutableRefObject<HTMLVideoElement | null>).current = el
-                  }
-                }}
-                src={video.videoUrl}
-                muted={index === currentIndex ? isMuted : true}
-                loop
-                playsInline
-                autoPlay={index === currentIndex}
-                preload="auto"
-                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-200 ease-in-out ${
-                  index === currentIndex ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
-                }`}
-                onLoadedData={() => {
-                  // Ensure video is ready for smooth transition
-                  if (index === currentIndex && videoRefs.current[index]) {
-                    videoRefs.current[index]?.play().catch(() => {})
-                  }
-                }}
-              />
-            ))}
+            {videos.map((video, index) => {
+              const isCurrent = index === currentIndex
+              const isAdjacent = index === (currentIndex === 0 ? videos.length - 1 : currentIndex - 1) || 
+                                 index === (currentIndex === videos.length - 1 ? 0 : currentIndex + 1)
+              const shouldLoad = isCurrent || isAdjacent
+              const loadingState = videoLoadingStates.get(index)
+              const isBuffering = loadingState === 'loading' && isCurrent
+
+              return (
+                <div
+                  key={video.id}
+                  className={`absolute inset-0 w-full h-full transition-opacity duration-200 ease-in-out ${
+                    isCurrent ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
+                  }`}
+                >
+                  {shouldLoad ? (
+                    <video
+                      ref={(el) => {
+                        videoRefs.current[index] = el
+                        if (index === currentIndex) {
+                          (videoRef as React.MutableRefObject<HTMLVideoElement | null>).current = el
+                        }
+                      }}
+                      src={video.videoUrl}
+                      muted={isCurrent ? isMuted : true}
+                      loop
+                      playsInline
+                      disablePictureInPicture
+                      controlsList="nodownload nofullscreen noremoteplayback"
+                      autoPlay={isCurrent}
+                      preload={isCurrent ? 'auto' : isAdjacent ? 'metadata' : 'none'}
+                      className="w-full h-full object-cover"
+                      onLoadStart={() => {
+                        setVideoLoadingStates((prev) => {
+                          const newMap = new Map(prev)
+                          newMap.set(index, 'loading')
+                          return newMap
+                        })
+                      }}
+                      onLoadedData={() => {
+                        setVideoLoadingStates((prev) => {
+                          const newMap = new Map(prev)
+                          newMap.set(index, 'ready')
+                          return newMap
+                        })
+                        if (isCurrent && videoRefs.current[index]) {
+                          videoRefs.current[index]?.play().catch(() => {})
+                        }
+                      }}
+                      onCanPlayThrough={() => {
+                        setVideoLoadingStates((prev) => {
+                          const newMap = new Map(prev)
+                          newMap.set(index, 'ready')
+                          return newMap
+                        })
+                      }}
+                      onError={(e) => {
+                        console.error(`Video ${index} error:`, e)
+                        const retryCount = videoErrors.get(index) || 0
+                        if (retryCount < 3) {
+                          setVideoErrors((prev) => {
+                            const newMap = new Map(prev)
+                            newMap.set(index, retryCount + 1)
+                            return newMap
+                          })
+                          setVideoLoadingStates((prev) => {
+                            const newMap = new Map(prev)
+                            newMap.set(index, 'error')
+                            return newMap
+                          })
+                          // Retry after delay
+                          setTimeout(() => {
+                            const video = videoRefs.current[index]
+                            if (video) {
+                              video.load()
+                            }
+                          }, 1000 * (retryCount + 1))
+                        } else {
+                          setVideoLoadingStates((prev) => {
+                            const newMap = new Map(prev)
+                            newMap.set(index, 'error')
+                            return newMap
+                          })
+                        }
+                      }}
+                      onWaiting={() => {
+                        // Video is buffering
+                        if (isCurrent) {
+                          setIsPlaying(false)
+                        }
+                      }}
+                      onPlaying={() => {
+                        if (isCurrent) {
+                          setIsPlaying(true)
+                        }
+                      }}
+                    />
+                  ) : null}
+                  
+                  {/* Loading/Buffering indicator */}
+                  {isBuffering && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                      <div className="w-16 h-16 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    </div>
+                  )}
+                  
+                  {/* Error state */}
+                  {loadingState === 'error' && isCurrent && (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50">
+                      <Video className="w-16 h-16 text-white/50 mb-4" />
+                      <p className="text-white text-sm">Erreur de chargement</p>
+                      <button
+                        onClick={() => {
+                          const video = videoRefs.current[index]
+                          if (video) {
+                            setVideoErrors((prev) => {
+                              const newMap = new Map(prev)
+                              newMap.delete(index)
+                              return newMap
+                            })
+                            video.load()
+                          }
+                        }}
+                        className="mt-4 px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg text-white text-sm transition-colors"
+                      >
+                        Réessayer
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )
+            })}
 
             {/* Mute button - bottom right */}
             <button
@@ -506,17 +693,26 @@ export default function CarouselPage() {
             </button>
 
             {/* Swipe indicator - only on first video, onboarding - discreet and semi-transparent */}
-            {showSwipeIndicator && currentIndex === 0 && !hasSwiped && (
+            {showSwipeIndicator && currentIndex === 0 && !hasSwiped && swipeAnimationData && (
               <div className="absolute inset-0 z-[15] flex items-center justify-center pointer-events-none">
                 <div className="relative w-full h-full flex items-center justify-center">
                   <div
                     className="absolute"
                     style={{
-                      animation: 'swipeUp 1.5s ease-in-out infinite',
                       opacity: 0.15,
                     }}
                   >
-                    <Hand className="w-8 h-8 md:w-10 md:h-10 rotate-90 text-white" />
+                    <Lottie
+                      key="swipe-indicator"
+                      lottieRef={lottieRef}
+                      animationData={swipeAnimationData}
+                      loop={true}
+                      autoplay={true}
+                      style={{ width: 120, height: 120 }}
+                      rendererSettings={{
+                        preserveAspectRatio: 'xMidYMid slice',
+                      }}
+                    />
                   </div>
                 </div>
               </div>

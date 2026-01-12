@@ -255,8 +255,8 @@ export function TranslationProvider({ children }: { children: React.ReactNode })
           return
         }
 
-        // Wait for DOM to be ready after restoring French (reduced delay for speed)
-        await new Promise(resolve => setTimeout(resolve, 50))
+        // Wait for DOM to be ready after restoring French - increased delay to ensure React has finished rendering
+        await new Promise(resolve => setTimeout(resolve, 200))
 
         // Collect all text nodes to translate (now in French)
         const walker = document.createTreeWalker(
@@ -339,8 +339,25 @@ export function TranslationProvider({ children }: { children: React.ReactNode })
             // Preserve leading and trailing spaces from original
             const leadingSpaces = originalFullText.match(/^\s*/)?.[0] || ''
             const trailingSpaces = originalFullText.match(/\s*$/)?.[0] || ''
-            textNode.textContent = leadingSpaces + translations[originalTrimmed] + trailingSpaces
+            let translatedText = translations[originalTrimmed]
+            
+            // Remove trailing periods from titles (h2, h3, h4, etc.)
+            const parent = textNode.parentElement
+            if (parent && (parent.tagName === 'H2' || parent.tagName === 'H3' || parent.tagName === 'H4')) {
+              // Remove trailing period if it exists
+              translatedText = translatedText.replace(/\.$/, '')
+            }
+            
+            textNode.textContent = leadingSpaces + translatedText + trailingSpaces
             appliedCount++
+          }
+        })
+
+        // Additional cleanup: Remove trailing periods from all title elements
+        const titleElements = document.querySelectorAll('h2, h3, h4')
+        titleElements.forEach((el) => {
+          if (el.textContent && el.textContent.trim().endsWith('.')) {
+            el.textContent = el.textContent.trim().slice(0, -1) + (el.textContent.match(/\s*$/)?.[0] || '')
           }
         })
 

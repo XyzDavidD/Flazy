@@ -390,10 +390,10 @@ export default function AdminPage() {
 
   const getDefaultTitle = (position: number): string => {
     const titles = [
-      'Interviews & News',
-      'UGC & Témoignages',
-      'Boost & Publicité',
-      'Viral & Divertissement',
+      'Actualité',
+      'Preuve',
+      'Publicité',
+      'Viral',
     ]
     return titles[position - 1] || `Exemple ${position}`
   }

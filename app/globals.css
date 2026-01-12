@@ -46,6 +46,24 @@
   }
 }
 
+/* Disable video casting/remote playback overlays */
+video::-webkit-media-controls-overlay-play-button,
+video::-webkit-media-controls-play-button {
+  display: none !important;
+}
+
+/* Hide cast buttons and remote playback controls */
+video::-webkit-media-controls-remote-playback-button {
+  display: none !important;
+}
+
+/* Prevent casting overlay on mobile */
+video {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
 @keyframes flazyGradient {
   0% {
     background-position: 0% 50%;

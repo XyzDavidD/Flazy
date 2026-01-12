@@ -971,6 +971,12 @@ function ExamplesSection() {
         const pauseHandler = handlePause(index)
         video.addEventListener('play', playHandler)
         video.addEventListener('pause', pauseHandler)
+        
+        // Disable remote playback (casting)
+        if ('disableRemotePlayback' in video) {
+          (video as any).disableRemotePlayback = true
+        }
+        
         cleanupFunctions.push(() => {
           video.removeEventListener('play', playHandler)
           video.removeEventListener('pause', pauseHandler)
@@ -982,6 +988,31 @@ function ExamplesSection() {
       cleanupFunctions.forEach(cleanup => cleanup())
     }
   }, [exampleVideos.length])
+  
+  // Prevent cast overlays from appearing
+  useEffect(() => {
+    const preventCastOverlay = () => {
+      // Remove any cast buttons that might appear
+      const castButtons = document.querySelectorAll('[data-cast-button], .cast-button, [aria-label*="Cast"]')
+      castButtons.forEach(btn => {
+        (btn as HTMLElement).style.display = 'none'
+      })
+      
+      // Prevent remote playback on all videos
+      const allVideos = document.querySelectorAll('video')
+      allVideos.forEach(video => {
+        if ('disableRemotePlayback' in video) {
+          (video as any).disableRemotePlayback = true
+        }
+      })
+    }
+    
+    // Run immediately and on interval to catch dynamically added elements
+    preventCastOverlay()
+    const interval = setInterval(preventCastOverlay, 500)
+    
+    return () => clearInterval(interval)
+  }, [])
 
   // Fetch example videos from database - same pattern as carousel
   useEffect(() => {
@@ -998,16 +1029,16 @@ function ExamplesSection() {
           console.error('Error fetching example videos:', error)
           // Fallback to defaults on error
           setExampleVideos([
-            { title: 'Interviews & News', desc: 'Formats réalistes inspirés des médias et de l\'actualité.', videoUrl: '/placeholder.mp4', icon: Video },
-            { title: 'UGC & Témoignages', desc: 'Vidéos UGC et témoignages authentiques.', videoUrl: '/placeholder.mp4', icon: Users },
-            { title: 'Boost & Publicité', desc: 'Vidéos publicitaires orientées conversion.', videoUrl: '/placeholder.mp4', icon: Rocket },
-            { title: 'Viral & Divertissement', desc: 'Formats créatifs pensés pour la viralité.', videoUrl: '/placeholder.mp4', icon: Sparkles },
+            { title: 'Actualité', desc: 'Formats réalistes inspirés des médias et de l\'actualité.', videoUrl: '/placeholder.mp4', icon: Video },
+            { title: 'Preuve', desc: 'Vidéos UGC et témoignages authentiques.', videoUrl: '/placeholder.mp4', icon: Users },
+            { title: 'Publicité', desc: 'Vidéos publicitaires orientées conversion.', videoUrl: '/placeholder.mp4', icon: Rocket },
+            { title: 'Viral', desc: 'Formats créatifs pensés pour la viralité.', videoUrl: '/placeholder.mp4', icon: Sparkles },
           ])
           return
         }
 
         // Create array with 4 positions, fill with defaults if missing
-        const defaultTitles = ['Interviews & News', 'UGC & Témoignages', 'Boost & Publicité', 'Viral & Divertissement']
+        const defaultTitles = ['Actualité', 'Preuve', 'Publicité', 'Viral']
         const defaultDescs = [
           'Formats réalistes inspirés des médias et de l\'actualité.',
           'Vidéos UGC et témoignages authentiques.',
@@ -1025,7 +1056,7 @@ function ExamplesSection() {
               .getPublicUrl(video.video_path)
             
             videosByPosition.push({
-              title: video.title || defaultTitles[i],
+              title: defaultTitles[i], // Always use the new shorter titles
               desc: video.description || defaultDescs[i],
               videoUrl: urlData.publicUrl,
               icon: defaultIcons[i] || Video,
@@ -1046,10 +1077,10 @@ function ExamplesSection() {
         console.error('Error fetching example videos:', error)
         // Fallback to defaults on error
         setExampleVideos([
-          { title: 'Interviews & News', desc: 'Formats réalistes inspirés des médias et de l\'actualité.', videoUrl: '/placeholder.mp4', icon: Video },
-          { title: 'UGC & Témoignages', desc: 'Vidéos UGC et témoignages authentiques.', videoUrl: '/placeholder.mp4', icon: Users },
-          { title: 'Boost & Publicité', desc: 'Vidéos publicitaires orientées conversion.', videoUrl: '/placeholder.mp4', icon: Rocket },
-          { title: 'Viral & Divertissement', desc: 'Formats créatifs pensés pour la viralité.', videoUrl: '/placeholder.mp4', icon: Sparkles },
+          { title: 'Actualité', desc: 'Formats réalistes inspirés des médias et de l\'actualité.', videoUrl: '/placeholder.mp4', icon: Video },
+          { title: 'Preuve', desc: 'Vidéos UGC et témoignages authentiques.', videoUrl: '/placeholder.mp4', icon: Users },
+          { title: 'Publicité', desc: 'Vidéos publicitaires orientées conversion.', videoUrl: '/placeholder.mp4', icon: Rocket },
+          { title: 'Viral', desc: 'Formats créatifs pensés pour la viralité.', videoUrl: '/placeholder.mp4', icon: Sparkles },
         ])
       } finally {
         setIsLoadingExamples(false)
@@ -1061,25 +1092,25 @@ function ExamplesSection() {
 
   const examples = exampleVideos.length > 0 ? exampleVideos : [
     {
-      title: 'Interviews & News',
+      title: 'Actualité',
       desc: 'Formats réalistes inspirés des médias et de l\'actualité.',
       icon: Video,
       videoUrl: '/placeholder.mp4',
     },
     {
-      title: 'UGC & Témoignages',
+      title: 'Preuve',
       desc: 'Vidéos UGC et témoignages authentiques.',
       icon: Users,
       videoUrl: '/placeholder.mp4',
     },
     {
-      title: 'Boost & Publicité',
+      title: 'Publicité',
       desc: 'Vidéos publicitaires orientées conversion.',
       icon: Rocket,
       videoUrl: '/placeholder.mp4',
     },
     {
-      title: 'Viral & Divertissement',
+      title: 'Viral',
       desc: 'Formats créatifs pensés pour la viralité.',
       icon: Sparkles,
       videoUrl: '/placeholder.mp4',
@@ -1152,6 +1183,8 @@ function ExamplesSection() {
                     src={example.videoUrl || '/placeholder.mp4'}
                     loop
                     playsInline
+                    disablePictureInPicture
+                    controlsList="nodownload nofullscreen noremoteplayback"
                     className="w-full h-full block object-cover"
                   />
                   {/* Play icon - visible at start (when not playing) or when paused */}
@@ -1459,7 +1492,7 @@ function HowItWorksSection() {
             Comment ça fonctionne
           </div>
           <h2 className="text-[28px] lg:text-[32px] mb-3 font-extrabold leading-tight">
-            Créez des vidéos virales en quelques minutes, grâce à un processus simple et fluide.
+            Créez des vidéos virales en quelques minutes, grâce à un processus simple et fluide
           </h2>
         </div>
 

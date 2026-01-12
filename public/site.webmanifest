@@ -1,0 +1,21 @@
+{
+  "name": "FLAZY - Générateur de Vidéos IA Virales",
+  "short_name": "FLAZY",
+  "description": "Créez des vidéos virales et monétisables avec l'IA",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "theme_color": "#ff8a1f",
+  "background_color": "#020314",
+  "display": "standalone",
+  "start_url": "/"
+}
