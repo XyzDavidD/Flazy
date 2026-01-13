@@ -382,6 +382,19 @@ function Footer() {
 // FAQ Section
 export default function FAQPage() {
   const [openIndex, setOpenIndex] = useState<number | null>(0)
+  const { language } = useTranslation()
+  
+  // Re-trigger translation when FAQ answers open (if not in French)
+  useEffect(() => {
+    if (language !== 'fr' && openIndex !== null) {
+      // Small delay to ensure content is rendered, then trigger translation
+      const timer = setTimeout(() => {
+        // Dispatch custom event to trigger re-translation
+        window.dispatchEvent(new CustomEvent('retranslate-content'))
+      }, 100)
+      return () => clearTimeout(timer)
+    }
+  }, [openIndex, language])
 
   const faqs = [
     {
@@ -478,6 +491,8 @@ export default function FAQPage() {
                     <p
                       className="text-[13px] text-text-soft leading-relaxed m-0"
                       dangerouslySetInnerHTML={{ __html: faq.a }}
+                      data-original-html={faq.a}
+                      data-translate-html="true"
                     />
                   </div>
                 </div>

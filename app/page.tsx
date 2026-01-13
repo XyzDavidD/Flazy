@@ -1526,7 +1526,7 @@ function HowItWorksSection() {
 
 // Footer Component
 function Footer() {
-  const currentYear = new Date().getFullYear()
+  const currentYear = 2025
   
   return (
     <footer className="py-6 border-t border-[rgba(30,41,59,0.9)] bg-[rgba(3,7,18,0.98)] text-[11px] text-text-muted mt-12">
@@ -1561,38 +1561,20 @@ export default function Home() {
   const [isChecking, setIsChecking] = useState(true)
 
   useEffect(() => {
-    // Check if user is logged in and has 0 credits, redirect to pricing
-    const checkAndRedirect = async () => {
+    // Just check auth state, don't redirect automatically
+    // Users can navigate freely - redirect only happens when they try to generate videos
+    const checkAuth = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession()
-        
-        if (session?.user && session?.access_token) {
-          // Fetch credits
-          const response = await fetch('/api/me', {
-            headers: {
-              'Authorization': `Bearer ${session.access_token}`,
-            },
-          })
-
-          if (response.ok) {
-            const data = await response.json()
-            const userCredits = data.credits ?? 0
-
-            // If user has 0 credits, redirect to pricing
-            if (userCredits === 0) {
-              window.location.href = '/pricing'
-              return
-            }
-          }
-        }
+        // Just set loading to false, no redirect
       } catch (error) {
-        console.error('Error checking credits for redirect:', error)
+        console.error('Error checking auth:', error)
       } finally {
         setIsChecking(false)
       }
     }
 
-    checkAndRedirect()
+    checkAuth()
   }, [])
 
   // Show loading state while checking

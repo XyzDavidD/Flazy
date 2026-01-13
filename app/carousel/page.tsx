@@ -387,7 +387,16 @@ export default function CarouselPage() {
       document.body.style.overflow = 'hidden'
       document.body.style.position = 'fixed'
       document.body.style.width = '100%'
-      document.body.style.height = '100%'
+      document.body.style.height = '100dvh' // Use dynamic viewport height
+      
+      // Set viewport height CSS variable for better mobile support
+      const setViewportHeight = () => {
+        const vh = window.innerHeight * 0.01
+        document.documentElement.style.setProperty('--vh', `${vh}px`)
+      }
+      setViewportHeight()
+      window.addEventListener('resize', setViewportHeight)
+      window.addEventListener('orientationchange', setViewportHeight)
       
       // Hide address bar by scrolling
       const hideAddressBar = () => {
@@ -395,13 +404,11 @@ export default function CarouselPage() {
         setTimeout(() => {
           window.scrollTo(0, 0)
         }, 0)
+        setViewportHeight()
       }
       
       // Hide address bar on load
       hideAddressBar()
-      
-      // Hide address bar on orientation change
-      window.addEventListener('orientationchange', hideAddressBar)
       
       // Prevent address bar from showing on scroll
       let lastScrollY = window.scrollY
@@ -448,6 +455,8 @@ export default function CarouselPage() {
         document.body.style.position = 'unset'
         document.body.style.width = 'unset'
         document.body.style.height = 'unset'
+        window.removeEventListener('resize', setViewportHeight)
+        window.removeEventListener('orientationchange', setViewportHeight)
         window.removeEventListener('orientationchange', hideAddressBar)
         window.removeEventListener('scroll', preventAddressBar)
         document.removeEventListener('touchstart', handleFirstInteraction)
@@ -472,16 +481,7 @@ export default function CarouselPage() {
     }
   }, [showSwipeIndicator, currentIndex, hasSwiped, swipeAnimationData])
 
-  // Auto-hide swipe indicator after 2 seconds
-  useEffect(() => {
-    if (showSwipeIndicator && currentIndex === 0 && !hasSwiped) {
-      const timer = setTimeout(() => {
-        setShowSwipeIndicator(false)
-        setHasSwiped(true)
-      }, 2000)
-      return () => clearTimeout(timer)
-    }
-  }, [showSwipeIndicator, currentIndex, hasSwiped])
+  // Swipe indicator stays visible until user swipes (no auto-hide)
 
   // Reset indicator visibility when on first video and hasn't swiped yet
   useEffect(() => {
@@ -505,10 +505,12 @@ export default function CarouselPage() {
             #020314
           `,
           backgroundAttachment: 'fixed',
-          // Fullscreen mobile support
-          minHeight: '100vh',
+          // Fullscreen mobile support - use dvh (dynamic viewport height) to account for browser UI
+          height: '100dvh',
+          minHeight: '100dvh',
+          maxHeight: '100dvh',
           paddingTop: 'env(safe-area-inset-top)',
-          paddingBottom: 'env(safe-area-inset-bottom)',
+          paddingBottom: 'max(env(safe-area-inset-bottom), 20px)',
           paddingLeft: 'env(safe-area-inset-left)',
           paddingRight: 'env(safe-area-inset-right)',
         }}
@@ -534,12 +536,14 @@ export default function CarouselPage() {
           <p className="text-text-soft text-sm text-center">Revenez bientôt pour découvrir de nouvelles vidéos !</p>
         </div>
       ) : (
-        <div className="w-full h-full md:flex md:items-center md:justify-center md:min-h-screen md:py-8 md:h-screen">
+        <div className="w-full h-full md:flex md:items-center md:justify-center md:min-h-screen md:py-8 md:h-screen" style={{ height: '100%' }}>
           <div 
             ref={containerRef}
             className="relative w-full h-full md:w-[400px] md:h-auto bg-black md:rounded-2xl overflow-hidden cursor-pointer"
             style={{
               aspectRatio: '9/16',
+              height: '100%',
+              maxHeight: '100%',
             }}
             onTouchStart={onTouchStart}
             onTouchMove={onTouchMove}
@@ -679,11 +683,26 @@ export default function CarouselPage() {
               )
             })}
 
-            {/* Mute button - bottom right */}
+            {/* Make with Flazy button - bottom left */}
+            <div
+              className="absolute left-4 z-30 px-3 py-1.5 md:px-4 md:py-2 rounded-full bg-black/70 backdrop-blur-sm border border-white/30 flex items-center justify-center shadow-lg"
+              style={{ 
+                pointerEvents: 'auto',
+                bottom: 'max(calc(env(safe-area-inset-bottom) + 16px), 60px)',
+              }}
+            >
+              <span className="text-white text-xs md:text-sm font-medium">Made with Flazy</span>
+            </div>
+
+            {/* Mute button - bottom right, small and discreet */}
             <button
               onClick={toggleMute}
-              className="absolute bottom-4 right-4 z-20 w-10 h-10 md:w-12 md:h-12 rounded-full bg-black/60 backdrop-blur-sm border border-white/20 flex items-center justify-center hover:bg-black/80 transition-all duration-200 touch-manipulation"
+              className="absolute right-4 z-30 w-10 h-10 md:w-12 md:h-12 rounded-full bg-black/70 backdrop-blur-sm border border-white/30 flex items-center justify-center hover:bg-black/90 transition-all duration-200 touch-manipulation shadow-lg"
               aria-label={isMuted ? 'Activer le son' : 'Désactiver le son'}
+              style={{ 
+                pointerEvents: 'auto',
+                bottom: 'max(calc(env(safe-area-inset-bottom) + 16px), 60px)',
+              }}
             >
               {isMuted ? (
                 <VolumeX className="w-5 h-5 md:w-6 md:h-6 text-white" />
@@ -692,14 +711,14 @@ export default function CarouselPage() {
               )}
             </button>
 
-            {/* Swipe indicator - only on first video, onboarding - discreet and semi-transparent */}
+            {/* Swipe indicator - only on first video, onboarding - visible until first swipe */}
             {showSwipeIndicator && currentIndex === 0 && !hasSwiped && swipeAnimationData && (
               <div className="absolute inset-0 z-[15] flex items-center justify-center pointer-events-none">
                 <div className="relative w-full h-full flex items-center justify-center">
                   <div
                     className="absolute"
                     style={{
-                      opacity: 0.15,
+                      opacity: 0.5,
                     }}
                   >
                     <Lottie

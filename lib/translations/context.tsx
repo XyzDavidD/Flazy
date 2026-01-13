@@ -62,7 +62,7 @@ async function translateText(
 
   // Create abort controller for timeout
   const controller = new AbortController()
-  const timeoutId = setTimeout(() => controller.abort(), 5000) // 5 second timeout
+  const timeoutId = setTimeout(() => controller.abort(), 3000) // 3 second timeout for faster failure
 
   try {
     // Try multiple endpoints for better reliability
@@ -127,7 +127,7 @@ async function translateText(
 
     // If all endpoints failed and we have retries, try again
     if (retries > 0) {
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      await new Promise(resolve => setTimeout(resolve, 500)) // Faster retry
       return translateText(text, targetLang, sourceLang, retries - 1)
     }
 
@@ -140,7 +140,7 @@ async function translateText(
   }
 }
 
-// Translate multiple texts with rate limiting and progress tracking
+  // Translate multiple texts with rate limiting and progress tracking
 async function translateBatch(
   texts: string[],
   targetLang: Language,
@@ -166,9 +166,9 @@ async function translateBatch(
     return results
   }
 
-  // Translate uncached texts with optimized batching for speed
-  // Process in parallel batches for faster translation
-  const batchSize = 3 // Process 3 at a time for better speed
+  // Translate uncached texts with optimized batching for maximum speed
+  // Increased batch size for faster parallel processing
+  const batchSize = 5 // Process 5 at a time for better speed
   let processed = 0
 
   for (let i = 0; i < uncached.length; i += batchSize) {
@@ -198,9 +198,9 @@ async function translateBatch(
     
     await Promise.all(batchPromises)
     
-    // Reduced delay between batches for faster overall translation
+    // Minimal delay between batches for faster overall translation
     if (i + batchSize < uncached.length) {
-      await new Promise(resolve => setTimeout(resolve, 100))
+      await new Promise(resolve => setTimeout(resolve, 50))
     }
   }
   
@@ -221,6 +221,83 @@ export function TranslationProvider({ children }: { children: React.ReactNode })
     }
   }, [])
 
+  // Listen for re-translation requests (e.g., when FAQ answers open)
+  useEffect(() => {
+    const handleRetranslate = async () => {
+      if (language !== 'fr' && !isTranslatingRef.current) {
+        // Re-translate HTML content that might have been hidden
+        const htmlElements = document.querySelectorAll('[data-translate-html="true"]')
+        if (htmlElements.length > 0) {
+          // Small delay to ensure content is rendered
+          setTimeout(async () => {
+            if (!isTranslatingRef.current) {
+              isTranslatingRef.current = true
+              setIsLoading(true)
+              
+              try {
+                const htmlTextsToTranslate = new Set<string>()
+                const htmlElementsData = new Map<Element, string>()
+                
+                htmlElements.forEach(el => {
+                  const originalHtml = el.getAttribute('data-original-html') || el.innerHTML
+                  if (!originalHtml) return
+                  
+                  const tempDiv = document.createElement('div')
+                  tempDiv.innerHTML = originalHtml
+                  const walker = document.createTreeWalker(tempDiv, NodeFilter.SHOW_TEXT, null)
+                  
+                  let node
+                  while ((node = walker.nextNode())) {
+                    const text = node.textContent?.trim() || ''
+                    if (text.length > 1 && text.length < 500) {
+                      htmlTextsToTranslate.add(text)
+                    }
+                  }
+                  
+                  if (htmlTextsToTranslate.size > 0) {
+                    htmlElementsData.set(el, originalHtml)
+                  }
+                })
+                
+                if (htmlTextsToTranslate.size > 0) {
+                  const htmlTextsArray = Array.from(htmlTextsToTranslate)
+                  const htmlTranslations = await translateBatch(htmlTextsArray, language, 'fr')
+                  
+                  htmlElementsData.forEach((originalHtml, el) => {
+                    const tempDiv = document.createElement('div')
+                    tempDiv.innerHTML = originalHtml
+                    const walker = document.createTreeWalker(tempDiv, NodeFilter.SHOW_TEXT, null)
+                    
+                    let node
+                    while ((node = walker.nextNode())) {
+                      const text = node.textContent?.trim() || ''
+                      if (htmlTranslations[text]) {
+                        const fullText = node.textContent || ''
+                        const leadingSpaces = fullText.match(/^\s*/)?.[0] || ''
+                        const trailingSpaces = fullText.match(/\s*$/)?.[0] || ''
+                        node.textContent = leadingSpaces + htmlTranslations[text] + trailingSpaces
+                      }
+                    }
+                    
+                    el.innerHTML = tempDiv.innerHTML
+                  })
+                }
+              } catch (error) {
+                console.error('Error re-translating HTML content:', error)
+              } finally {
+                setIsLoading(false)
+                isTranslatingRef.current = false
+              }
+            }
+          }, 200)
+        }
+      }
+    }
+    
+    window.addEventListener('retranslate-content', handleRetranslate)
+    return () => window.removeEventListener('retranslate-content', handleRetranslate)
+  }, [language])
+
   // Auto-translate page content when language changes
   useEffect(() => {
     if (isTranslatingRef.current) return
@@ -236,7 +313,7 @@ export function TranslationProvider({ children }: { children: React.ReactNode })
           setIsLoading(false)
           isTranslatingRef.current = false
         }
-      }, 30000) // 30 second max
+      }, 20000) // 20 second max for faster feedback
 
       try {
         // FIRST: Always restore to French original text first
@@ -255,8 +332,8 @@ export function TranslationProvider({ children }: { children: React.ReactNode })
           return
         }
 
-        // Wait for DOM to be ready after restoring French - increased delay to ensure React has finished rendering
-        await new Promise(resolve => setTimeout(resolve, 200))
+        // Wait for DOM to be ready after restoring French - optimized delay for faster translation
+        await new Promise(resolve => setTimeout(resolve, 150))
 
         // Collect all text nodes to translate (now in French)
         const walker = document.createTreeWalker(
@@ -268,28 +345,32 @@ export function TranslationProvider({ children }: { children: React.ReactNode })
               const parent = node.parentElement
               
               // Skip if:
-              // - Too short or too long
-              // - Just numbers
+              // - Too short (but allow single words that are meaningful)
+              // - Too long
+              // - Just numbers or special characters only
               // - In script/style tags
               // - Already marked as no-translate
               // - In code blocks
+              // - In input/textarea VALUE (but allow labels!)
               if (
-                text.length < 2 ||
-                text.length > 200 ||
-                /^\d+$/.test(text) ||
+                text.length < 1 ||
+                text.length > 500 ||
+                /^[\d\s\.,;:!?\-_=+*\/\\()\[\]{}|@#$%^&~`"']+$/.test(text) ||
                 !parent ||
                 parent.closest('script, style, [data-no-translate], code, pre') ||
-                parent.closest('input, textarea') ||
-                parent.closest('nav, header')?.querySelector('[data-no-translate]')
+                (parent.tagName === 'INPUT' || parent.tagName === 'TEXTAREA') ||
+                (parent.closest('nav, header') && parent.closest('[data-no-translate]'))
               ) {
                 return NodeFilter.FILTER_REJECT
               }
 
-              // Only translate visible elements
-              const rect = parent.getBoundingClientRect()
-              if (rect.width === 0 && rect.height === 0) {
+              // Translate all elements in the DOM, even if hidden (like FAQ answers that will be shown)
+              // Only reject if parent is display:none or visibility:hidden
+              const style = window.getComputedStyle(parent)
+              if (style.display === 'none' || style.visibility === 'hidden') {
                 return NodeFilter.FILTER_REJECT
               }
+              // Allow elements with opacity:0 or max-height:0 (they're still in DOM and will be shown)
 
               return NodeFilter.FILTER_ACCEPT
             }
@@ -315,7 +396,8 @@ export function TranslationProvider({ children }: { children: React.ReactNode })
         }
 
         // Get unique texts to translate (these are in French) - increased limit for better coverage
-        const textsToTranslate = Array.from(uniqueTexts).slice(0, 100)
+        // Process all unique texts for complete translation
+        const textsToTranslate = Array.from(uniqueTexts).slice(0, 300)
 
         console.log(`Translating ${textsToTranslate.length} French texts to ${language}...`)
 
@@ -360,6 +442,75 @@ export function TranslationProvider({ children }: { children: React.ReactNode })
             el.textContent = el.textContent.trim().slice(0, -1) + (el.textContent.match(/\s*$/)?.[0] || '')
           }
         })
+
+        // Translate HTML content in elements marked with data-translate-html
+        // This handles FAQ answers and other content using dangerouslySetInnerHTML
+        const htmlElements = document.querySelectorAll('[data-translate-html="true"]')
+        const htmlTextsToTranslate = new Set<string>()
+        const htmlElementsData = new Map<Element, string>()
+        
+        htmlElements.forEach(el => {
+          const originalHtml = el.getAttribute('data-original-html') || el.innerHTML
+          if (!originalHtml) return
+          
+          // Extract all text content from HTML (preserving structure)
+          const tempDiv = document.createElement('div')
+          tempDiv.innerHTML = originalHtml
+          
+          // Walk through text nodes to collect texts
+          const walker = document.createTreeWalker(
+            tempDiv,
+            NodeFilter.SHOW_TEXT,
+            null
+          )
+          
+          let node
+          while ((node = walker.nextNode())) {
+            const text = node.textContent?.trim() || ''
+            if (text.length > 1 && text.length < 500 && !/^[\d\s\.,;:!?\-_=+*\/\\()\[\]{}|@#$%^&~`"']+$/.test(text)) {
+              htmlTextsToTranslate.add(text)
+            }
+          }
+          
+          if (htmlTextsToTranslate.size > 0) {
+            htmlElementsData.set(el, originalHtml)
+          }
+        })
+        
+        // Translate HTML content texts
+        if (htmlTextsToTranslate.size > 0) {
+          const htmlTextsArray = Array.from(htmlTextsToTranslate)
+          const htmlTranslations = await translateBatch(htmlTextsArray, language, 'fr')
+          
+          // Apply translations to each HTML element
+          htmlElementsData.forEach((originalHtml, el) => {
+            const tempDiv = document.createElement('div')
+            tempDiv.innerHTML = originalHtml
+            
+            // Walk through and translate text nodes
+            const walker = document.createTreeWalker(
+              tempDiv,
+              NodeFilter.SHOW_TEXT,
+              null
+            )
+            
+            let node
+            while ((node = walker.nextNode())) {
+              const text = node.textContent?.trim() || ''
+              if (htmlTranslations[text]) {
+                // Preserve leading/trailing spaces
+                const fullText = node.textContent || ''
+                const leadingSpaces = fullText.match(/^\s*/)?.[0] || ''
+                const trailingSpaces = fullText.match(/\s*$/)?.[0] || ''
+                node.textContent = leadingSpaces + htmlTranslations[text] + trailingSpaces
+              }
+            }
+            
+            // Update element with translated HTML
+            el.innerHTML = tempDiv.innerHTML
+            appliedCount++
+          })
+        }
 
         console.log(`Applied ${appliedCount} translations`)
         clearTimeout(overallTimeout)

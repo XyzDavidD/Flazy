@@ -34,6 +34,14 @@
   }
 }
 
+/* Dynamic viewport height support for mobile browsers */
+@supports (height: 100dvh) {
+  .carousel-fullscreen {
+    height: 100dvh;
+    min-height: 100dvh;
+  }
+}
+
 @keyframes flazyTopbar {
   0% {
     background-position: 0% 50%;
