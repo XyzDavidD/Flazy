@@ -7,7 +7,6 @@ import { supabase } from '@/lib/supabaseClient'
 import { useCredits } from '@/hooks/useCredits'
 import { useTranslation } from '@/lib/translations/context'
 import {
-  Zap,
   Lock,
   Shield,
   ChevronDown,
@@ -31,56 +30,6 @@ import {
   User,
   Globe,
 } from 'lucide-react'
-
-// Top Bar Component
-function TopBar() {
-  const [countdown, setCountdown] = useState('')
-
-  useEffect(() => {
-    let countdownEnd = Date.now() + 24 * 60 * 60 * 1000
-
-    const updateCountdown = () => {
-      const diff = countdownEnd - Date.now()
-
-      if (diff <= 0) {
-        countdownEnd = Date.now() + 24 * 60 * 60 * 1000
-      }
-
-      const totalSeconds = Math.max(0, Math.floor((countdownEnd - Date.now()) / 1000))
-      const hours = Math.floor(totalSeconds / 3600)
-      const minutes = Math.floor((totalSeconds % 3600) / 60)
-      const seconds = totalSeconds % 60
-
-      const h = String(hours).padStart(2, '0')
-      const m = String(minutes).padStart(2, '0')
-      const s = String(seconds).padStart(2, '0')
-
-      setCountdown(`${h} h ${m} min ${s} s`)
-    }
-
-    updateCountdown()
-    const interval = setInterval(updateCountdown, 1000)
-    return () => clearInterval(interval)
-  }, [])
-
-  return (
-    <div className="flex items-center justify-center text-[#111827] text-[10px] sm:text-[13px] font-semibold py-[4px] sm:py-[6px] px-2 sm:px-4 text-center shadow-[0_1px_0_rgba(15,23,42,0.8)] min-h-[36px] sm:min-h-[34px] overflow-hidden" style={{
-      backgroundImage: 'linear-gradient(90deg, #ff6b00 0%, #ffd700 25%, #ff4b2b 50%, #ffd700 75%, #ff6b00 100%)',
-      backgroundSize: '220% 100%',
-      animation: 'flazyTopbar 10s ease-in-out infinite alternate'
-    }}>
-      <span className="inline-flex items-center justify-center gap-1 sm:gap-2 flex-wrap sm:flex-nowrap max-w-full">
-        <Zap className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
-        <span className="whitespace-nowrap text-[10px] sm:text-[13px]">Offre spéciale FLAZY</span>
-        <strong className="whitespace-nowrap text-[10px] sm:text-[13px]">40 % de réduction</strong>
-        <span className="hidden sm:inline whitespace-nowrap">Offre valable encore</span>
-        <span className="px-1.5 sm:px-2 py-[2px] rounded-full border border-[rgba(252,211,77,0.95)] bg-[rgba(15,23,42,0.95)] text-[#f9fafb] text-[9px] sm:text-[11px] shadow-[0_0_0_1px_rgba(252,211,77,0.35)] whitespace-nowrap flex-shrink-0">
-          {countdown}
-        </span>
-      </span>
-    </div>
-  )
-}
 
 // Header Component
 function Header() {
@@ -1596,7 +1545,6 @@ export default function Home() {
       `,
       backgroundAttachment: 'fixed'
     }}>
-      <TopBar />
       <Header />
       <main className="py-6 pb-0">
         <Hero />
