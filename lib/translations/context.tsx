@@ -233,7 +233,7 @@ export function TranslationProvider({ children }: { children: React.ReactNode })
         // Re-translate HTML content that might have been hidden (like FAQ answers)
         // Use a longer delay to ensure DOM is fully ready
         setTimeout(async () => {
-          if (!isTranslatingRef.current && language !== 'fr') {
+          if (!isTranslatingRef.current) {
             isTranslatingRef.current = true
             setIsLoading(true)
             

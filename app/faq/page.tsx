@@ -349,7 +349,7 @@ function Header() {
 
 // Footer Component
 function Footer() {
-  const currentYear = new Date().getFullYear()
+  const currentYear = 2025
 
   return (
     <footer className="py-6 border-t border-[rgba(30,41,59,0.9)] bg-[rgba(3,7,18,0.98)] text-[11px] text-text-muted mt-12">
