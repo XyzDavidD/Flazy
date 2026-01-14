@@ -505,14 +505,14 @@ export default function PricingPage() {
               return (
                 <div key={i} className="relative flex flex-col h-full">
                   {plan.recommended && (
-                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
-                      <div className="bg-gradient-to-br from-[#ff6b00] via-[#ffd700] to-[#ff4b2b] text-[#111827] text-[12px] font-bold uppercase tracking-wide px-5 py-2 rounded-full shadow-[0_4px_16px_rgba(0,0,0,0.5)] whitespace-nowrap">
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
+                      <div className="bg-gradient-to-br from-[#ff6b00] via-[#ffd700] to-[#ff4b2b] text-[#111827] text-[11px] font-bold uppercase tracking-wide px-4 py-1.5 rounded-full shadow-[0_4px_16px_rgba(0,0,0,0.5)] whitespace-nowrap">
                         Le plus populaire
                       </div>
                     </div>
                   )}
                   <div
-                    className={`rounded-[22px] p-4 md:p-5 border shadow-[0_18px_40px_rgba(0,0,0,0.8)] flex flex-col gap-2.5 h-full hover:border-[rgba(252,211,77,1)] transition-all duration-300 ${
+                    className={`rounded-[22px] p-4 md:p-5 border shadow-[0_18px_40px_rgba(0,0,0,0.8)] flex flex-col h-full hover:border-[rgba(252,211,77,1)] transition-all duration-300 ${
                       plan.recommended 
                         ? 'border-2 border-[rgba(252,211,77,1)]' 
                         : 'border border-[rgba(252,211,77,0.95)]'
@@ -521,21 +521,27 @@ export default function PricingPage() {
                       background: `
                         radial-gradient(circle at top, rgba(255, 138, 31, ${plan.recommended ? '0.25' : '0.18'}), transparent 60%),
                         rgba(6, 9, 22, 0.98)
-                      `,
-                      paddingTop: plan.recommended ? 'calc(1rem + 2rem)' : '1rem', // Extra padding for recommended to account for badge space
+                      `
                     }}
                   >
-                    <div className="flex items-center justify-between gap-2 min-h-[2.5rem]">
-                      <div className="text-[11px] uppercase tracking-[0.14em] text-accent-orange-soft font-semibold flex-1 leading-tight">
+                    {/* Header section with fixed height for consistent alignment - same for all cards */}
+                    <div className="flex items-start justify-between gap-2 mb-3 min-h-[2.5rem] mt-2">
+                      <div className="text-[11px] uppercase tracking-[0.14em] text-accent-orange-soft font-semibold leading-tight flex-1">
                         {plan.badge}
                       </div>
-                      <Icon className="w-5 h-5 text-accent-orange-soft opacity-60 flex-shrink-0" />
+                      <Icon className="w-4 h-4 text-accent-orange-soft opacity-60 flex-shrink-0 mt-0.5" />
                     </div>
-                    <div className="text-[13px] text-text-soft font-medium">{plan.name}</div>
-                    <div className="text-[11px] text-text-muted">Aucun abonnement requis</div>
-                    <div className="mt-auto pt-2 space-y-2">
+                    
+                    {/* Content section */}
+                    <div className="space-y-1.5 mb-4">
+                      <div className="text-[13px] text-text-soft font-medium">{plan.name}</div>
+                      <div className="text-[11px] text-text-muted">Aucun abonnement requis</div>
+                    </div>
+                    
+                    {/* Bottom section with price and button */}
+                    <div className="mt-auto pt-2 space-y-3">
                       <div className="flex items-baseline justify-between gap-2">
-                        <span className="text-2xl font-bold text-text-main">{plan.price}</span>
+                        <span className="text-xl font-bold text-text-main">{plan.price}</span>
                         {plan.offer && (
                           <span className="text-[11px] px-2 py-1 rounded-full bg-[rgba(22,163,74,0.18)] border border-[rgba(22,163,74,0.8)] text-[#bbf7d0]">
                             {plan.offer}
@@ -545,11 +551,11 @@ export default function PricingPage() {
                       <button
                         onClick={() => handleChoosePack(plan.pack)}
                         disabled={isProcessing === plan.pack || isLoading}
-                        className="w-full bg-transparent text-accent-orange-soft border border-[rgba(248,181,86,0.95)] shadow-[0_0_0_1px_rgba(248,181,86,0.4)] rounded-full text-[12px] font-medium px-4 py-2 cursor-pointer inline-flex items-center justify-center gap-2 transition-all duration-[0.18s] ease-out hover:bg-[radial-gradient(circle_at_top_left,rgba(255,138,31,0.16),transparent_70%)] hover:border-[rgba(248,181,86,1)] hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                        className="w-full bg-transparent text-accent-orange-soft border border-[rgba(248,181,86,0.95)] shadow-[0_0_0_1px_rgba(248,181,86,0.4)] rounded-full text-[11px] font-medium px-3 py-1.5 cursor-pointer inline-flex items-center justify-center gap-1.5 transition-all duration-[0.18s] ease-out hover:bg-[radial-gradient(circle_at_top_left,rgba(255,138,31,0.16),transparent_70%)] hover:border-[rgba(248,181,86,1)] hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                       >
                         {isProcessing === plan.pack ? (
                           <>
-                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            <Loader2 className="w-3 h-3 animate-spin" />
                             <span>Chargement...</span>
                           </>
                         ) : (

@@ -382,19 +382,24 @@ function Footer() {
 // FAQ Section
 export default function FAQPage() {
   const [openIndex, setOpenIndex] = useState<number | null>(0)
-  const { language } = useTranslation()
+  const { language, retranslate } = useTranslation()
   
-  // Re-trigger translation when FAQ answers open (if not in French)
+  // Re-trigger translation when FAQ answers open OR when language changes
   useEffect(() => {
-    if (language !== 'fr' && openIndex !== null) {
-      // Small delay to ensure content is rendered, then trigger translation
+    if (language !== 'fr') {
+      // When language changes, translate ALL FAQ answers (even hidden ones)
+      // Also trigger when FAQ opens to ensure the opened answer is translated
       const timer = setTimeout(() => {
-        // Dispatch custom event to trigger re-translation
+        // Dispatch custom event to trigger re-translation of ALL FAQ answers
         window.dispatchEvent(new CustomEvent('retranslate-content'))
-      }, 100)
+        // Also call retranslate if available
+        if (retranslate) {
+          retranslate()
+        }
+      }, 300) // Slightly longer delay to ensure DOM is ready
       return () => clearTimeout(timer)
     }
-  }, [openIndex, language])
+  }, [openIndex, language, retranslate])
 
   const faqs = [
     {

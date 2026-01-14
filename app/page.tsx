@@ -343,30 +343,43 @@ function Header() {
           </div>
 
           {/* Language Selector - Mobile */}
-          <div className="border-t border-[rgba(51,65,85,0.5)] pt-3 mt-3">
-            <div className="px-4 py-2 text-xs text-text-muted mb-2">Langue / Language / Idioma</div>
-            <div className="space-y-1">
-              {languages.map((lang) => (
-                <button
-                  key={lang.code}
-                  onClick={() => {
-                    handleLanguageChange(lang.code as 'fr' | 'en' | 'es')
-                    setMobileMenuOpen(false)
-                  }}
-                  className={`w-full text-left px-4 py-2.5 text-sm rounded-lg transition-colors flex items-center gap-3 touch-manipulation ${
-                    currentLanguage === lang.code
-                      ? 'bg-[rgba(252,211,77,0.15)] text-text-main'
-                      : 'text-text-soft hover:text-text-main hover:bg-[rgba(15,23,42,0.5)]'
-                  }`}
-                >
-                  <span className="text-lg">{lang.flag}</span>
-                  <span>{lang.name}</span>
-                  {currentLanguage === lang.code && (
-                    <CheckCircle2 className="w-4 h-4 ml-auto text-accent-orange-soft" />
-                  )}
-                </button>
-              ))}
-            </div>
+          <div className="border-t border-[rgba(51,65,85,0.5)] pt-3 mt-3 language-dropdown" data-no-translate>
+            <button
+              onClick={() => {
+                setLanguageDropdownOpen(!languageDropdownOpen)
+              }}
+              className="w-full text-left px-4 py-2.5 text-sm rounded-lg transition-colors flex items-center justify-between touch-manipulation text-text-soft hover:text-text-main hover:bg-[rgba(15,23,42,0.5)]"
+              disabled={isTranslating}
+            >
+              <div className="flex items-center gap-3">
+                <span className="text-lg">{currentLang.flag}</span>
+                <span>{currentLang.name}</span>
+              </div>
+              {isTranslating ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${languageDropdownOpen ? 'rotate-180' : ''}`} />
+              )}
+            </button>
+            {languageDropdownOpen && (
+              <div className="mt-1 space-y-1" data-no-translate>
+                {languages.filter(lang => lang.code !== currentLanguage).map((lang) => (
+                  <button
+                    key={lang.code}
+                    onClick={() => {
+                      handleLanguageChange(lang.code as 'fr' | 'en' | 'es')
+                    }}
+                    disabled={isTranslating}
+                    className={`w-full text-left px-4 py-2.5 text-sm rounded-lg transition-colors flex items-center gap-3 touch-manipulation ${
+                      'text-text-soft hover:text-text-main hover:bg-[rgba(15,23,42,0.5)]'
+                    } ${isTranslating ? 'opacity-50 cursor-wait' : ''}`}
+                  >
+                    <span className="text-lg">{lang.flag}</span>
+                    <span>{lang.name}</span>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
           
           <div className="border-t border-[rgba(51,65,85,0.5)] pt-3 mt-3">
@@ -481,27 +494,6 @@ function Hero() {
               >
                 Découvrir les créations
               </Link>
-            </div>
-
-            <div className="flex flex-wrap gap-6 items-center text-xs text-white mt-4 justify-center">
-              <div className="inline-flex items-center gap-2">
-                <div className="w-[18px] h-[18px] rounded-full bg-[radial-gradient(circle_at_30%_0,#ffe29f,#ff8a1f_50%,#ff4b2b_90%)] flex items-center justify-center">
-                  <Lock className="w-3 h-3 text-[#111827]" />
-                </div>
-                <span>Paiement sécurisé</span>
-              </div>
-              <div className="inline-flex items-center gap-2">
-                <div className="w-[18px] h-[18px] rounded-full bg-[radial-gradient(circle_at_30%_0,#ffe29f,#ff8a1f_50%,#ff4b2b_90%)] flex items-center justify-center">
-                  <Shield className="w-3 h-3 text-[#111827]" />
-                </div>
-                <span>Données protégées</span>
-              </div>
-              <div className="inline-flex items-center gap-2">
-                <div className="w-[18px] h-[18px] rounded-full bg-[radial-gradient(circle_at_30%_0,#ffe29f,#ff8a1f_50%,#ff4b2b_90%)] flex items-center justify-center">
-                  <Zap className="w-3 h-3 text-[#111827]" />
-                </div>
-                <span>Résultats rapides</span>
-              </div>
             </div>
           </div>
         </div>

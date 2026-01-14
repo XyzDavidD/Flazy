@@ -8,6 +8,7 @@ interface TranslationContextType {
   language: Language
   setLanguage: (lang: Language) => void
   isLoading: boolean
+  retranslate?: () => void
 }
 
 const TranslationContext = createContext<TranslationContextType | undefined>(undefined)
@@ -104,6 +105,10 @@ async function translateText(
         // Validate translation (should be different from original for different languages)
         if (translatedText && translatedText !== text && translatedText.trim().length > 0) {
           clearTimeout(timeoutId)
+          
+          // Preserve brand name "Flazy" / "FLAZY" - prevent translation to "Flazo"
+          translatedText = translatedText.replace(/Flazo/gi, 'Flazy')
+          translatedText = translatedText.replace(/FLAZO/gi, 'FLAZY')
           
           // Update cache
           if (!cache[cacheKey]) {
@@ -225,23 +230,62 @@ export function TranslationProvider({ children }: { children: React.ReactNode })
   useEffect(() => {
     const handleRetranslate = async () => {
       if (language !== 'fr' && !isTranslatingRef.current) {
-        // Re-translate HTML content that might have been hidden
-        const htmlElements = document.querySelectorAll('[data-translate-html="true"]')
-        if (htmlElements.length > 0) {
-          // Small delay to ensure content is rendered
-          setTimeout(async () => {
-            if (!isTranslatingRef.current) {
-              isTranslatingRef.current = true
-              setIsLoading(true)
+        // Re-translate HTML content that might have been hidden (like FAQ answers)
+        // Use a longer delay to ensure DOM is fully ready
+        setTimeout(async () => {
+          if (!isTranslatingRef.current && language !== 'fr') {
+            isTranslatingRef.current = true
+            setIsLoading(true)
+            
+            try {
+              // Find ALL elements with data-translate-html, even if hidden
+              const htmlElements = document.querySelectorAll('[data-translate-html="true"]')
+              if (htmlElements.length === 0) {
+                setIsLoading(false)
+                isTranslatingRef.current = false
+                return
+              }
               
-              try {
-                const htmlTextsToTranslate = new Set<string>()
-                const htmlElementsData = new Map<Element, string>()
+              const htmlTextsToTranslate = new Set<string>()
+              const htmlElementsData = new Map<Element, string>()
+              
+              // Process ALL FAQ answers, even if hidden
+              htmlElements.forEach(el => {
+                // Always use data-original-html if available, otherwise use current innerHTML
+                let originalHtml = el.getAttribute('data-original-html')
+                if (!originalHtml) {
+                  // If no original stored, get current content and store it
+                  originalHtml = el.innerHTML
+                  el.setAttribute('data-original-html', originalHtml)
+                }
                 
-                htmlElements.forEach(el => {
-                  const originalHtml = el.getAttribute('data-original-html') || el.innerHTML
-                  if (!originalHtml) return
-                  
+                if (!originalHtml || originalHtml.trim() === '') return
+                
+                // Extract all text content from HTML
+                const tempDiv = document.createElement('div')
+                tempDiv.innerHTML = originalHtml
+                const walker = document.createTreeWalker(tempDiv, NodeFilter.SHOW_TEXT, null)
+                
+                let node
+                while ((node = walker.nextNode())) {
+                  const text = node.textContent?.trim() || ''
+                  if (text.length > 1 && text.length < 500 && !/^[\d\s\.,;:!?\-_=+*\/\\()\[\]{}|@#$%^&~`"']+$/.test(text)) {
+                    htmlTextsToTranslate.add(text)
+                  }
+                }
+                
+                if (htmlTextsToTranslate.size > 0) {
+                  htmlElementsData.set(el, originalHtml)
+                }
+              })
+              
+              if (htmlTextsToTranslate.size > 0) {
+                console.log(`Re-translating ${htmlTextsToTranslate.size} HTML texts for FAQ answers...`)
+                const htmlTextsArray = Array.from(htmlTextsToTranslate)
+                const htmlTranslations = await translateBatch(htmlTextsArray, language, 'fr')
+                
+                // Apply translations to each HTML element
+                htmlElementsData.forEach((originalHtml, el) => {
                   const tempDiv = document.createElement('div')
                   tempDiv.innerHTML = originalHtml
                   const walker = document.createTreeWalker(tempDiv, NodeFilter.SHOW_TEXT, null)
@@ -249,48 +293,38 @@ export function TranslationProvider({ children }: { children: React.ReactNode })
                   let node
                   while ((node = walker.nextNode())) {
                     const text = node.textContent?.trim() || ''
-                    if (text.length > 1 && text.length < 500) {
-                      htmlTextsToTranslate.add(text)
+                    if (htmlTranslations[text]) {
+                      const fullText = node.textContent || ''
+                      const leadingSpaces = fullText.match(/^\s*/)?.[0] || ''
+                      const trailingSpaces = fullText.match(/\s*$/)?.[0] || ''
+                      let translatedText = htmlTranslations[text]
+                      
+                      // Preserve brand name "Flazy" / "FLAZY" - prevent translation to "Flazo"
+                      translatedText = translatedText.replace(/Flazo/gi, 'Flazy')
+                      translatedText = translatedText.replace(/FLAZO/gi, 'FLAZY')
+                      
+                      node.textContent = leadingSpaces + translatedText + trailingSpaces
                     }
                   }
                   
-                  if (htmlTextsToTranslate.size > 0) {
-                    htmlElementsData.set(el, originalHtml)
+                  // Update the element with translated HTML
+                  el.innerHTML = tempDiv.innerHTML
+                  // Keep the original HTML stored for future translations
+                  if (!el.getAttribute('data-original-html')) {
+                    el.setAttribute('data-original-html', originalHtml)
                   }
                 })
                 
-                if (htmlTextsToTranslate.size > 0) {
-                  const htmlTextsArray = Array.from(htmlTextsToTranslate)
-                  const htmlTranslations = await translateBatch(htmlTextsArray, language, 'fr')
-                  
-                  htmlElementsData.forEach((originalHtml, el) => {
-                    const tempDiv = document.createElement('div')
-                    tempDiv.innerHTML = originalHtml
-                    const walker = document.createTreeWalker(tempDiv, NodeFilter.SHOW_TEXT, null)
-                    
-                    let node
-                    while ((node = walker.nextNode())) {
-                      const text = node.textContent?.trim() || ''
-                      if (htmlTranslations[text]) {
-                        const fullText = node.textContent || ''
-                        const leadingSpaces = fullText.match(/^\s*/)?.[0] || ''
-                        const trailingSpaces = fullText.match(/\s*$/)?.[0] || ''
-                        node.textContent = leadingSpaces + htmlTranslations[text] + trailingSpaces
-                      }
-                    }
-                    
-                    el.innerHTML = tempDiv.innerHTML
-                  })
-                }
-              } catch (error) {
-                console.error('Error re-translating HTML content:', error)
-              } finally {
-                setIsLoading(false)
-                isTranslatingRef.current = false
+                console.log(`Successfully re-translated ${htmlElementsData.size} FAQ answer elements`)
               }
+            } catch (error) {
+              console.error('Error re-translating HTML content:', error)
+            } finally {
+              setIsLoading(false)
+              isTranslatingRef.current = false
             }
-          }, 200)
-        }
+          }
+        }, 300) // Increased delay to ensure DOM is ready
       }
     }
     
@@ -363,6 +397,11 @@ export function TranslationProvider({ children }: { children: React.ReactNode })
               ) {
                 return NodeFilter.FILTER_REJECT
               }
+              
+              // Explicitly allow LABEL elements to be translated
+              if (parent.tagName === 'LABEL') {
+                return NodeFilter.FILTER_ACCEPT
+              }
 
               // Translate all elements in the DOM, even if hidden (like FAQ answers that will be shown)
               // Only reject if parent is display:none or visibility:hidden
@@ -423,6 +462,11 @@ export function TranslationProvider({ children }: { children: React.ReactNode })
             const trailingSpaces = originalFullText.match(/\s*$/)?.[0] || ''
             let translatedText = translations[originalTrimmed]
             
+            // Preserve brand name "Flazy" / "FLAZY" - prevent translation to "Flazo"
+            // Replace any incorrect translations of Flazy back to Flazy
+            translatedText = translatedText.replace(/Flazo/gi, 'Flazy')
+            translatedText = translatedText.replace(/FLAZO/gi, 'FLAZY')
+            
             // Remove trailing periods from titles (h2, h3, h4, etc.)
             const parent = textNode.parentElement
             if (parent && (parent.tagName === 'H2' || parent.tagName === 'H3' || parent.tagName === 'H4')) {
@@ -445,13 +489,23 @@ export function TranslationProvider({ children }: { children: React.ReactNode })
 
         // Translate HTML content in elements marked with data-translate-html
         // This handles FAQ answers and other content using dangerouslySetInnerHTML
+        // IMPORTANT: Find ALL elements, even if hidden (opacity-0, max-h-0, etc.)
         const htmlElements = document.querySelectorAll('[data-translate-html="true"]')
         const htmlTextsToTranslate = new Set<string>()
         const htmlElementsData = new Map<Element, string>()
         
+        console.log(`Found ${htmlElements.length} HTML elements to translate (including hidden FAQ answers)`)
+        
         htmlElements.forEach(el => {
-          const originalHtml = el.getAttribute('data-original-html') || el.innerHTML
-          if (!originalHtml) return
+          // Get original HTML - use data-original-html if available, otherwise use current innerHTML
+          let originalHtml = el.getAttribute('data-original-html')
+          if (!originalHtml) {
+            // Store current HTML as original for future translations
+            originalHtml = el.innerHTML
+            el.setAttribute('data-original-html', originalHtml)
+          }
+          
+          if (!originalHtml || originalHtml.trim() === '') return
           
           // Extract all text content from HTML (preserving structure)
           const tempDiv = document.createElement('div')
@@ -479,6 +533,7 @@ export function TranslationProvider({ children }: { children: React.ReactNode })
         
         // Translate HTML content texts
         if (htmlTextsToTranslate.size > 0) {
+          console.log(`Translating ${htmlTextsToTranslate.size} unique texts from HTML content (FAQ answers, etc.)`)
           const htmlTextsArray = Array.from(htmlTextsToTranslate)
           const htmlTranslations = await translateBatch(htmlTextsArray, language, 'fr')
           
@@ -502,14 +557,26 @@ export function TranslationProvider({ children }: { children: React.ReactNode })
                 const fullText = node.textContent || ''
                 const leadingSpaces = fullText.match(/^\s*/)?.[0] || ''
                 const trailingSpaces = fullText.match(/\s*$/)?.[0] || ''
-                node.textContent = leadingSpaces + htmlTranslations[text] + trailingSpaces
+                let translatedText = htmlTranslations[text]
+                
+                // Preserve brand name "Flazy" / "FLAZY" - prevent translation to "Flazo"
+                translatedText = translatedText.replace(/Flazo/gi, 'Flazy')
+                translatedText = translatedText.replace(/FLAZO/gi, 'FLAZY')
+                
+                node.textContent = leadingSpaces + translatedText + trailingSpaces
               }
             }
             
             // Update element with translated HTML
             el.innerHTML = tempDiv.innerHTML
+            // Ensure original HTML is stored for future translations
+            if (!el.getAttribute('data-original-html')) {
+              el.setAttribute('data-original-html', originalHtml)
+            }
             appliedCount++
           })
+          
+          console.log(`Translated ${htmlElementsData.size} HTML elements (FAQ answers)`)
         }
 
         console.log(`Applied ${appliedCount} translations`)
@@ -533,8 +600,14 @@ export function TranslationProvider({ children }: { children: React.ReactNode })
     document.documentElement.lang = lang
   }, [])
 
+  const retranslate = useCallback(() => {
+    if (language !== 'fr' && !isTranslatingRef.current) {
+      window.dispatchEvent(new CustomEvent('retranslate-content'))
+    }
+  }, [language])
+
   return (
-    <TranslationContext.Provider value={{ language, setLanguage, isLoading }}>
+    <TranslationContext.Provider value={{ language, setLanguage, isLoading, retranslate }}>
       {children}
     </TranslationContext.Provider>
   )

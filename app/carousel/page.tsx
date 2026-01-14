@@ -276,15 +276,33 @@ export default function CarouselPage() {
     }
   }, [currentIndex, currentVideo, isMuted, pauseAllVideos])
 
-  // Sync state with video events
+  // Sync state with video events - but prevent pause icon on natural video events
   useEffect(() => {
     const video = videoRef.current
     if (video) {
       const handlePlay = () => setIsPlaying(true)
-      const handlePause = () => setIsPlaying(false)
+      const handlePause = (e: Event) => {
+        // Only set paused state if it's a user-initiated pause, not automatic buffering/looping
+        // Check if video is actually paused and not just buffering
+        if (video.paused && video.readyState >= 3) {
+          // Only show pause icon if video is truly paused (not buffering or looping)
+          const timeRemaining = video.duration - video.currentTime
+          if (timeRemaining > 0.2) { // Not near the end
+            setIsPlaying(false)
+          }
+        }
+      }
+      
+      const handleEnded = () => {
+        // When video ends, immediately restart to prevent pause icon
+        video.currentTime = 0
+        video.play().catch(() => {})
+        setIsPlaying(true)
+      }
 
       video.addEventListener('play', handlePlay)
       video.addEventListener('pause', handlePause)
+      video.addEventListener('ended', handleEnded)
       
       // Disable remote playback (casting)
       if ('disableRemotePlayback' in video) {
@@ -294,6 +312,7 @@ export default function CarouselPage() {
       return () => {
         video.removeEventListener('play', handlePlay)
         video.removeEventListener('pause', handlePause)
+        video.removeEventListener('ended', handleEnded)
       }
     }
   }, [currentVideo])
@@ -510,7 +529,7 @@ export default function CarouselPage() {
           minHeight: '100dvh',
           maxHeight: '100dvh',
           paddingTop: 'env(safe-area-inset-top)',
-          paddingBottom: 'max(env(safe-area-inset-bottom), 20px)',
+          paddingBottom: 'env(safe-area-inset-bottom)',
           paddingLeft: 'env(safe-area-inset-left)',
           paddingRight: 'env(safe-area-inset-right)',
         }}
@@ -544,6 +563,7 @@ export default function CarouselPage() {
               aspectRatio: '9/16',
               height: '100%',
               maxHeight: '100%',
+              backgroundColor: '#000000',
             }}
             onTouchStart={onTouchStart}
             onTouchMove={onTouchMove}
@@ -582,6 +602,7 @@ export default function CarouselPage() {
                       autoPlay={isCurrent}
                       preload={isCurrent ? 'auto' : isAdjacent ? 'metadata' : 'none'}
                       className="w-full h-full object-cover"
+                      style={{ backgroundColor: '#000000' }}
                       onLoadStart={() => {
                         setVideoLoadingStates((prev) => {
                           const newMap = new Map(prev)
@@ -636,14 +657,31 @@ export default function CarouselPage() {
                         }
                       }}
                       onWaiting={() => {
-                        // Video is buffering
-                        if (isCurrent) {
-                          setIsPlaying(false)
-                        }
+                        // Video is buffering - don't change play state to prevent icon flicker
+                        // The video will continue playing when buffered
                       }}
                       onPlaying={() => {
                         if (isCurrent) {
                           setIsPlaying(true)
+                        }
+                      }}
+                      onEnded={() => {
+                        // When video ends (before loop), immediately restart to prevent pause icon
+                        if (isCurrent && videoRefs.current[index]) {
+                          videoRefs.current[index]!.currentTime = 0
+                          videoRefs.current[index]!.play().catch(() => {})
+                          setIsPlaying(true)
+                        }
+                      }}
+                      onTimeUpdate={() => {
+                        // Prevent pause state when video is near the end (before loop)
+                        if (isCurrent && videoRefs.current[index]) {
+                          const video = videoRefs.current[index]!
+                          const timeRemaining = video.duration - video.currentTime
+                          // If less than 0.1 seconds remaining, ensure it keeps playing
+                          if (timeRemaining < 0.1 && video.duration > 0) {
+                            setIsPlaying(true)
+                          }
                         }
                       }}
                     />
@@ -682,17 +720,6 @@ export default function CarouselPage() {
                 </div>
               )
             })}
-
-            {/* Make with Flazy button - bottom left */}
-            <div
-              className="absolute left-4 z-30 px-3 py-1.5 md:px-4 md:py-2 rounded-full bg-black/70 backdrop-blur-sm border border-white/30 flex items-center justify-center shadow-lg"
-              style={{ 
-                pointerEvents: 'auto',
-                bottom: 'max(calc(env(safe-area-inset-bottom) + 16px), 60px)',
-              }}
-            >
-              <span className="text-white text-xs md:text-sm font-medium">Made with Flazy</span>
-            </div>
 
             {/* Mute button - bottom right, small and discreet */}
             <button
