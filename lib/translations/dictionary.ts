@@ -393,11 +393,6 @@ export const translations: Record<string, Record<Language, string>> = {
     en: 'Select the pack that suits your needs (Starter, Creator, Pro or Boost) and complete your secure payment.',
     es: 'Selecciona el pack que se adapte a tus necesidades (Starter, Creator, Pro o Boost) y completa tu pago seguro.',
   },
-  'Décrivez votre vidéo': {
-    fr: 'Décrivez votre vidéo',
-    en: 'Describe your video',
-    es: 'Describe tu video',
-  },
   'Rédigez un prompt détaillé décrivant la vidéo que vous souhaitez générer : personnage, lieu, ton, style, etc.': {
     fr: 'Rédigez un prompt détaillé décrivant la vidéo que vous souhaitez générer : personnage, lieu, ton, style, etc.',
     en: 'Write a detailed prompt describing the video you want to generate: character, location, tone, style, etc.',
