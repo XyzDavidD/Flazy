@@ -551,11 +551,6 @@ export const translations: Record<string, Record<Language, string>> = {
     en: 'Select the Starter, Creator, Pro or Boost pack depending on the number of videos you want to generate each month.',
     es: 'Selecciona el pack Starter, Creator, Pro o Boost según el número de videos que quieras generar cada mes.',
   },
-  'Décrivez la vidéo que vous voulez': {
-    fr: 'Décrivez la vidéo que vous voulez',
-    en: 'Describe the video you want',
-    es: 'Describe el video que quieres',
-  },
   'Écrivez un prompt simple : type de vidéo, ambiance, message, langue. FLAZY gère les hooks, le rythme et la structure.': {
     fr: 'Écrivez un prompt simple : type de vidéo, ambiance, message, langue. FLAZY gère les hooks, le rythme et la structure.',
     en: 'Write a simple prompt: video type, mood, message, language. FLAZY handles the hooks, rhythm and structure.',
