@@ -525,26 +525,26 @@ export default function PricingPage() {
                       `
                     }}
                   >
-                    {/* Header section with fixed height for consistent alignment - same for all cards */}
-                    <div className="flex items-start justify-between gap-2 mb-3 min-h-[2.5rem] mt-2">
-                      <div className="text-[11px] uppercase tracking-[0.14em] text-accent-orange-soft font-semibold leading-tight flex-1">
+                    {/* Header section - centered with emoji next to title */}
+                    <div className="flex items-center justify-center gap-2 mb-3 mt-2">
+                      <Icon className="w-4 h-4 text-accent-orange-soft" />
+                      <div className="text-[11px] uppercase tracking-[0.14em] text-accent-orange-soft font-semibold">
                         {plan.badge}
                       </div>
-                      <Icon className="w-4 h-4 text-accent-orange-soft opacity-60 flex-shrink-0 mt-0.5" />
                     </div>
                     
-                    {/* Content section */}
-                    <div className="space-y-1.5 mb-4">
+                    {/* Content section - centered */}
+                    <div className="text-center mb-3">
                       <div className="text-[13px] text-text-soft font-medium">{plan.name}</div>
-                      <div className="text-[11px] text-text-muted">Aucun abonnement requis</div>
                     </div>
                     
-                    {/* Bottom section with price and button */}
-                    <div className="mt-auto pt-2 space-y-3">
-                      <div className="flex items-baseline justify-between gap-2">
+                    {/* Bottom section with price and button - centered */}
+                    <div className="mt-auto pt-2 space-y-3 text-center">
+                      <div className="flex flex-col items-center gap-0.5">
                         <span className="text-xl font-bold text-text-main">{plan.price}</span>
+                        <span className="text-[10px] text-text-muted">Sans abonnement</span>
                         {plan.offer && (
-                          <span className="text-[11px] px-2 py-1 rounded-full bg-[rgba(22,163,74,0.18)] border border-[rgba(22,163,74,0.8)] text-[#bbf7d0]">
+                          <span className="text-[11px] px-2 py-1 rounded-full bg-[rgba(22,163,74,0.18)] border border-[rgba(22,163,74,0.8)] text-[#bbf7d0] mt-1">
                             {plan.offer}
                           </span>
                         )}
