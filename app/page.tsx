@@ -6,6 +6,7 @@ import Image from 'next/image'
 import { supabase } from '@/lib/supabaseClient'
 import { useCredits } from '@/hooks/useCredits'
 import { useTranslation } from '@/lib/translations/context'
+import { t, getFaqAnswer, type Language } from '@/lib/translations/dictionary'
 import {
   Lock,
   Shield,
@@ -615,6 +616,12 @@ function FormSection() {
       return
     }
 
+    // Check if user has tokens
+    if (credits === null || credits <= 0) {
+      setShowNoCreditsPopup(true)
+      return
+    }
+
     setIsLoading(true)
 
     try {
@@ -691,10 +698,7 @@ function FormSection() {
     }
   }
 
-  const isLocked = !user || (user && credits !== null && credits <= 0)
-  const lockReason = !user 
-    ? 'Créez un compte et choisissez un pack pour générer des vidéos.'
-    : 'Choisissez un pack pour générer des vidéos.'
+  const [showNoCreditsPopup, setShowNoCreditsPopup] = useState(false)
 
   return (
     <section className="prompt-section pt-10 md:pt-12 pb-2 md:pb-4">
@@ -740,62 +744,33 @@ function FormSection() {
           </div>
         )}
 
-        <div className="relative">
-          {/* Locked Overlay - only show if locked */}
-          {isLocked && !isLoadingAuth && (
-            <div className="absolute inset-0 z-30 flex items-center justify-center rounded-[22px] backdrop-blur-sm bg-[rgba(0,0,0,0.3)]">
-              <div className="bg-[rgba(6,9,22,0.98)] rounded-[22px] p-8 border-2 border-[rgba(252,211,77,0.8)] shadow-[0_18px_40px_rgba(0,0,0,0.9)] max-w-md mx-4 text-center">
-                <Lock className="w-12 h-12 text-accent-orange-soft mx-auto mb-4" />
-                <h3 className="text-2xl font-extrabold text-text-main mb-3">Accès réservé</h3>
-                <p className="text-sm text-text-soft mb-6 leading-relaxed">
-                  {lockReason}
-                </p>
-                <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                  {!user ? (
-                    <>
-                      <Link
-                        href="/auth/signup"
-                        className="relative overflow-hidden bg-transparent text-[#111827] shadow-[0_18px_45px_rgba(0,0,0,0.75)] z-0 rounded-full border-none text-[13px] font-semibold px-6 py-3 inline-flex items-center justify-center gap-2 transition-all duration-[0.18s] ease-out hover:-translate-y-px hover:shadow-[0_22px_60px_rgba(0,0,0,0.95)]"
-                        style={{
-                          position: 'relative',
-                        }}
-                      >
-                        <span className="absolute inset-0 -z-10 rounded-full" style={{
-                          backgroundImage: 'linear-gradient(90deg, #ff6b00 0%, #ffd700 25%, #ff4b2b 50%, #ffd700 75%, #ff6b00 100%)',
-                          backgroundSize: '220% 100%',
-                          animation: 'flazyTopbar 10s ease-in-out infinite alternate'
-                        }}></span>
-                        Créer un compte
-                      </Link>
-                      <Link
-                        href="/pricing"
-                        className="bg-transparent text-accent-orange-soft border border-[rgba(248,181,86,0.95)] shadow-[0_0_0_1px_rgba(248,181,86,0.4)] rounded-full text-[13px] font-semibold px-6 py-3 inline-flex items-center justify-center gap-2 transition-all duration-[0.18s] ease-out hover:bg-[radial-gradient(circle_at_top_left,rgba(255,138,31,0.16),transparent_70%)] hover:border-[rgba(248,181,86,1)]"
-                      >
-                        Voir les packs
-                      </Link>
-                    </>
-                  ) : (
-                    <Link
-                      href="/pricing"
-                      className="relative overflow-hidden bg-transparent text-[#111827] shadow-[0_18px_45px_rgba(0,0,0,0.75)] z-0 rounded-full border-none text-[13px] font-semibold px-6 py-3 inline-flex items-center justify-center gap-2 transition-all duration-[0.18s] ease-out hover:-translate-y-px hover:shadow-[0_22px_60px_rgba(0,0,0,0.95)]"
-                      style={{
-                        position: 'relative',
-                      }}
-                    >
-                      <span className="absolute inset-0 -z-10 rounded-full" style={{
-                        backgroundImage: 'linear-gradient(90deg, #ff6b00 0%, #ffd700 25%, #ff4b2b 50%, #ffd700 75%, #ff6b00 100%)',
-                        backgroundSize: '220% 100%',
-                        animation: 'flazyTopbar 10s ease-in-out infinite alternate'
-                      }}></span>
-                      Choisir un pack
-                    </Link>
-                  )}
-                </div>
-              </div>
+        {/* Insufficient Credits Popup */}
+        {showNoCreditsPopup && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setShowNoCreditsPopup(false)}>
+            <div className="bg-[rgba(6,9,22,0.98)] rounded-[22px] p-8 border-2 border-[rgba(252,211,77,0.8)] shadow-[0_18px_40px_rgba(0,0,0,0.9)] max-w-md mx-4 text-center" onClick={(e) => e.stopPropagation()}>
+              <Lock className="w-12 h-12 text-accent-orange-soft mx-auto mb-4" />
+              <h3 className="text-2xl font-extrabold text-text-main mb-3">Crédits insuffisants</h3>
+              <p className="text-sm text-text-soft mb-6 leading-relaxed">
+                Vous n'avez plus de crédits disponibles pour générer une vidéo.
+              </p>
+              <Link
+                href="/pricing"
+                className="relative overflow-hidden bg-transparent text-[#111827] shadow-[0_18px_45px_rgba(0,0,0,0.75)] z-0 rounded-full border-none text-[13px] font-semibold px-6 py-3 inline-flex items-center justify-center gap-2 transition-all duration-[0.18s] ease-out hover:-translate-y-px hover:shadow-[0_22px_60px_rgba(0,0,0,0.95)]"
+                style={{ position: 'relative' }}
+              >
+                <span className="absolute inset-0 -z-10 rounded-full" style={{
+                  backgroundImage: 'linear-gradient(90deg, #ff6b00 0%, #ffd700 25%, #ff4b2b 50%, #ffd700 75%, #ff6b00 100%)',
+                  backgroundSize: '220% 100%',
+                  animation: 'flazyTopbar 10s ease-in-out infinite alternate'
+                }}></span>
+                Recharger vos tokens
+              </Link>
             </div>
-          )}
+          </div>
+        )}
 
-          <form onSubmit={handleSubmit} className={`grid md:grid-cols-[1.1fr_0.9fr] gap-8 items-start ${isLocked ? 'pointer-events-none opacity-80' : ''}`}>
+        <div className="relative">
+          <form onSubmit={handleSubmit} className="grid md:grid-cols-[1.1fr_0.9fr] gap-8 items-start">
             <div
               id="prompt-zone"
               className="rounded-[22px] p-6 border border-[rgba(252,211,77,0.75)] shadow-[0_18px_40px_rgba(0,0,0,0.8)]"
@@ -822,7 +797,7 @@ function FormSection() {
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
                   rows={6}
-                  disabled={isLocked}
+                  disabled={false}
                   className="w-full min-h-[160px] resize-y rounded-2xl border border-[rgba(75,85,99,0.95)] bg-[rgba(15,23,42,0.96)] text-text-main px-4 py-3 text-[13px] outline-none transition-all duration-[0.18s] ease-out placeholder:text-text-muted focus:border-accent-orange-soft focus:shadow-[0_0_0_1px_rgba(248,181,86,0.6)] focus:bg-[rgba(15,23,42,0.98)] disabled:opacity-50 disabled:cursor-not-allowed"
                   placeholder="« Une femme élégante explique comment elle a augmenté ses ventes grâce aux vidéos courtes générées par l'IA. »"
                   required
@@ -1307,40 +1282,19 @@ function PricingSection() {
 // FAQ Section with Dropdowns
 function FAQSection() {
   const [openIndex, setOpenIndex] = useState<number | null>(0)
+  const { language } = useTranslation()
+  const lang = language as Language
 
-  const faqs = [
-    {
-      q: 'Combien de temps faut-il pour générer mes vidéos ?',
-      a: 'Le temps de génération dépend de la demande actuelle, mais dans la plupart des cas, les vidéos sont générées <strong>en quelques minutes</strong> après la validation de votre prompt.',
-    },
-    {
-      q: 'Qui possède les vidéos générées ?',
-      a: 'Toutes les vidéos générées vous appartiennent à <strong>100%</strong>. Vous êtes libre de les utiliser à des fins personnelles ou professionnelles.',
-    },
-    {
-      q: 'Puis-je utiliser les vidéos à des fins commerciales ?',
-      a: 'Oui. Toutes les vidéos générées sur FLAZY peuvent être utilisées commercialement, <strong>sans frais supplémentaires</strong>.',
-    },
-    {
-      q: 'Les vidéos contiennent-elles un filigrane ?',
-      a: 'Par défaut, les vidéos sont disponibles <strong>sans aucun filigrane</strong> et sont prêtes à être publiées.',
-    },
-    {
-      q: 'Où puis-je publier mes vidéos ?',
-      a: 'Les vidéos sont optimisées pour le format vertical 9:16 et peuvent être publiées sur TikTok, Instagram Reels, YouTube Shorts, Snapchat, Facebook et autres plateformes de contenu court.',
-    },
-    {
-      q: 'Que faire si je n\'aime pas le résultat ?',
-      a: 'Vous pouvez ajuster votre prompt et générer une nouvelle vidéo tant que vous avez des tokens disponibles.',
-    },
-    {
-      q: 'Mes prompts et vidéos générées sont-ils privés ?',
-      a: 'Oui. Les prompts et les vidéos générées sont <strong>privés</strong> et ne sont pas partagés publiquement, sauf si vous avez explicitement approuvé l\'option « J\'autorise ma vidéo à être publiée dans le carrousel public de FLAZY. »',
-    },
-    {
-      q: 'Que se passe-t-il si j\'arrive au bout de mes tokens ?',
-      a: 'Vous pouvez simplement acheter des packs de tokens supplémentaires ou combiner plusieurs packs de tokens. Les tokens sont <strong>cumulables</strong>, vous permettant de générer autant de vidéos que vous le souhaitez, sans limiter votre rythme de publication.',
-    },
+  // FAQ questions - we use the dictionary keys
+  const faqQuestions = [
+    'Combien de temps faut-il pour générer mes vidéos ?',
+    'Qui possède les vidéos générées ?',
+    'Puis-je utiliser les vidéos à des fins commerciales ?',
+    'Les vidéos contiennent-elles un filigrane ?',
+    'Où puis-je publier mes vidéos ?',
+    "Que faire si je n'aime pas le résultat ?",
+    'Mes prompts et vidéos générées sont-ils privés ?',
+    "Que se passe-t-il si j'arrive au bout de mes tokens ?",
   ]
 
   return (
@@ -1348,19 +1302,19 @@ function FAQSection() {
       <div className="max-w-[1120px] mx-auto px-5">
         <div className="text-left mb-6 md:mb-8">
           <div className="text-[11px] uppercase tracking-[0.16em] mb-1.5 font-semibold text-accent-orange">
-            Questions fréquentes
+            {t('Questions fréquentes', lang)}
           </div>
           <h2 className="text-[28px] lg:text-[32px] mb-3 font-extrabold leading-tight">
-            Des réponses claires et transparentes
+            {t('Des réponses claires et transparentes', lang)}
           </h2>
           <p className="text-[14px] lg:text-[15px] text-text-soft max-w-[600px] leading-relaxed">
-            Voici les informations essentielles à connaître sur FLAZY.
+            {t('Voici les informations essentielles à connaître sur FLAZY.', lang)}
           </p>
         </div>
       </div>
       <div className="max-w-[1120px] mx-auto px-5">
         <div className="space-y-3 w-full">
-          {faqs.map((faq, index) => (
+          {faqQuestions.map((question, index) => (
             <div
               key={index}
               className="bg-[rgba(6,9,22,0.98)] rounded-[22px] border border-[rgba(252,211,77,0.7)] shadow-[0_18px_40px_rgba(0,0,0,0.8)] overflow-hidden hover:border-[rgba(252,211,77,0.9)] transition-all duration-300"
@@ -1369,7 +1323,7 @@ function FAQSection() {
                 onClick={() => setOpenIndex(openIndex === index ? null : index)}
                 className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-[rgba(15,23,42,0.5)] transition-colors"
               >
-                <h3 className="text-[15px] font-semibold text-text-main pr-4">{faq.q}</h3>
+                <h3 className="text-[15px] font-semibold text-text-main pr-4">{t(question, lang)}</h3>
                 <ChevronDown
                   className={`w-5 h-5 text-accent-orange-soft flex-shrink-0 transition-transform duration-300 ${
                     openIndex === index ? 'rotate-180' : ''
@@ -1384,7 +1338,7 @@ function FAQSection() {
                 <div className="px-6 pb-4 pt-2 border-t border-[rgba(51,65,85,0.5)]">
                   <p
                     className="text-[13px] text-text-soft leading-relaxed m-0"
-                    dangerouslySetInnerHTML={{ __html: faq.a }}
+                    dangerouslySetInnerHTML={{ __html: getFaqAnswer(index, lang) }}
                   />
                 </div>
               </div>
@@ -1467,22 +1421,24 @@ function HowItWorksSection() {
 
 // Footer Component
 function Footer() {
+  const { language } = useTranslation()
+  const lang = language as Language
   const currentYear = 2025
   
   return (
     <footer className="py-6 border-t border-[rgba(30,41,59,0.9)] bg-[rgba(3,7,18,0.98)] text-[11px] text-text-muted mt-12">
       <div className="max-w-[1120px] mx-auto px-5">
         <div className="flex items-center justify-between gap-2.5 flex-wrap">
-          <div>© {currentYear} FLAZY Tous droits réservés.</div>
+          <div>© {currentYear} FLAZY. {t('Tous droits réservés.', lang)}</div>
           <div className="flex gap-3.5 flex-wrap">
             <Link href="/mentions-legales" className="text-text-muted hover:text-text-main transition-colors">
-              Mentions légales
+              {t('Mentions légales', lang)}
             </Link>
             <Link href="/conditions-generales" className="text-text-muted hover:text-text-main transition-colors">
-              Conditions générales
+              {t('Conditions générales', lang)}
             </Link>
             <Link href="/politique-confidentialite" className="text-text-muted hover:text-text-main transition-colors">
-              Politique de confidentialité
+              {t('Politique de confidentialité', lang)}
             </Link>
             <a
               href="mailto:Flazy.orders@gmail.com"

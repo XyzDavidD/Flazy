@@ -276,33 +276,14 @@ export default function CarouselPage() {
     }
   }, [currentIndex, currentVideo, isMuted, pauseAllVideos])
 
-  // Sync state with video events - but prevent pause icon on natural video events
+  // Sync state with video events - only listen to play event, manage pause state manually
   useEffect(() => {
     const video = videoRef.current
     if (video) {
+      // Only listen to play event - pause state is managed by togglePlayPause
       const handlePlay = () => setIsPlaying(true)
-      const handlePause = (e: Event) => {
-        // Only set paused state if it's a user-initiated pause, not automatic buffering/looping
-        // Check if video is actually paused and not just buffering
-        if (video.paused && video.readyState >= 3) {
-          // Only show pause icon if video is truly paused (not buffering or looping)
-          const timeRemaining = video.duration - video.currentTime
-          if (timeRemaining > 0.2) { // Not near the end
-            setIsPlaying(false)
-          }
-        }
-      }
       
-      const handleEnded = () => {
-        // When video ends, immediately restart to prevent pause icon
-        video.currentTime = 0
-        video.play().catch(() => {})
-        setIsPlaying(true)
-      }
-
       video.addEventListener('play', handlePlay)
-      video.addEventListener('pause', handlePause)
-      video.addEventListener('ended', handleEnded)
       
       // Disable remote playback (casting)
       if ('disableRemotePlayback' in video) {
@@ -311,8 +292,6 @@ export default function CarouselPage() {
 
       return () => {
         video.removeEventListener('play', handlePlay)
-        video.removeEventListener('pause', handlePause)
-        video.removeEventListener('ended', handleEnded)
       }
     }
   }, [currentVideo])
@@ -656,32 +635,9 @@ export default function CarouselPage() {
                           })
                         }
                       }}
-                      onWaiting={() => {
-                        // Video is buffering - don't change play state to prevent icon flicker
-                        // The video will continue playing when buffered
-                      }}
                       onPlaying={() => {
                         if (isCurrent) {
                           setIsPlaying(true)
-                        }
-                      }}
-                      onEnded={() => {
-                        // When video ends (before loop), immediately restart to prevent pause icon
-                        if (isCurrent && videoRefs.current[index]) {
-                          videoRefs.current[index]!.currentTime = 0
-                          videoRefs.current[index]!.play().catch(() => {})
-                          setIsPlaying(true)
-                        }
-                      }}
-                      onTimeUpdate={() => {
-                        // Prevent pause state when video is near the end (before loop)
-                        if (isCurrent && videoRefs.current[index]) {
-                          const video = videoRefs.current[index]!
-                          const timeRemaining = video.duration - video.currentTime
-                          // If less than 0.1 seconds remaining, ensure it keeps playing
-                          if (timeRemaining < 0.1 && video.duration > 0) {
-                            setIsPlaying(true)
-                          }
                         }
                       }}
                     />

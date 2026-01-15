@@ -613,50 +613,51 @@ export default function AdminPage() {
           )}
 
           {isLoading ? (
-            <div className="flex flex-col items-center justify-center min-h-[400px] space-y-6">
-              <Loader2 className="w-12 h-12 text-accent-orange-soft animate-spin" />
-              <p className="text-text-soft">Chargement des vidéos...</p>
+            <div className="flex flex-col items-center justify-center min-h-[300px] space-y-4">
+              <Loader2 className="w-10 h-10 text-accent-orange-soft animate-spin" />
+              <p className="text-text-soft text-sm">Chargement des vidéos...</p>
             </div>
           ) : videos.length === 0 ? (
-            <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
-              <div className="w-16 h-16 rounded-full bg-[rgba(255,138,31,0.2)] flex items-center justify-center">
-                <Upload className="w-8 h-8 text-accent-orange-soft" />
+            <div className="flex flex-col items-center justify-center min-h-[300px] space-y-3">
+              <div className="w-12 h-12 rounded-full bg-[rgba(255,138,31,0.2)] flex items-center justify-center">
+                <Upload className="w-6 h-6 text-accent-orange-soft" />
               </div>
-              <p className="text-text-main text-xl font-semibold">Aucune vidéo</p>
-              <p className="text-text-soft text-sm">Ajoutez votre première vidéo pour commencer</p>
+              <p className="text-text-main text-lg font-semibold">Aucune vidéo</p>
+              <p className="text-text-soft text-xs">Ajoutez votre première vidéo pour commencer</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-2.5">
               {videos.map((video) => {
                 const videoUrl = getVideoUrl(video.video_path)
                 return (
                   <div
                     key={video.id}
-                    className="bg-[rgba(6,9,22,0.98)] rounded-[22px] p-4 border border-[rgba(252,211,77,0.75)] shadow-[0_18px_40px_rgba(0,0,0,0.8)]"
+                    className="bg-[rgba(6,9,22,0.98)] rounded-xl p-1.5 border border-[rgba(252,211,77,0.6)] shadow-[0_8px_20px_rgba(0,0,0,0.6)] hover:border-[rgba(252,211,77,0.9)] transition-all duration-200"
                     style={{
                       background: `
-                        radial-gradient(circle at top, rgba(255, 138, 31, 0.22), transparent 60%),
+                        radial-gradient(circle at top, rgba(255, 138, 31, 0.15), transparent 60%),
                         rgba(6, 9, 22, 0.98)
                       `
                     }}
                   >
-                    <div className="relative aspect-[9/16] rounded-xl overflow-hidden mb-4 bg-[#020617]">
+                    <div className="relative aspect-[9/16] rounded-lg overflow-hidden mb-1.5 bg-[#020617]">
                       <video
                         src={videoUrl}
                         controls
                         className="w-full h-full object-cover"
+                        style={{ fontSize: '8px' }}
                       />
                     </div>
-                    <div className="flex items-center justify-between">
-                      <div className="text-xs text-text-muted">
+                    <div className="flex items-center justify-between px-0.5">
+                      <div className="text-[9px] text-text-muted truncate">
                         {new Date(video.created_at).toLocaleDateString('fr-FR')}
                       </div>
                       <button
                         onClick={() => handleDelete(video.id)}
-                        className="p-2 rounded-lg bg-[rgba(239,68,68,0.15)] border border-[rgba(239,68,68,0.6)] text-[#fecaca] hover:bg-[rgba(239,68,68,0.25)] transition-colors"
+                        className="p-1 rounded-md bg-[rgba(239,68,68,0.15)] border border-[rgba(239,68,68,0.5)] text-[#fecaca] hover:bg-[rgba(239,68,68,0.25)] transition-colors"
                         title="Supprimer"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-3 h-3" />
                       </button>
                     </div>
                   </div>
@@ -666,19 +667,19 @@ export default function AdminPage() {
           )}
 
           {/* Example Videos Section */}
-          <div className="mt-16 pt-16 border-t border-[rgba(51,65,85,0.5)]">
-            <div className="mb-6">
-              <h2 className="text-2xl lg:text-3xl font-extrabold mb-2">Gestion des vidéos d'exemple</h2>
-              <p className="text-sm text-text-soft">Gérez les 4 vidéos affichées dans la section "Exemples de vidéos virales"</p>
+          <div className="mt-10 pt-10 border-t border-[rgba(51,65,85,0.5)]">
+            <div className="mb-4">
+              <h2 className="text-xl lg:text-2xl font-extrabold mb-1">Gestion des vidéos d'exemple</h2>
+              <p className="text-xs text-text-soft">Gérez les 4 vidéos affichées dans la section "Exemples de vidéos virales"</p>
             </div>
 
             {isLoadingExamples ? (
-              <div className="flex flex-col items-center justify-center min-h-[400px] space-y-6">
-                <Loader2 className="w-12 h-12 text-accent-orange-soft animate-spin" />
-                <p className="text-text-soft">Chargement des vidéos d'exemple...</p>
+              <div className="flex flex-col items-center justify-center min-h-[200px] space-y-4">
+                <Loader2 className="w-8 h-8 text-accent-orange-soft animate-spin" />
+                <p className="text-text-soft text-sm">Chargement des vidéos d'exemple...</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 gap-3">
                 {[1, 2, 3, 4].map((position) => {
                   const exampleVideo = exampleVideos[position - 1]
                   const videoUrl = exampleVideo ? getVideoUrl(exampleVideo.video_path) : null
@@ -686,25 +687,24 @@ export default function AdminPage() {
                   return (
                     <div
                       key={position}
-                      className="bg-[rgba(6,9,22,0.98)] rounded-[22px] p-4 border border-[rgba(252,211,77,0.75)] shadow-[0_18px_40px_rgba(0,0,0,0.8)]"
+                      className="bg-[rgba(6,9,22,0.98)] rounded-xl p-2 border border-[rgba(252,211,77,0.6)] shadow-[0_8px_20px_rgba(0,0,0,0.6)] hover:border-[rgba(252,211,77,0.9)] transition-all duration-200"
                       style={{
                         background: `
-                          radial-gradient(circle at top, rgba(255, 138, 31, 0.22), transparent 60%),
+                          radial-gradient(circle at top, rgba(255, 138, 31, 0.15), transparent 60%),
                           rgba(6, 9, 22, 0.98)
                         `
                       }}
                     >
-                      <div className="mb-3">
-                        <div className="text-xs text-text-muted mb-1">Position {position}</div>
-                        <div className="text-sm font-semibold text-text-main">
-                          {exampleVideo?.title || getDefaultTitle(position)}
-                        </div>
-                        <div className="text-xs text-text-soft mt-1">
-                          {exampleVideo?.description || getDefaultDescription(position)}
+                      <div className="mb-1.5">
+                        <div className="flex items-center justify-between">
+                          <div className="text-[9px] text-text-muted">Position {position}</div>
+                          <div className="text-[10px] font-semibold text-accent-orange-soft">
+                            {exampleVideo?.title || getDefaultTitle(position)}
+                          </div>
                         </div>
                       </div>
                       
-                      <div className="relative aspect-[9/16] rounded-xl overflow-hidden mb-4 bg-[#020617]">
+                      <div className="relative aspect-[9/16] rounded-lg overflow-hidden mb-2 bg-[#020617]">
                         {videoUrl ? (
                           <video
                             src={videoUrl}
@@ -712,10 +712,10 @@ export default function AdminPage() {
                             className="w-full h-full object-cover"
                           />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-[rgba(15,23,42,0.5)] border border-[rgba(252,211,77,0.3)] rounded-xl">
+                          <div className="w-full h-full flex items-center justify-center bg-[rgba(15,23,42,0.5)] border border-[rgba(252,211,77,0.3)] rounded-lg">
                             <div className="text-center">
-                              <Video className="w-8 h-8 text-text-muted mx-auto mb-2" />
-                              <p className="text-xs text-text-muted">Aucune vidéo</p>
+                              <Video className="w-5 h-5 text-text-muted mx-auto mb-1" />
+                              <p className="text-[9px] text-text-muted">Aucune vidéo</p>
                             </div>
                           </div>
                         )}
@@ -733,7 +733,7 @@ export default function AdminPage() {
                       <button
                         onClick={() => exampleFileInputRefs.current[position - 1]?.click()}
                         disabled={isReplacingExample === position}
-                        className="w-full relative overflow-hidden bg-transparent text-[#111827] shadow-[0_18px_45px_rgba(0,0,0,0.75)] z-0 rounded-full border-none text-[13px] font-semibold px-4 py-2.5 h-[38px] inline-flex items-center justify-center gap-2 transition-all duration-[0.18s] ease-out hover:-translate-y-px hover:shadow-[0_22px_60px_rgba(0,0,0,0.95)] disabled:opacity-60 disabled:cursor-not-allowed"
+                        className="w-full relative overflow-hidden bg-transparent text-[#111827] shadow-[0_8px_20px_rgba(0,0,0,0.6)] z-0 rounded-full border-none text-[10px] font-semibold px-2 py-1.5 h-[26px] inline-flex items-center justify-center gap-1 transition-all duration-[0.18s] ease-out hover:-translate-y-px hover:shadow-[0_12px_30px_rgba(0,0,0,0.8)] disabled:opacity-60 disabled:cursor-not-allowed"
                         style={{
                           position: 'relative',
                         }}
@@ -745,12 +745,12 @@ export default function AdminPage() {
                         }}></span>
                         {isReplacingExample === position ? (
                           <>
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                            <span>Remplacement...</span>
+                            <Loader2 className="w-3 h-3 animate-spin" />
+                            <span>...</span>
                           </>
                         ) : (
                           <>
-                            <RefreshCw className="w-4 h-4" />
+                            <RefreshCw className="w-3 h-3" />
                             <span>{exampleVideo ? 'Remplacer' : 'Ajouter'}</span>
                           </>
                         )}

@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
 import { useCredits } from '@/hooks/useCredits'
 import { useTranslation } from '@/lib/translations/context'
+import { t, type Language } from '@/lib/translations/dictionary'
 import {
   Sparkles,
   Users,
