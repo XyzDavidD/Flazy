@@ -140,7 +140,7 @@ function Header() {
             href="/carousel"
             className="relative cursor-pointer transition-colors duration-[0.18s] ease-out hover:text-text-main after:content-[''] after:absolute after:left-0 after:-bottom-[6px] after:w-0 after:h-0.5 after:rounded-full after:bg-gradient-to-r after:from-[#ffb347] after:via-[#ff8a1f] after:to-[#ff4b2b] after:transition-all after:duration-[0.18s] after:ease-out hover:after:w-[18px]"
           >
-            Carrousel
+            Creations
           </Link>
           <Link
             href="/pricing"
@@ -268,7 +268,7 @@ function Header() {
                 e.stopPropagation()
               }}
             >
-              Carrousel
+              Creations
             </Link>
             <Link
               href="/pricing"
@@ -554,6 +554,10 @@ function FormSection() {
 
   // Use new credits hook with realtime updates
   const { credits, refresh: refreshCredits } = useCredits()
+  
+  // Get current language for translations
+  const { language } = useTranslation()
+  const lang = language as Language
 
   // Check auth state for user (for form gating)
   useEffect(() => {
@@ -781,30 +785,21 @@ function FormSection() {
                 `
               }}
             >
-            <div className="text-xs text-text-soft mb-4 flex items-center gap-2">
+            <div className="text-xs text-text-soft mb-3 flex items-center gap-2">
               <Video className="w-4 h-4 text-accent-orange-soft" />
-              <span className="font-semibold">Votre prompt</span>
+              <span className="font-semibold">{t('Décrivez votre vidéo', lang)}</span>
             </div>
 
-            <div className="space-y-4">
-
-              <div>
-                <label htmlFor="prompt" className="block text-xs text-text-soft mb-2 font-medium">
-                  Décrivez votre vidéo
-                </label>
-                <textarea
-                  id="prompt"
-                  value={prompt}
-                  onChange={(e) => setPrompt(e.target.value)}
-                  rows={6}
-                  disabled={false}
-                  className="w-full min-h-[160px] resize-y rounded-2xl border border-[rgba(75,85,99,0.95)] bg-[rgba(15,23,42,0.96)] text-text-main px-4 py-3 text-[13px] outline-none transition-all duration-[0.18s] ease-out placeholder:text-text-muted focus:border-accent-orange-soft focus:shadow-[0_0_0_1px_rgba(248,181,86,0.6)] focus:bg-[rgba(15,23,42,0.98)] disabled:opacity-50 disabled:cursor-not-allowed"
-                  placeholder="« Une femme élégante explique comment elle a augmenté ses ventes grâce aux vidéos courtes générées par l'IA. »"
-                  required
-                />
-              </div>
-
-            </div>
+            <textarea
+              id="prompt"
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              rows={4}
+              disabled={false}
+              className="w-full min-h-[100px] resize-y rounded-2xl border border-[rgba(75,85,99,0.95)] bg-[rgba(15,23,42,0.96)] text-text-main px-4 py-3 text-[13px] outline-none transition-all duration-[0.18s] ease-out placeholder:text-text-muted focus:border-accent-orange-soft focus:shadow-[0_0_0_1px_rgba(248,181,86,0.6)] focus:bg-[rgba(15,23,42,0.98)] disabled:opacity-50 disabled:cursor-not-allowed"
+              placeholder="« Une femme élégante explique comment elle a augmenté ses ventes grâce aux vidéos courtes générées par l'IA. »"
+              required
+            />
 
             <div className="mt-4 flex items-center justify-end gap-4 text-[11px] text-text-muted">
               <button

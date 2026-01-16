@@ -123,7 +123,7 @@ function Header() {
             href="/carousel"
             className="relative cursor-pointer transition-colors duration-[0.18s] ease-out hover:text-text-main after:content-[''] after:absolute after:left-0 after:-bottom-[6px] after:w-0 after:h-0.5 after:rounded-full after:bg-gradient-to-r after:from-[#ffb347] after:via-[#ff8a1f] after:to-[#ff4b2b] after:transition-all after:duration-[0.18s] after:ease-out hover:after:w-[18px]"
           >
-            Carrousel
+            Creations
           </Link>
           <Link
             href="/pricing"
@@ -251,7 +251,7 @@ function Header() {
                 e.stopPropagation()
               }}
             >
-              Carrousel
+              Creations
             </Link>
             <Link
               href="/pricing"

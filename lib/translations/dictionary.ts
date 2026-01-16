@@ -7,10 +7,10 @@ export const translations: Record<string, Record<Language, string>> = {
   // ============================================
   // HEADER & NAVIGATION
   // ============================================
-  'Carrousel': {
-    fr: 'Carrousel',
-    en: 'Carousel',
-    es: 'Carrusel',
+  'Creations': {
+    fr: 'Créations',
+    en: 'Creations',
+    es: 'Creaciones',
   },
   'Tarifs': {
     fr: 'Tarifs',

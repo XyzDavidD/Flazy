@@ -6,6 +6,7 @@ import Image from 'next/image'
 import { supabase } from '@/lib/supabaseClient'
 import { useCredits } from '@/hooks/useCredits'
 import { useTranslation } from '@/lib/translations/context'
+import { t, type Language } from '@/lib/translations/dictionary'
 import {
   ChevronDown,
   Menu,
@@ -336,6 +337,9 @@ function Footer() {
 }
 
 export default function MentionsLegales() {
+  const { language } = useTranslation()
+  const lang = language as Language
+  
   return (
     <div className="min-h-screen" style={{
       background: `
@@ -450,9 +454,10 @@ export default function MentionsLegales() {
               <Link 
                 href="/" 
                 className="inline-flex items-center text-accent-orange-soft hover:text-accent-orange transition-colors"
+                data-no-translate
               >
                 <ChevronLeft className="w-4 h-4 mr-1" />
-                Retour à l'accueil
+                {t("Retour à l'accueil", lang)}
               </Link>
             </div>
           </div>
