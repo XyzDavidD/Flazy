@@ -24,6 +24,7 @@ import {
   ChevronLeft,
   Globe,
   CheckCircle2,
+  Video,
 } from 'lucide-react'
 
 // Header Component (same as FAQ page)

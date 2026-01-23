@@ -15,6 +15,7 @@ import {
   LogOut,
   ChevronLeft,
   Loader2,
+  Video,
 } from 'lucide-react'
 
 // Header Component (simplified for legal pages)

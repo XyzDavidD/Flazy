@@ -16,6 +16,7 @@ import {
   ChevronLeft,
   CheckCircle2,
   Loader2,
+  Video,
 } from 'lucide-react'
 
 // Header Component (simplified for legal pages)
