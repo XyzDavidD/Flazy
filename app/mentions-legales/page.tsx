@@ -172,6 +172,14 @@ function Header() {
                     </button>
                     {accountDropdownOpen && (
                       <div className="absolute right-0 mt-2 w-48 rounded-xl bg-[rgba(6,9,22,0.98)] border border-[rgba(252,211,77,0.75)] shadow-lg overflow-hidden z-50">
+                        <Link
+                          href="/mes-videos"
+                          onClick={() => setAccountDropdownOpen(false)}
+                          className="w-full text-left px-4 py-3 text-sm text-text-soft hover:bg-[rgba(15,23,42,0.5)] transition-colors flex items-center gap-2"
+                        >
+                          <Video className="w-4 h-4" />
+                          Mes vidéos
+                        </Link>
                         <button
                           onClick={handleLogout}
                           className="w-full text-left px-4 py-3 text-sm text-text-soft hover:bg-[rgba(15,23,42,0.5)] transition-colors flex items-center gap-2"
@@ -262,6 +270,14 @@ function Header() {
                   </span>
                   <span>crédits</span>
                 </div>
+                <Link
+                  href="/mes-videos"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block w-full text-left px-4 py-2.5 text-sm text-text-soft hover:text-text-main hover:bg-[rgba(15,23,42,0.5)] rounded-lg transition-colors flex items-center gap-2 touch-manipulation"
+                >
+                  <Video className="w-4 h-4" />
+                  Mes vidéos
+                </Link>
                 <button
                   onClick={() => {
                     handleLogout()

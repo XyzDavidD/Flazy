@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabaseClient'
-import { Trash2, Upload, Lock, Loader2, X, CheckCircle2, AlertCircle, RefreshCw, Video } from 'lucide-react'
+import { Trash2, Upload, Lock, Loader2, X, CheckCircle2, AlertCircle, RefreshCw, Video, Users, User } from 'lucide-react'
 
 interface CarouselVideo {
   id: string
@@ -23,13 +23,21 @@ interface ExampleVideo {
   description: string
 }
 
+interface User {
+  id: string
+  email: string
+  created_at: string
+}
+
 export default function AdminPage() {
   const [isUnlocked, setIsUnlocked] = useState(false)
   const [password, setPassword] = useState('')
   const [videos, setVideos] = useState<CarouselVideo[]>([])
   const [exampleVideos, setExampleVideos] = useState<(ExampleVideo | null)[]>([])
+  const [users, setUsers] = useState<User[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [isLoadingExamples, setIsLoadingExamples] = useState(false)
+  const [isLoadingUsers, setIsLoadingUsers] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
   const [isReplacingExample, setIsReplacingExample] = useState<number | null>(null)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
@@ -44,6 +52,7 @@ export default function AdminPage() {
       if (unlocked) {
         fetchVideos()
         fetchExampleVideos()
+        fetchUsers()
       }
     }
   }, [])
@@ -68,6 +77,7 @@ export default function AdminPage() {
         }
         fetchVideos()
         fetchExampleVideos()
+        fetchUsers()
         setPassword('')
       } else {
         setMessage({ type: 'error', text: 'Mot de passe incorrect' })
@@ -271,7 +281,28 @@ export default function AdminPage() {
       setIsLoadingExamples(false)
     }
   }
-
+  const fetchUsers = async () => {
+    setIsLoadingUsers(true)
+    try {
+      const response = await fetch('/api/admin/users')
+      const data = await response.json()
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch users')
+      }
+      
+      setUsers(data.users || [])
+    } catch (error) {
+      console.error('Error fetching users:', error)
+      setMessage({ 
+        type: 'error', 
+        text: error instanceof Error ? error.message : 'Erreur lors du chargement des utilisateurs' 
+      })
+      setTimeout(() => setMessage(null), 5000)
+    } finally {
+      setIsLoadingUsers(false)
+    }
+  }
   const handleReplaceExample = async (position: number, file: File) => {
     if (!file) {
       setMessage({ type: 'error', text: 'Veuillez sélectionner un fichier vidéo' })
@@ -550,6 +581,60 @@ export default function AdminPage() {
 
       <main className="py-8 md:py-12">
         <div className="max-w-[1120px] mx-auto px-5">
+          {/* Users Section */}
+          <div className="mb-10">
+            <div className="mb-4">
+              <h2 className="text-xl lg:text-2xl font-extrabold mb-1">Utilisateurs</h2>
+              <p className="text-xs text-text-soft">Cliquez sur un utilisateur pour gérer ses vidéos</p>
+            </div>
+
+            {isLoadingUsers ? (
+              <div className="flex flex-col items-center justify-center min-h-[150px] space-y-4">
+                <Loader2 className="w-8 h-8 text-accent-orange-soft animate-spin" />
+                <p className="text-text-soft text-sm">Chargement des utilisateurs...</p>
+              </div>
+            ) : users.length === 0 ? (
+              <div className="flex flex-col items-center justify-center min-h-[150px] space-y-3">
+                <div className="w-12 h-12 rounded-full bg-[rgba(255,138,31,0.2)] flex items-center justify-center">
+                  <Users className="w-6 h-6 text-accent-orange-soft" />
+                </div>
+                <p className="text-text-main text-lg font-semibold">Aucun utilisateur</p>
+                <p className="text-text-soft text-xs">Aucun utilisateur enregistré pour le moment</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {users.map((user) => (
+                  <Link
+                    key={user.id}
+                    href={`/admin/users/${user.id}`}
+                    className="bg-[rgba(6,9,22,0.98)] rounded-xl p-4 border border-[rgba(252,211,77,0.6)] shadow-[0_8px_20px_rgba(0,0,0,0.6)] hover:border-[rgba(252,211,77,0.9)] transition-all duration-200 hover:-translate-y-px"
+                    style={{
+                      background: `
+                        radial-gradient(circle at top, rgba(255, 138, 31, 0.15), transparent 60%),
+                        rgba(6, 9, 22, 0.98)
+                      `
+                    }}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-[rgba(255,138,31,0.2)] flex items-center justify-center flex-shrink-0">
+                        <User className="w-5 h-5 text-accent-orange-soft" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-text-main truncate">{user.email}</p>
+                        <p className="text-xs text-text-muted">
+                          Inscrit le {new Date(user.created_at).toLocaleDateString('fr-FR')}
+                        </p>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Divider */}
+          <div className="mb-10 border-t border-[rgba(51,65,85,0.5)]"></div>
+
           <div className="mb-6 flex items-center justify-between flex-wrap gap-4">
             <div>
               <h1 className="text-2xl lg:text-3xl font-extrabold mb-2">Gestion du carrousel</h1>
