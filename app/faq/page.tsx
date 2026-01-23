@@ -18,6 +18,7 @@ import {
   Globe,
   CheckCircle2,
   Loader2,
+  Video,
 } from 'lucide-react'
 
 // Header Component (simplified for FAQ page)
