@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { headers } from 'next/headers'
 import Stripe from 'stripe'
 import { createSupabaseServer } from '@/lib/supabaseServer'
+import { isSessionProcessed, markSessionProcessed } from '@/lib/paymentSecurity'
 
 export const runtime = 'nodejs'
 
@@ -59,6 +60,27 @@ export async function POST(req: Request) {
         return NextResponse.json({ received: true }, { status: 200 })
       }
 
+      // SECURITY: Check if session already processed (prevent double-crediting)
+      const alreadyProcessed = await isSessionProcessed(session.id)
+      if (alreadyProcessed) {
+        console.warn(`Session ${session.id} already processed. Skipping.`)
+        return NextResponse.json({ received: true, message: 'Already processed' }, { status: 200 })
+      }
+
+      // SECURITY: Verify payment status
+      if (session.payment_status !== 'paid') {
+        console.warn(`Session ${session.id} payment not confirmed. Status: ${session.payment_status}`)
+        return NextResponse.json({ received: true, message: 'Payment not confirmed' }, { status: 200 })
+      }
+
+      // SECURITY: Check session age (ignore sessions older than 24 hours)
+      const sessionCreatedAt = session.created * 1000 // Convert to milliseconds
+      const twentyFourHoursAgo = Date.now() - (24 * 60 * 60 * 1000)
+      if (sessionCreatedAt < twentyFourHoursAgo) {
+        console.warn(`Session ${session.id} is older than 24 hours. Ignoring.`)
+        return NextResponse.json({ received: true, message: 'Session too old' }, { status: 200 })
+      }
+
       // Determine tokens granted
       const tokens = PRICE_TO_TOKENS[priceId] || 0
 
@@ -98,6 +120,9 @@ export async function POST(req: Request) {
       }
 
       console.log(`Granted ${tokens} tokens to user ${userId}. New total: ${currentCredits + tokens}`)
+
+      // SECURITY: Mark session as processed BEFORE inserting purchase record
+      await markSessionProcessed(session.id, userId, tokens, session.amount_total || 0)
 
       // Insert purchase record
       const { error: purchaseError } = await supabase

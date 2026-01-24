@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { createSupabaseServer } from '@/lib/supabaseServer'
+import { checkPaymentRateLimit, logPaymentAttempt, getClientIp } from '@/lib/paymentSecurity'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2024-06-20',
@@ -20,7 +21,13 @@ const PACK_TO_PRICE_ID: Record<string, string> = {
 }
 
 export async function POST(request: NextRequest) {
+  let userId: string | undefined
+  let ipAddress: string | undefined
+
   try {
+    // Get client IP address
+    ipAddress = getClientIp(request)
+
     const authHeader = request.headers.get('authorization')
     
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -43,10 +50,25 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    userId = user.id
+
+    // SECURITY: Check rate limits
+    const rateLimitCheck = await checkPaymentRateLimit(userId, ipAddress)
+    if (!rateLimitCheck.allowed) {
+      // Log failed attempt due to rate limit
+      await logPaymentAttempt(userId, ipAddress, false, undefined, rateLimitCheck.reason)
+      
+      return NextResponse.json(
+        { error: rateLimitCheck.reason },
+        { status: 429 }
+      )
+    }
+
     const body = await request.json()
     const { pack } = body
 
     if (!pack || typeof pack !== 'string') {
+      await logPaymentAttempt(userId, ipAddress, false, undefined, 'Missing pack parameter')
       return NextResponse.json(
         { error: 'Pack manquant. Veuillez sélectionner un pack.' },
         { status: 400 }
@@ -65,6 +87,8 @@ export async function POST(request: NextRequest) {
                         `STRIPE_PRICE_${pack.toUpperCase()}`
       
       console.error(`Missing Stripe price ID for pack "${pack}". Missing env var: ${missingEnv}`)
+      await logPaymentAttempt(userId, ipAddress, false, undefined, `Missing price ID for pack: ${pack}`)
+      
       return NextResponse.json(
         { error: `Configuration manquante pour le pack "${pack}". Variable d'environnement manquante: ${missingEnv}` },
         { status: 500 }
@@ -89,11 +113,28 @@ export async function POST(request: NextRequest) {
         priceId: priceId,
         pack: pack,
       },
+      // SECURITY: Prevent session reuse
+      expires_at: Math.floor(Date.now() / 1000) + (30 * 60), // 30 minutes
     })
+
+    // Log successful checkout session creation
+    await logPaymentAttempt(userId, ipAddress, true, session.id)
 
     return NextResponse.json({ url: session.url }, { status: 200 })
   } catch (error) {
     console.error('POST /api/stripe/create-checkout error:', error)
+    
+    // Log failed attempt
+    if (userId && ipAddress) {
+      await logPaymentAttempt(
+        userId,
+        ipAddress,
+        false,
+        undefined,
+        error instanceof Error ? error.message : 'Unknown error'
+      )
+    }
+    
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Erreur interne du serveur. Veuillez réessayer plus tard.' },
       { status: 500 }
