@@ -512,11 +512,6 @@ export const translations: Record<string, Record<Language, string>> = {
     en: 'Protected data',
     es: 'Datos protegidos',
   },
-  'Découvrir les créations': {
-    fr: 'Découvrir les créations',
-    en: 'Discover creations',
-    es: 'Descubrir creaciones',
-  },
 
   // ============================================
   // STEPS SECTION (Homepage)
