@@ -124,11 +124,6 @@ export const translations: Record<string, Record<Language, string>> = {
     en: 'How long does it take to generate my videos?',
     es: '¿Cuánto tiempo se tarda en generar mis videos?',
   },
-  'Qui possède les vidéos générées ?': {
-    fr: 'Qui possède les vidéos générées ?',
-    en: 'Who owns the generated videos?',
-    es: '¿Quién es el propietario de los videos generados?',
-  },
   'Puis-je utiliser les vidéos à des fins commerciales ?': {
     fr: 'Puis-je utiliser les vidéos à des fins commerciales ?',
     en: 'Can I use the videos for commercial purposes?',
@@ -169,14 +164,14 @@ export const translations: Record<string, Record<Language, string>> = {
     es: 'El tiempo de generación depende de la demanda actual, pero en la mayoría de los casos, los videos se generan <strong>en pocos minutos</strong> después de validar tu prompt.',
   },
   'faq_answer_2': {
-    fr: 'Toutes les vidéos générées vous appartiennent à <strong>100%</strong>. Vous êtes libre de les utiliser à des fins personnelles ou professionnelles.',
-    en: 'All generated videos belong to you <strong>100%</strong>. You are free to use them for personal or professional purposes.',
-    es: 'Todos los videos generados te pertenecen al <strong>100%</strong>. Eres libre de usarlos con fines personales o profesionales.',
+    fr: 'Vous conservez l\'intégralité des droits sur les vidéos générées.<br />Vous êtes libre de les utiliser à des fins personnelles ou professionnelles.',
+    en: 'You retain full rights to the generated videos.<br />You are free to use them for personal or professional purposes.',
+    es: 'Conservas la totalidad de los derechos sobre los videos generados.<br />Eres libre de usarlos con fines personales o profesionales.',
   },
   'faq_answer_3': {
-    fr: 'Oui. Toutes les vidéos générées sur FLAZY peuvent être utilisées commercialement, <strong>sans frais supplémentaires</strong>.',
-    en: 'Yes. All videos generated on FLAZY can be used commercially, <strong>at no extra cost</strong>.',
-    es: 'Sí. Todos los videos generados en FLAZY se pueden usar comercialmente, <strong>sin costos adicionales</strong>.',
+    fr: 'Par défaut, les vidéos sont disponibles <strong>sans aucun filigrane</strong> et sont prêtes à être publiées.',
+    en: 'By default, videos are available <strong>without any watermark</strong> and are ready to be published.',
+    es: 'Por defecto, los videos están disponibles <strong>sin ninguna marca de agua</strong> y están listos para publicarse.',
   },
   'faq_answer_4': {
     fr: 'Par défaut, les vidéos sont disponibles <strong>sans aucun filigrane</strong> et sont prêtes à être publiées.',
@@ -194,9 +189,9 @@ export const translations: Record<string, Record<Language, string>> = {
     es: 'Puedes ajustar tu prompt y generar un nuevo video siempre que tengas tokens disponibles.',
   },
   'faq_answer_7': {
-    fr: 'Oui. Les prompts et les vidéos générées sont <strong>privés</strong> et ne sont pas partagés publiquement, sauf si vous avez explicitement approuvé l\'option « J\'autorise ma vidéo à être publiée dans le carrousel public de FLAZY. »',
-    en: 'Yes. Prompts and generated videos are <strong>private</strong> and are not shared publicly, unless you have explicitly approved the option "I authorize my video to be published in FLAZY\'s public carousel."',
-    es: 'Sí. Los prompts y los videos generados son <strong>privados</strong> y no se comparten públicamente, a menos que hayas aprobado explícitamente la opción "Autorizo que mi video se publique en el carrusel público de FLAZY."',
+    fr: 'Oui. Les prompts et les vidéos générées sont privés par défaut et ne sont pas partagés publiquement, sauf si vous avez explicitement autorisé la publication de la vidéo dans le feed public.',
+    en: 'Yes. Prompts and generated videos are private by default and are not shared publicly, unless you have explicitly authorized the video to be published in the public feed.',
+    es: 'Sí. Los prompts y los videos generados son privados por defecto y no se comparten públicamente, a menos que hayas autorizado explícitamente la publicación del video en el feed público.',
   },
   'faq_answer_8': {
     fr: 'Vous pouvez simplement acheter des packs de tokens supplémentaires ou combiner plusieurs packs de tokens. Les tokens sont <strong>cumulables</strong>, vous permettant de générer autant de vidéos que vous le souhaitez, sans limiter votre rythme de publication.',
@@ -275,6 +270,16 @@ export const translations: Record<string, Record<Language, string>> = {
     fr: 'Décrivez votre vidéo',
     en: 'Describe your video',
     es: 'Describe tu video',
+  },
+  'Exemple': {
+    fr: 'Exemple :',
+    en: 'Example:',
+    es: 'Ejemplo:',
+  },
+  'prompt_example': {
+    fr: '« Une femme élégante explique comment elle a augmenté ses ventes grâce aux vidéos courtes. »',
+    en: '“An elegant woman explains how she increased her sales thanks to short videos.”',
+    es: '“Una mujer elegante explica cómo aumentó sus ventas gracias a los videos cortos.”',
   },
   'Générer': {
     fr: 'Générer',
@@ -388,35 +393,35 @@ export const translations: Record<string, Record<Language, string>> = {
     en: 'Choose your pack',
     es: 'Elige tu pack',
   },
-  'Sélectionnez le pack qui correspond à vos besoins (Starter, Creator, Pro ou Boost) et complétez votre paiement sécurisé.': {
-    fr: 'Sélectionnez le pack qui correspond à vos besoins (Starter, Creator, Pro ou Boost) et complétez votre paiement sécurisé.',
-    en: 'Select the pack that suits your needs (Starter, Creator, Pro or Boost) and complete your secure payment.',
-    es: 'Selecciona el pack que se adapte a tus necesidades (Starter, Creator, Pro o Boost) y completa tu pago seguro.',
+  'Sélectionnez le pack qui correspond à vos besoins (Starter, Creator, Pro ou Boost), puis finalisez votre commande.': {
+    fr: 'Sélectionnez le pack qui correspond à vos besoins (Starter, Creator, Pro ou Boost), puis finalisez votre commande.',
+    en: 'Select the pack that suits your needs (Starter, Creator, Pro or Boost), then complete your order.',
+    es: 'Selecciona el pack que se adapte a tus necesidades (Starter, Creator, Pro o Boost), luego finaliza tu pedido.',
   },
-  'Rédigez un prompt détaillé décrivant la vidéo que vous souhaitez générer : personnage, lieu, ton, style, etc.': {
-    fr: 'Rédigez un prompt détaillé décrivant la vidéo que vous souhaitez générer : personnage, lieu, ton, style, etc.',
-    en: 'Write a detailed prompt describing the video you want to generate: character, location, tone, style, etc.',
-    es: 'Escribe un prompt detallado describiendo el video que quieres generar: personaje, lugar, tono, estilo, etc.',
+  'Décrivez la vidéo que vous souhaitez générer : sujet, ambiance, style.': {
+    fr: 'Décrivez la vidéo que vous souhaitez générer : sujet, ambiance, style.',
+    en: 'Describe the video you want to generate: subject, atmosphere, style.',
+    es: 'Describe el video que quieres generar: tema, ambiente, estilo.',
   },
   'Génération automatique': {
     fr: 'Génération automatique',
     en: 'Automatic generation',
     es: 'Generación automática',
   },
-  'Notre IA génère votre vidéo en quelques minutes. Vos vidéos sont disponibles directement dans votre espace (Mes vidéos).': {
-    fr: 'Notre IA génère votre vidéo en quelques minutes. Vos vidéos sont disponibles directement dans votre espace (Mes vidéos).',
-    en: 'Our AI generates your video in minutes. Your videos are available directly in your space (My videos).',
-    es: 'Nuestra IA genera tu video en minutos. Tus videos están disponibles directamente en tu espacio (Mis videos).',
+  'Votre vidéo est générée automatiquement en quelques minutes et accessible dans votre espace "Mes vidéos".': {
+    fr: 'Votre vidéo est générée automatiquement en quelques minutes et accessible dans votre espace "Mes vidéos".',
+    en: 'Your video is automatically generated in minutes and accessible in your "My videos" space.',
+    es: 'Tu video se genera automáticamente en minutos y es accesible en tu espacio "Mis videos".',
   },
   'Publiez et monétisez': {
     fr: 'Publiez et monétisez',
     en: 'Publish and monetize',
     es: 'Publica y monetiza',
   },
-  'Téléchargez votre vidéo et publiez-la sur TikTok, Reels, YouTube Shorts ou toute autre plateforme. Les vidéos vous appartiennent à 100%.': {
-    fr: 'Téléchargez votre vidéo et publiez-la sur TikTok, Reels, YouTube Shorts ou toute autre plateforme. Les vidéos vous appartiennent à 100%.',
-    en: 'Download your video and publish it on TikTok, Reels, YouTube Shorts or any other platform. The videos belong to you 100%.',
-    es: 'Descarga tu video y publícalo en TikTok, Reels, YouTube Shorts o cualquier otra plataforma. Los videos te pertenecen al 100%.',
+  'Téléchargez votre vidéo et publiez-la sur TikTok, Reels, YouTube Shorts ou toute autre plateforme. Vous conservez l\'intégralité des droits sur vos vidéos.': {
+    fr: 'Téléchargez votre vidéo et publiez-la sur TikTok, Reels, YouTube Shorts ou toute autre plateforme. Vous conservez l\'intégralité des droits sur vos vidéos.',
+    en: 'Download your video and publish it on TikTok, Reels, YouTube Shorts or any other platform. You retain full rights to your videos.',
+    es: 'Descarga tu video y publícalo en TikTok, Reels, YouTube Shorts o cualquier otra plataforma. Conservas la totalidad de los derechos sobre tus videos.',
   },
 
   // ============================================
@@ -507,10 +512,10 @@ export const translations: Record<string, Record<Language, string>> = {
     en: 'Protected data',
     es: 'Datos protegidos',
   },
-  'Voir le carrousel': {
-    fr: 'Voir le carrousel',
-    en: 'View carousel',
-    es: 'Ver carrusel',
+  'Découvrir les créations': {
+    fr: 'Découvrir les créations',
+    en: 'Discover creations',
+    es: 'Descubrir creaciones',
   },
 
   // ============================================

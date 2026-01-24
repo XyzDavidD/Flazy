@@ -385,10 +385,10 @@ function Footer({ lang }: { lang: Language }) {
               {t('Politique de confidentialité', lang)}
             </Link>
             <a
-              href="mailto:Flazy.orders@gmail.com"
+              href="mailto:Support@flazy.app"
               className="text-text-muted hover:text-text-main transition-colors"
             >
-              Flazy.orders@gmail.com
+              Support@flazy.app
             </a>
           </div>
         </div>
@@ -406,7 +406,6 @@ export default function FAQPage() {
   // FAQ questions - we use the dictionary keys
   const faqQuestions = [
     'Combien de temps faut-il pour générer mes vidéos ?',
-    'Qui possède les vidéos générées ?',
     'Puis-je utiliser les vidéos à des fins commerciales ?',
     'Les vidéos contiennent-elles un filigrane ?',
     'Où puis-je publier mes vidéos ?',

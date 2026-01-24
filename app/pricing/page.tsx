@@ -545,18 +545,23 @@ export default function PricingPage() {
                     {/* Header section - centered with emoji next to title */}
                     <div className="flex items-center justify-center gap-2 mb-3 mt-2">
                       <Icon className="w-4 h-4 text-accent-orange-soft" />
-                      <div className="text-[11px] uppercase tracking-[0.14em] text-accent-orange-soft font-semibold">
-                        {plan.badge}
+                      <div className="text-[11px] uppercase tracking-[0.14em] text-accent-orange-soft font-semibold text-center leading-tight">
+                        {plan.badge.split(' ').map((word, idx) => (
+                          <React.Fragment key={idx}>
+                            {word}
+                            {idx === 0 && <br />}
+                          </React.Fragment>
+                        ))}
                       </div>
                     </div>
                     
                     {/* Content section - centered */}
-                    <div className="text-center mb-3">
+                    <div className="text-center mb-2">
                       <div className="text-[13px] text-text-soft font-medium">{plan.name}</div>
                     </div>
                     
                     {/* Bottom section with price and button - centered */}
-                    <div className="mt-auto pt-2 space-y-3 text-center">
+                    <div className="mt-auto pt-1 space-y-3 text-center">
                       <div className="flex flex-col items-center gap-0.5">
                         <span className="text-xl font-bold text-text-main">{plan.price}</span>
                         <span className="text-[10px] text-text-muted">Sans abonnement</span>

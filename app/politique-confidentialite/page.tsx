@@ -340,10 +340,10 @@ function Footer() {
               Politique de confidentialité
             </Link>
             <a
-              href="mailto:Flazy.orders@gmail.com"
+              href="mailto:Support@flazy.app"
               className="text-text-muted hover:text-text-main transition-colors"
             >
-              Flazy.orders@gmail.com
+              Support@flazy.app
             </a>
           </div>
         </div>
@@ -458,7 +458,7 @@ export default function PolitiqueConfidentialite() {
                 <li><strong>Droit à l'effacement :</strong> demander la suppression de vos données, dans les limites prévues par la loi</li>
               </ul>
               <p className="mb-3">
-                Pour exercer ces droits, contactez-nous à : <strong>Flazy.orders@gmail.com</strong>
+                Pour exercer ces droits, contactez-nous à : <strong>Support@flazy.app</strong>
               </p>
               <p>
                 Vous disposez également du droit d'introduire une réclamation auprès de l'autorité de contrôle compétente, notamment la CNIL.
@@ -505,7 +505,7 @@ export default function PolitiqueConfidentialite() {
             <section>
               <h2 className="text-xl font-bold text-text-main mb-3">12. Contact</h2>
               <p>
-                Pour toute question concernant cette politique de confidentialité ou vos données personnelles, contactez-nous à : <strong>Flazy.orders@gmail.com</strong>
+                Pour toute question concernant cette politique de confidentialité ou vos données personnelles, contactez-nous à : <strong>Support@flazy.app</strong>
               </p>
             </section>
 

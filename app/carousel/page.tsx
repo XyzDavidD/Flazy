@@ -14,6 +14,7 @@ import {
   Play,
   Video,
   Loader2,
+  Download,
 } from 'lucide-react'
 
 export default function CarouselPage() {
@@ -580,8 +581,9 @@ export default function CarouselPage() {
                       controlsList="nodownload nofullscreen noremoteplayback"
                       autoPlay={isCurrent}
                       preload={isCurrent ? 'auto' : isAdjacent ? 'metadata' : 'none'}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover pointer-events-none"
                       style={{ backgroundColor: '#000000' }}
+                      onContextMenu={(e) => e.preventDefault()}
                       onLoadStart={() => {
                         setVideoLoadingStates((prev) => {
                           const newMap = new Map(prev)
@@ -684,7 +686,7 @@ export default function CarouselPage() {
               aria-label={isMuted ? 'Activer le son' : 'Désactiver le son'}
               style={{ 
                 pointerEvents: 'auto',
-                bottom: 'max(calc(env(safe-area-inset-bottom) + 16px), 60px)',
+                bottom: 'max(calc(env(safe-area-inset-bottom) + 16px), 120px)',
               }}
             >
               {isMuted ? (
@@ -692,6 +694,30 @@ export default function CarouselPage() {
               ) : (
                 <Volume2 className="w-5 h-5 md:w-6 md:h-6 text-white" />
               )}
+            </button>
+
+            {/* Download button - below mute button */}
+            <button
+              onClick={() => {
+                const currentVideo = videos[currentIndex]
+                if (currentVideo) {
+                  const link = document.createElement('a')
+                  link.href = currentVideo.videoUrl
+                  link.download = 'flazy-video.mp4'
+                  link.target = '_blank'
+                  document.body.appendChild(link)
+                  link.click()
+                  document.body.removeChild(link)
+                }
+              }}
+              className="absolute right-4 z-30 w-10 h-10 md:w-12 md:h-12 rounded-full bg-black/70 backdrop-blur-sm border border-white/30 flex items-center justify-center hover:bg-black/90 transition-all duration-200 touch-manipulation shadow-lg"
+              aria-label="Télécharger la vidéo"
+              style={{ 
+                pointerEvents: 'auto',
+                bottom: 'max(calc(env(safe-area-inset-bottom) + 16px), 60px)',
+              }}
+            >
+              <Download className="w-5 h-5 md:w-6 md:h-6 text-white" />
             </button>
 
             {/* Swipe indicator - only on first video, onboarding - visible until first swipe */}

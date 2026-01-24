@@ -340,10 +340,10 @@ function Footer() {
               Politique de confidentialité
             </Link>
             <a
-              href="mailto:Flazy.orders@gmail.com"
+              href="mailto:Support@flazy.app"
               className="text-text-muted hover:text-text-main transition-colors"
             >
-              Flazy.orders@gmail.com
+              Support@flazy.app
             </a>
           </div>
         </div>

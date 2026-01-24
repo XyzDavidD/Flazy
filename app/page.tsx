@@ -552,6 +552,7 @@ function StepsSection() {
 // Form Section Component
 function FormSection() {
   const [prompt, setPrompt] = useState('')
+  const [allowPublic, setAllowPublic] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
@@ -655,7 +656,10 @@ function FormSection() {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${session.access_token}`,
           },
-          body: JSON.stringify({ prompt: prompt.trim() }),
+          body: JSON.stringify({ 
+            prompt: prompt.trim(),
+            allowPublic: allowPublic 
+          }),
           signal: controller.signal,
         })
         clearTimeout(timeoutId)
@@ -693,6 +697,7 @@ function FormSection() {
 
       setSuccess(true)
       setPrompt('')
+      setAllowPublic(false)
       
       // Realtime subscription will update credits automatically
       // Call refresh immediately as fallback (realtime might have a small delay)
@@ -799,22 +804,49 @@ function FormSection() {
               <span className="font-semibold">{t('Décrivez votre vidéo', lang)}</span>
             </div>
 
+            <div className="text-xs text-text-muted mb-2">
+              {t('Exemple', lang)}
+            </div>
+
             <textarea
               id="prompt"
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               rows={4}
               disabled={false}
-              className="w-full min-h-[100px] resize-y rounded-2xl border border-[rgba(75,85,99,0.95)] bg-[rgba(15,23,42,0.96)] text-text-main px-4 py-3 text-[13px] outline-none transition-all duration-[0.18s] ease-out placeholder:text-text-muted focus:border-accent-orange-soft focus:shadow-[0_0_0_1px_rgba(248,181,86,0.6)] focus:bg-[rgba(15,23,42,0.98)] disabled:opacity-50 disabled:cursor-not-allowed"
-              placeholder="« Une femme élégante explique comment elle a augmenté ses ventes grâce aux vidéos courtes générées par l'IA. »"
+              className="w-full min-h-[100px] resize-none rounded-2xl border border-[rgba(75,85,99,0.95)] bg-[rgba(15,23,42,0.96)] text-text-main px-4 py-3 text-[13px] outline-none transition-all duration-[0.18s] ease-out placeholder:text-text-muted focus:border-accent-orange-soft focus:shadow-[0_0_0_1px_rgba(248,181,86,0.6)] focus:bg-[rgba(15,23,42,0.98)] disabled:opacity-50 disabled:cursor-not-allowed"
+              placeholder={t('prompt_example', lang)}
               required
             />
+
+            <div className="mt-3">
+              <label className="flex items-center gap-2.5 cursor-pointer group">
+                <div className="relative flex items-center justify-center">
+                  <input
+                    type="checkbox"
+                    checked={allowPublic}
+                    onChange={(e) => setAllowPublic(e.target.checked)}
+                    className="peer sr-only"
+                  />
+                  <div className="w-4 h-4 rounded border-2 border-[rgba(75,85,99,0.95)] bg-[rgba(15,23,42,0.96)] peer-checked:bg-gradient-to-br peer-checked:from-[#ff8a1f] peer-checked:via-[#ffd700] peer-checked:to-[#ff4b2b] peer-checked:border-[rgba(248,181,86,0.8)] transition-all duration-200 flex items-center justify-center">
+                    {allowPublic && (
+                      <svg className="w-2.5 h-2.5 text-[#111827] font-bold" fill="none" strokeWidth="3" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                    )}
+                  </div>
+                </div>
+                <span className="text-[12px] text-text-soft group-hover:text-text-main transition-colors leading-snug">
+                  Autoriser la publication de cette vidéo dans le feed public
+                </span>
+              </label>
+            </div>
 
             <div className="mt-4 flex items-center justify-end gap-4 text-[11px] text-text-muted">
               <button
                 type="submit"
                 disabled={isLoading}
-                className="relative overflow-hidden bg-transparent text-[#111827] shadow-[0_18px_45px_rgba(0,0,0,0.75)] z-0 rounded-full border-none text-[13px] font-semibold px-[26px] py-3 h-[42px] inline-flex items-center justify-center gap-2 whitespace-nowrap text-center min-w-[140px] transition-all duration-[0.18s] ease-out hover:-translate-y-px hover:shadow-[0_22px_60px_rgba(0,0,0,0.95)] disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+                className="relative overflow-hidden bg-transparent text-[#111827] shadow-[0_18px_45px_rgba(0,0,0,0.75)] z-0 rounded-full border-none text-[13px] font-semibold px-[23px] py-[11px] h-[38px] inline-flex items-center justify-center gap-2 whitespace-nowrap text-center min-w-[140px] transition-all duration-[0.18s] ease-out hover:-translate-y-px hover:shadow-[0_22px_60px_rgba(0,0,0,0.95)] disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0"
                 style={{
                   position: 'relative',
                 }}
@@ -843,7 +875,15 @@ function FormSection() {
           </div>
 
           <div className="text-[13px] text-text-soft">
-            <div className="p-2.5 md:p-3 rounded-xl bg-[rgba(15,23,42,0.5)] border border-[rgba(51,65,85,0.3)]">
+            <div 
+              className="p-4 md:p-5 rounded-[22px] border border-[rgba(252,211,77,0.75)] shadow-[0_18px_40px_rgba(0,0,0,0.8)]"
+              style={{
+                background: `
+                  radial-gradient(circle at top, rgba(255, 138, 31, 0.22), transparent 60%),
+                  rgba(6, 9, 22, 0.98)
+                `
+              }}
+            >
               <p className="text-xs text-text-muted leading-snug md:leading-relaxed m-0">
                 Une fois votre prompt envoyé, la vidéo est générée automatiquement en quelques minutes.<br />
                 Elle est disponible dans votre espace (Mes vidéos).
@@ -1105,7 +1145,8 @@ function ExamplesSection() {
                     playsInline
                     disablePictureInPicture
                     controlsList="nodownload nofullscreen noremoteplayback"
-                    className="w-full h-full block object-cover"
+                    onContextMenu={(e) => e.preventDefault()}
+                    className="w-full h-full block object-cover pointer-events-none"
                   />
                   {/* Play icon - visible at start (when not playing) or when paused */}
                   {playingIndex !== i && (
@@ -1292,7 +1333,6 @@ function FAQSection() {
   // FAQ questions - we use the dictionary keys
   const faqQuestions = [
     'Combien de temps faut-il pour générer mes vidéos ?',
-    'Qui possède les vidéos générées ?',
     'Puis-je utiliser les vidéos à des fins commerciales ?',
     'Les vidéos contiennent-elles un filigrane ?',
     'Où puis-je publier mes vidéos ?',
@@ -1360,25 +1400,25 @@ function HowItWorksSection() {
     {
       number: '1',
       title: 'Choisissez votre pack',
-      description: 'Sélectionnez le pack qui correspond à vos besoins (Starter, Creator, Pro ou Boost) et complétez votre paiement sécurisé.',
+      description: 'Sélectionnez le pack qui correspond à vos besoins (Starter, Creator, Pro ou Boost), puis finalisez votre commande.',
       icon: CheckCircle2,
     },
     {
       number: '2',
       title: 'Décrivez votre vidéo',
-      description: 'Rédigez un prompt détaillé décrivant la vidéo que vous souhaitez générer : personnage, lieu, ton, style, etc.',
+      description: 'Décrivez la vidéo que vous souhaitez générer : sujet, ambiance, style.',
       icon: Video,
     },
     {
       number: '3',
       title: 'Génération automatique',
-      description: 'Notre IA génère votre vidéo en quelques minutes. Vos vidéos sont disponibles directement dans votre espace (Mes vidéos).',
+      description: 'Votre vidéo est générée automatiquement en quelques minutes et accessible dans votre espace "Mes vidéos".',
       icon: Rocket,
     },
     {
       number: '4',
       title: 'Publiez et monétisez',
-      description: 'Téléchargez votre vidéo et publiez-la sur TikTok, Reels, YouTube Shorts ou toute autre plateforme. Les vidéos vous appartiennent à 100%.',
+      description: 'Téléchargez votre vidéo et publiez-la sur TikTok, Reels, YouTube Shorts ou toute autre plateforme. Vous conservez l\'intégralité des droits sur vos vidéos.',
       icon: CheckCircle2,
     },
   ]
@@ -1445,10 +1485,10 @@ function Footer() {
               {t('Politique de confidentialité', lang)}
             </Link>
             <a
-              href="mailto:Flazy.orders@gmail.com"
+              href="mailto:Support@flazy.app"
               className="text-text-muted hover:text-text-main transition-colors"
             >
-              Flazy.orders@gmail.com
+              Support@flazy.app
             </a>
           </div>
         </div>
@@ -1532,10 +1572,18 @@ export default function Home() {
                 </Link>
                 <Link
                   href="/carousel"
-                  className="bg-transparent text-accent-orange-soft border border-[rgba(248,181,86,0.95)] shadow-[0_0_0_1px_rgba(248,181,86,0.4)] rounded-full text-[13px] font-semibold px-6 py-3 inline-flex items-center justify-center gap-2 transition-all duration-[0.18s] ease-out hover:bg-[radial-gradient(circle_at_top_left,rgba(255,138,31,0.16),transparent_70%)] hover:border-[rgba(248,181,86,1)]"
+                  className="relative overflow-hidden bg-transparent text-[#111827] shadow-[0_18px_45px_rgba(0,0,0,0.75)] z-0 rounded-full border-none text-[13px] font-semibold px-6 py-3 cursor-pointer inline-flex items-center gap-2 transition-all duration-[0.18s] ease-out hover:-translate-y-px hover:shadow-[0_22px_60px_rgba(0,0,0,0.95)]"
+                  style={{
+                    position: 'relative',
+                  }}
                 >
+                  <span className="absolute inset-0 -z-10 rounded-full" style={{
+                    backgroundImage: 'linear-gradient(90deg, #ff6b00 0%, #ffd700 25%, #ff4b2b 50%, #ffd700 75%, #ff6b00 100%)',
+                    backgroundSize: '220% 100%',
+                    animation: 'flazyTopbar 10s ease-in-out infinite alternate'
+                  }}></span>
                   <Video className="w-4 h-4" />
-                  <span>Voir le carrousel</span>
+                  <span>Découvrir les créations</span>
                 </Link>
               </div>
             </div>

@@ -341,10 +341,10 @@ function Footer() {
               Politique de confidentialité
             </Link>
             <a
-              href="mailto:Flazy.orders@gmail.com"
+              href="mailto:Support@flazy.app"
               className="text-text-muted hover:text-text-main transition-colors"
             >
-              Flazy.orders@gmail.com
+              Support@flazy.app
             </a>
           </div>
         </div>
@@ -380,7 +380,7 @@ export default function MentionsLegales() {
                 FLAZY est une plateforme de génération de vidéos par intelligence artificielle.
               </p>
               <p className="mb-3">
-                <strong>Email :</strong> Flazy.orders@gmail.com
+                <strong>Email :</strong> Support@flazy.app
               </p>
               <p>
                 Cet email constitue le point de contact officiel pour toute demande liée au service.

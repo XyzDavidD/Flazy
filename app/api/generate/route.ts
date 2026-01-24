@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { prompt } = body
+    const { prompt, allowPublic } = body
 
     if (!prompt || typeof prompt !== 'string' || prompt.trim() === '') {
       return NextResponse.json(
@@ -112,6 +112,7 @@ export async function POST(request: NextRequest) {
               <p><strong>Email utilisateur:</strong> ${user.email}</p>
               <p><strong>ID utilisateur:</strong> ${user.id}</p>
               <p><strong>Crédits restants:</strong> ${remainingCredits}</p>
+              <p><strong>Autorisation feed public:</strong> ${allowPublic ? 'Oui' : 'Non'}</p>
             </div>
 
             <div style="background-color: white; padding: 20px; border-radius: 8px;">
