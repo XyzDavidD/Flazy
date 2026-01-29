@@ -11,6 +11,8 @@ import {
   Lock,
   Shield,
   ChevronDown,
+  Camera,
+  Eye,
   Play,
   Pause,
   Menu,
@@ -131,14 +133,13 @@ function Header() {
             />
             <div>
               <div className="font-extrabold tracking-[0.08em] uppercase text-[15px]">FLAZY</div>
-              <div className="text-[11px] text-text-muted">Vidéos IA virales prêtes à poster</div>
             </div>
           </Link>
         </div>
 
         <div className="hidden lg:flex items-center gap-[18px] text-[13px] text-text-muted absolute left-1/2 -translate-x-1/2">
           <Link
-            href="/carousel"
+            href="/creations"
             className="relative cursor-pointer transition-colors duration-[0.18s] ease-out hover:text-text-main after:content-[''] after:absolute after:left-0 after:-bottom-[6px] after:w-0 after:h-0.5 after:rounded-full after:bg-gradient-to-r after:from-[#ffb347] after:via-[#ff8a1f] after:to-[#ff4b2b] after:transition-all after:duration-[0.18s] after:ease-out hover:after:w-[18px]"
           >
             Creations
@@ -158,14 +159,14 @@ function Header() {
         </div>
 
         <div className="flex items-center gap-3">
-          {/* Language Selector - Compact */}
-          <div className="hidden sm:block relative language-dropdown" data-no-translate>
+          {/* Language Selector - Mobile (Top Bar) */}
+          <div className="sm:hidden relative language-dropdown" data-no-translate>
             <button
               onClick={() => {
                 setLanguageDropdownOpen(!languageDropdownOpen)
                 setAccountDropdownOpen(false)
               }}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border border-[rgba(148,163,184,0.7)] bg-transparent text-text-soft text-[13px] font-medium transition-all duration-[0.18s] ease-out hover:bg-[rgba(15,23,42,0.9)] hover:text-text-main hover:border-[rgba(203,213,225,0.9)]"
+              className="flex items-center gap-1 px-1.5 py-1 rounded-full bg-transparent text-text-soft text-[13px] font-medium transition-colors duration-150 hover:text-text-main"
               aria-label="Select language"
               disabled={isTranslating}
             >
@@ -177,18 +178,54 @@ function Header() {
               )}
             </button>
             {languageDropdownOpen && (
-              <div className="absolute right-0 mt-2 w-40 rounded-xl bg-[rgba(6,9,22,0.98)] border border-[rgba(252,211,77,0.75)] shadow-lg overflow-hidden z-50" data-no-translate>
+              <div className="absolute right-0 mt-2 w-24 rounded-xl bg-[rgba(6,9,22,0.98)] border border-[rgba(252,211,77,0.75)] shadow-lg overflow-hidden z-50" data-no-translate>
                 {languages.filter(lang => lang.code !== currentLanguage).map((lang) => (
                   <button
                     key={lang.code}
                     onClick={() => handleLanguageChange(lang.code as 'fr' | 'en' | 'es')}
                     disabled={isTranslating}
-                    className={`w-full text-left px-4 py-2.5 text-sm transition-colors flex items-center gap-2.5 ${
+                    className={`w-full text-left px-3 py-2 text-sm transition-colors flex items-center gap-2 ${
                       'text-text-soft hover:bg-[rgba(15,23,42,0.5)] hover:text-text-main'
                     } ${isTranslating ? 'opacity-50 cursor-wait' : ''}`}
                   >
                     <span className="text-base">{lang.flag}</span>
-                    <span>{lang.name}</span>
+                    <span className="text-[11px] font-semibold tracking-[0.18em]">{lang.code.toUpperCase()}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          {/* Language Selector - Compact */}
+          <div className="hidden sm:block relative language-dropdown" data-no-translate>
+            <button
+              onClick={() => {
+                setLanguageDropdownOpen(!languageDropdownOpen)
+                setAccountDropdownOpen(false)
+              }}
+              className="flex items-center gap-1 px-1.5 py-1 rounded-full bg-transparent text-text-soft text-[13px] font-medium transition-colors duration-150 hover:text-text-main"
+              aria-label="Select language"
+              disabled={isTranslating}
+            >
+              <span className="text-base leading-none">{currentLang.flag}</span>
+              {isTranslating ? (
+                <Loader2 className="w-3 h-3 animate-spin" />
+              ) : (
+                <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${languageDropdownOpen ? 'rotate-180' : ''}`} />
+              )}
+            </button>
+            {languageDropdownOpen && (
+              <div className="absolute right-0 mt-2 w-24 rounded-xl bg-[rgba(6,9,22,0.98)] border border-[rgba(252,211,77,0.75)] shadow-lg overflow-hidden z-50" data-no-translate>
+                {languages.filter(lang => lang.code !== currentLanguage).map((lang) => (
+                  <button
+                    key={lang.code}
+                    onClick={() => handleLanguageChange(lang.code as 'fr' | 'en' | 'es')}
+                    disabled={isTranslating}
+                    className={`w-full text-left px-3 py-2 text-sm transition-colors flex items-center gap-2 ${
+                      'text-text-soft hover:bg-[rgba(15,23,42,0.5)] hover:text-text-main'
+                    } ${isTranslating ? 'opacity-50 cursor-wait' : ''}`}
+                  >
+                    <span className="text-base">{lang.flag}</span>
+                    <span className="text-[11px] font-semibold tracking-[0.18em]">{lang.code.toUpperCase()}</span>
                   </button>
                 ))}
               </div>
@@ -270,7 +307,7 @@ function Header() {
         <div className="lg:hidden pb-4 px-5 space-y-1 border-t border-[rgba(51,65,85,0.5)] pt-4 relative z-50">
           <div className="space-y-1 mb-3">
             <Link
-              href="/carousel"
+              href="/creations"
               className="block w-full text-left px-4 py-2.5 text-sm text-text-soft hover:text-text-main hover:bg-[rgba(15,23,42,0.5)] rounded-lg transition-colors touch-manipulation"
               onClick={(e) => {
                 setMobileMenuOpen(false)
@@ -301,46 +338,6 @@ function Header() {
             </Link>
           </div>
 
-          {/* Language Selector - Mobile */}
-          <div className="border-t border-[rgba(51,65,85,0.5)] pt-3 mt-3 language-dropdown" data-no-translate>
-            <button
-              onClick={() => {
-                setLanguageDropdownOpen(!languageDropdownOpen)
-              }}
-              className="w-full text-left px-4 py-2.5 text-sm rounded-lg transition-colors flex items-center justify-between touch-manipulation text-text-soft hover:text-text-main hover:bg-[rgba(15,23,42,0.5)]"
-              disabled={isTranslating}
-            >
-              <div className="flex items-center gap-3">
-                <span className="text-lg">{currentLang.flag}</span>
-                <span>{currentLang.name}</span>
-              </div>
-              {isTranslating ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${languageDropdownOpen ? 'rotate-180' : ''}`} />
-              )}
-            </button>
-            {languageDropdownOpen && (
-              <div className="mt-1 space-y-1" data-no-translate>
-                {languages.filter(lang => lang.code !== currentLanguage).map((lang) => (
-                  <button
-                    key={lang.code}
-                    onClick={() => {
-                      handleLanguageChange(lang.code as 'fr' | 'en' | 'es')
-                    }}
-                    disabled={isTranslating}
-                    className={`w-full text-left px-4 py-2.5 text-sm rounded-lg transition-colors flex items-center gap-3 touch-manipulation ${
-                      'text-text-soft hover:text-text-main hover:bg-[rgba(15,23,42,0.5)]'
-                    } ${isTranslating ? 'opacity-50 cursor-wait' : ''}`}
-                  >
-                    <span className="text-lg">{lang.flag}</span>
-                    <span>{lang.name}</span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-          
           <div className="border-t border-[rgba(51,65,85,0.5)] pt-3 mt-3">
             {user ? (
               <>
@@ -433,24 +430,26 @@ function Hero() {
             <div className="flex flex-wrap gap-2.5 mb-4 justify-center">
               <button
                 onClick={scrollToForm}
-                className="relative overflow-hidden bg-transparent text-[#111827] shadow-[0_18px_45px_rgba(0,0,0,0.75)] z-0 rounded-full border-none text-[13px] font-semibold px-6 py-3 cursor-pointer inline-flex items-center gap-2 transition-all duration-[0.18s] ease-out hover:-translate-y-px hover:shadow-[0_22px_60px_rgba(0,0,0,0.95)]"
+                className="relative overflow-hidden bg-transparent text-white shadow-[0_18px_45px_rgba(0,0,0,0.75)] z-0 rounded-full border-none text-[13px] font-semibold px-6 py-3 cursor-pointer inline-flex items-center gap-2"
                 style={{
                   position: 'relative',
                 }}
               >
                 <span className="absolute inset-0 -z-10 rounded-full" style={{
-                  backgroundImage: 'linear-gradient(90deg, #ff6b00 0%, #ffd700 25%, #ff4b2b 50%, #ffd700 75%, #ff6b00 100%)',
-                  backgroundSize: '220% 100%',
-                  animation: 'flazyTopbar 10s ease-in-out infinite alternate'
+                  backgroundColor: '#ff8a1f'
                 }}></span>
-                <Video className="w-4 h-4" />
+                <Camera className="w-4 h-4" />
                 Créer ma vidéo virale
               </button>
 
               <Link
-                href="/carousel"
-                className="bg-transparent text-white border border-[rgba(248,181,86,0.95)] shadow-[0_0_0_1px_rgba(248,181,86,0.4)] rounded-full text-[13px] font-semibold px-6 py-3 cursor-pointer inline-flex items-center gap-2 transition-all duration-[0.18s] ease-out hover:bg-[radial-gradient(circle_at_top_left,rgba(255,138,31,0.16),transparent_70%)] hover:border-[rgba(248,181,86,1)]"
+                href="/creations"
+                className="relative overflow-hidden bg-transparent text-white shadow-[0_14px_35px_rgba(0,0,0,0.7)] z-0 rounded-full border-none text-[13px] font-semibold px-6 py-3 cursor-pointer inline-flex items-center gap-2"
               >
+                <span className="absolute inset-0 -z-10 rounded-full" style={{
+                  backgroundColor: '#d97706'
+                }}></span>
+                <Eye className="w-4 h-4" />
                 Découvrir les créations
               </Link>
             </div>
@@ -473,10 +472,6 @@ function FeaturesSection() {
           <h2 className="text-[28px] lg:text-[32px] mb-3 font-extrabold leading-tight">
             Des vidéos pensées pour la viralité prêtes à poster
           </h2>
-          <p className="text-[14px] lg:text-[15px] text-text-soft max-w-[600px] leading-relaxed">
-            FLAZY combine intelligence artificielle et formats courts pour créer des vidéos qui accrochent dès la
-            première seconde.
-          </p>
         </div>
       </div>
     </section>
@@ -495,9 +490,6 @@ function StepsSection() {
           <h2 className="text-[28px] lg:text-[32px] mb-3 font-extrabold leading-tight">
             En 3 étapes, vos vidéos IA sont prêtes à publier
           </h2>
-          <p className="text-[14px] lg:text-[15px] text-text-soft max-w-[600px] leading-relaxed">
-            Choisissez votre pack, décrivez la vidéo que vous voulez, et retrouvez vos vidéos prêtes à poster dans votre espace (Mes vidéos).
-          </p>
         </div>
 
         <div className="grid md:grid-cols-3 gap-4 md:gap-5">
@@ -510,7 +502,7 @@ function StepsSection() {
             },
             {
               step: '2',
-              title: 'Décrivez la vidéo que vous voulez',
+              title: 'Décrivez votre prompt',
               text: 'Écrivez un prompt simple : type de vidéo, ambiance, message, langue. FLAZY gère les hooks, le rythme et la structure.',
               icon: Video,
             },
@@ -722,21 +714,12 @@ function FormSection() {
     <section className="prompt-section pt-10 md:pt-12 pb-2 md:pb-4">
       <div className="max-w-[1120px] mx-auto px-5">
         <div className="text-left mb-6 md:mb-8">
-          <div className="text-[11px] uppercase tracking-[0.16em] mb-1.5 font-semibold text-accent-orange">
-            Décrivez la vidéo que vous voulez
-          </div>
-          <h2 className="text-[28px] lg:text-[32px] mb-3 font-extrabold leading-tight">
-            Vous écrivez le prompt, FLAZY s'occupe du reste
-          </h2>
-          <p className="text-[14px] lg:text-[15px] text-text-soft max-w-[600px] leading-relaxed">
-            Donnez quelques indications simples et laissez FLAZY transformer vos idées en vidéos prêtes à poster.
-          </p>
           <div className="mt-4 inline-flex items-center px-4 py-2 rounded-full bg-[rgba(255,138,31,0.1)] border border-[rgba(255,138,31,0.3)]">
             <div className="relative flex items-center w-2 h-2">
               <div className="absolute w-2 h-2 bg-[#22c55e] rounded-full animate-pulse"></div>
               <div className="absolute w-2 h-2 bg-[#22c55e] rounded-full animate-ping opacity-75"></div>
             </div>
-            <span className="text-[13px] text-text-soft font-medium ml-2.5">
+            <span className="text-[13px] text-text-soft font-medium ml-1.5">
               <strong className="text-accent-orange-soft">{displayedGenerations}</strong>{' '}générations en cours
             </span>
           </div>
@@ -773,13 +756,11 @@ function FormSection() {
               </p>
               <Link
                 href="/pricing"
-                className="relative overflow-hidden bg-transparent text-[#111827] shadow-[0_18px_45px_rgba(0,0,0,0.75)] z-0 rounded-full border-none text-[13px] font-semibold px-6 py-3 inline-flex items-center justify-center gap-2 transition-all duration-[0.18s] ease-out hover:-translate-y-px hover:shadow-[0_22px_60px_rgba(0,0,0,0.95)]"
+                className="relative overflow-hidden bg-transparent text-white shadow-[0_18px_45px_rgba(0,0,0,0.75)] z-0 rounded-full border-none text-[13px] font-semibold px-6 py-3 inline-flex items-center justify-center gap-2 transition-all duration-[0.18s] ease-out hover:-translate-y-px hover:shadow-[0_22px_60px_rgba(0,0,0,0.95)]"
                 style={{ position: 'relative' }}
               >
                 <span className="absolute inset-0 -z-10 rounded-full" style={{
-                  backgroundImage: 'linear-gradient(90deg, #ff6b00 0%, #ffd700 25%, #ff4b2b 50%, #ffd700 75%, #ff6b00 100%)',
-                  backgroundSize: '220% 100%',
-                  animation: 'flazyTopbar 10s ease-in-out infinite alternate'
+                  backgroundColor: '#ff8a1f'
                 }}></span>
                 Recharger vos tokens
               </Link>
@@ -804,10 +785,6 @@ function FormSection() {
               <span className="font-semibold">{t('Décrivez votre vidéo', lang)}</span>
             </div>
 
-            <div className="text-xs text-text-muted mb-2">
-              {t('Exemple', lang)}
-            </div>
-
             <textarea
               id="prompt"
               value={prompt}
@@ -815,7 +792,7 @@ function FormSection() {
               rows={4}
               disabled={false}
               className="w-full min-h-[100px] resize-none rounded-2xl border border-[rgba(75,85,99,0.95)] bg-[rgba(15,23,42,0.96)] text-text-main px-4 py-3 text-[13px] outline-none transition-all duration-[0.18s] ease-out placeholder:text-text-muted focus:border-accent-orange-soft focus:shadow-[0_0_0_1px_rgba(248,181,86,0.6)] focus:bg-[rgba(15,23,42,0.98)] disabled:opacity-50 disabled:cursor-not-allowed"
-              placeholder={t('prompt_example', lang)}
+              placeholder={`${t('Exemple', lang)} ${t('prompt_example', lang)}`}
               required
             />
 
@@ -846,15 +823,13 @@ function FormSection() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="relative overflow-hidden bg-transparent text-[#111827] shadow-[0_18px_45px_rgba(0,0,0,0.75)] z-0 rounded-full border-none text-[13px] font-semibold px-[23px] py-[11px] h-[38px] inline-flex items-center justify-center gap-2 whitespace-nowrap text-center min-w-[140px] transition-all duration-[0.18s] ease-out hover:-translate-y-px hover:shadow-[0_22px_60px_rgba(0,0,0,0.95)] disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+                className="relative overflow-hidden bg-transparent text-white shadow-[0_18px_45px_rgba(0,0,0,0.75)] z-0 rounded-full border-none text-[13px] font-semibold px-[23px] py-[11px] h-[38px] inline-flex items-center justify-center gap-2 whitespace-nowrap text-center min-w-[140px] transition-all duration-[0.18s] ease-out hover:-translate-y-px hover:shadow-[0_22px_60px_rgba(0,0,0,0.95)] disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0"
                 style={{
                   position: 'relative',
                 }}
               >
                 <span className="absolute inset-0 -z-10 rounded-full" style={{
-                  backgroundImage: 'linear-gradient(90deg, #ff6b00 0%, #ffd700 25%, #ff4b2b 50%, #ffd700 75%, #ff6b00 100%)',
-                  backgroundSize: '220% 100%',
-                  animation: 'flazyTopbar 10s ease-in-out infinite alternate'
+                  backgroundColor: '#ff8a1f'
                 }}></span>
                 {isLoading ? (
                   <>
@@ -885,8 +860,7 @@ function FormSection() {
               }}
             >
               <p className="text-xs text-text-muted leading-snug md:leading-relaxed m-0">
-                Une fois votre prompt envoyé, la vidéo est générée automatiquement en quelques minutes.<br />
-                Elle est disponible dans votre espace (Mes vidéos).
+                Une fois votre prompt envoyé, la vidéo est générée automatiquement en quelques minutes. Elle est disponible dans votre espace (Mes vidéos).
               </p>
             </div>
           </div>
@@ -1116,7 +1090,6 @@ function ExamplesSection() {
             Aperçu des vidéos que vous pouvez générer avec FLAZY
           </h2>
           <p className="text-[14px] lg:text-[15px] text-text-soft max-w-[600px] leading-relaxed">
-            Chaque exemple ci-dessous illustre un type de vidéo que vous pouvez générer avec FLAZY.
           </p>
         </div>
 
@@ -1550,41 +1523,24 @@ export default function Home() {
         <Hero />
         <FormSection />
         <ExamplesSection />
-        <HowItWorksSection />
         <div className="py-8 md:py-10 pb-2 md:pb-4">
           <div className="max-w-[1120px] mx-auto px-5">
             <div className="text-center space-y-4">
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Link
                   href="/pricing"
-                  className="relative overflow-hidden bg-transparent text-[#111827] shadow-[0_18px_45px_rgba(0,0,0,0.75)] z-0 rounded-full border-none text-[13px] font-semibold px-6 py-3 cursor-pointer inline-flex items-center gap-2 transition-all duration-[0.18s] ease-out hover:-translate-y-px hover:shadow-[0_22px_60px_rgba(0,0,0,0.95)]"
+                  className="relative overflow-hidden bg-transparent text-white shadow-[0_18px_45px_rgba(0,0,0,0.75)] z-0 rounded-full border-none text-[13px] font-semibold px-6 py-3 cursor-pointer inline-flex items-center gap-2 transition-all duration-[0.18s] ease-out hover:-translate-y-px hover:shadow-[0_22px_60px_rgba(0,0,0,0.95)]"
                   style={{
                     position: 'relative',
                   }}
                 >
                   <span className="absolute inset-0 -z-10 rounded-full" style={{
-                    backgroundImage: 'linear-gradient(90deg, #ff6b00 0%, #ffd700 25%, #ff4b2b 50%, #ffd700 75%, #ff6b00 100%)',
-                    backgroundSize: '220% 100%',
-                    animation: 'flazyTopbar 10s ease-in-out infinite alternate'
+                    backgroundColor: '#ff8a1f'
                   }}></span>
-                  <span>Découvrez nos tarifs</span>
+                  <span>Choisir une offre</span>
                   <ChevronRight className="w-4 h-4" />
                 </Link>
-                <Link
-                  href="/carousel"
-                  className="relative overflow-hidden bg-transparent text-[#111827] shadow-[0_18px_45px_rgba(0,0,0,0.75)] z-0 rounded-full border-none text-[13px] font-semibold px-6 py-3 cursor-pointer inline-flex items-center gap-2 transition-all duration-[0.18s] ease-out hover:-translate-y-px hover:shadow-[0_22px_60px_rgba(0,0,0,0.95)]"
-                  style={{
-                    position: 'relative',
-                  }}
-                >
-                  <span className="absolute inset-0 -z-10 rounded-full" style={{
-                    backgroundImage: 'linear-gradient(90deg, #ff6b00 0%, #ffd700 25%, #ff4b2b 50%, #ffd700 75%, #ff6b00 100%)',
-                    backgroundSize: '220% 100%',
-                    animation: 'flazyTopbar 10s ease-in-out infinite alternate'
-                  }}></span>
-                  <Video className="w-4 h-4" />
-                  <span>Découvrir les créations</span>
-                </Link>
+                
               </div>
             </div>
           </div>

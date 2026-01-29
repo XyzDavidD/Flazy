@@ -729,17 +729,17 @@ export default function CarouselPage() {
             {/* Mute button - bottom right, small and discreet */}
             <button
               onClick={toggleMute}
-              className="absolute right-4 z-30 w-10 h-10 md:w-12 md:h-12 rounded-full bg-black/70 backdrop-blur-sm border border-white/30 flex items-center justify-center hover:bg-black/90 transition-all duration-200 touch-manipulation shadow-lg"
+              className="absolute right-4 z-30 w-9 h-9 md:w-11 md:h-11 rounded-full bg-black/70 backdrop-blur-sm border border-white/30 flex items-center justify-center hover:bg-black/90 transition-all duration-200 touch-manipulation shadow-lg"
               aria-label={isMuted ? 'Activer le son' : 'Désactiver le son'}
               style={{ 
                 pointerEvents: 'auto',
-                bottom: 'max(calc(env(safe-area-inset-bottom) + 16px), 120px)',
+                bottom: 'max(calc(env(safe-area-inset-bottom) + 12px), 96px)',
               }}
             >
               {isMuted ? (
-                <VolumeX className="w-5 h-5 md:w-6 md:h-6 text-white" />
+                <VolumeX className="w-4 h-4 md:w-5 md:h-5 text-white" />
               ) : (
-                <Volume2 className="w-5 h-5 md:w-6 md:h-6 text-white" />
+                <Volume2 className="w-4 h-4 md:w-5 md:h-5 text-white" />
               )}
             </button>
 
@@ -757,14 +757,14 @@ export default function CarouselPage() {
                   document.body.removeChild(link)
                 }
               }}
-              className="absolute right-4 z-30 w-10 h-10 md:w-12 md:h-12 rounded-full bg-black/70 backdrop-blur-sm border border-white/30 flex items-center justify-center hover:bg-black/90 transition-all duration-200 touch-manipulation shadow-lg"
+              className="absolute right-4 z-30 w-9 h-9 md:w-11 md:h-11 rounded-full bg-black/70 backdrop-blur-sm border border-white/30 flex items-center justify-center hover:bg-black/90 transition-all duration-200 touch-manipulation shadow-lg"
               aria-label="Télécharger la vidéo"
               style={{ 
                 pointerEvents: 'auto',
-                bottom: 'max(calc(env(safe-area-inset-bottom) + 16px), 60px)',
+                bottom: 'max(calc(env(safe-area-inset-bottom) + 12px), 44px)',
               }}
             >
-              <Download className="w-5 h-5 md:w-6 md:h-6 text-white" />
+              <Download className="w-4 h-4 md:w-5 md:h-5 text-white" />
             </button>
 
             {/* Swipe indicator - only on first video, onboarding - visible until first swipe */}
@@ -804,28 +804,28 @@ export default function CarouselPage() {
 
             {/* Desktop navigation arrows - right side */}
             {videos.length > 1 && (
-              <div className="hidden md:flex flex-col gap-4 absolute right-4 top-1/2 -translate-y-1/2 z-20">
+              <div className="hidden md:flex flex-col gap-4 absolute right-4 top-[55%] -translate-y-1/2 z-20">
                 <button
                   onClick={(e) => {
                     e.stopPropagation()
                     goToPrevious()
                   }}
-                  className="w-12 h-12 rounded-full bg-black/70 backdrop-blur-sm border-2 border-white/30 flex items-center justify-center hover:bg-black/90 hover:scale-110 hover:border-white/50 transition-all duration-200 shadow-lg"
+                  className="w-11 h-11 rounded-full bg-black/70 backdrop-blur-sm border-2 border-white/30 flex items-center justify-center hover:bg-black/90 hover:scale-110 hover:border-white/50 transition-all duration-200 shadow-lg"
                   aria-label="Vidéo précédente"
                   title="Vidéo précédente (↑)"
                 >
-                  <ChevronUp className="w-6 h-6 text-white" />
+                  <ChevronUp className="w-5 h-5 text-white" />
                 </button>
                 <button
                   onClick={(e) => {
                     e.stopPropagation()
                     goToNext()
                   }}
-                  className="w-12 h-12 rounded-full bg-black/70 backdrop-blur-sm border-2 border-white/30 flex items-center justify-center hover:bg-black/90 hover:scale-110 hover:border-white/50 transition-all duration-200 shadow-lg"
+                  className="w-11 h-11 rounded-full bg-black/70 backdrop-blur-sm border-2 border-white/30 flex items-center justify-center hover:bg-black/90 hover:scale-110 hover:border-white/50 transition-all duration-200 shadow-lg"
                   aria-label="Vidéo suivante"
                   title="Vidéo suivante (↓)"
                 >
-                  <ChevronDown className="w-6 h-6 text-white" />
+                  <ChevronDown className="w-5 h-5 text-white" />
                 </button>
               </div>
             )}

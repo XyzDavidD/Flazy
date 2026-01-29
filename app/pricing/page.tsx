@@ -114,14 +114,13 @@ function Header() {
             />
             <div>
               <div className="font-extrabold tracking-[0.08em] uppercase text-[15px]">FLAZY</div>
-              <div className="text-[11px] text-text-muted">Vidéos IA virales prêtes à poster</div>
             </div>
           </Link>
         </div>
 
         <div className="hidden lg:flex items-center gap-[18px] text-[13px] text-text-muted absolute left-1/2 -translate-x-1/2">
           <Link
-            href="/carousel"
+            href="/creations"
             className="relative cursor-pointer transition-colors duration-[0.18s] ease-out hover:text-text-main after:content-[''] after:absolute after:left-0 after:-bottom-[6px] after:w-0 after:h-0.5 after:rounded-full after:bg-gradient-to-r after:from-[#ffb347] after:via-[#ff8a1f] after:to-[#ff4b2b] after:transition-all after:duration-[0.18s] after:ease-out hover:after:w-[18px]"
           >
             Creations
@@ -141,14 +140,14 @@ function Header() {
         </div>
 
         <div className="flex items-center gap-3">
-          {/* Language Selector - Compact */}
-          <div className="hidden sm:block relative language-dropdown" data-no-translate>
+          {/* Language Selector - Mobile (Top Bar) */}
+          <div className="sm:hidden relative language-dropdown" data-no-translate>
             <button
               onClick={() => {
                 setLanguageDropdownOpen(!languageDropdownOpen)
                 setAccountDropdownOpen(false)
               }}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border border-[rgba(148,163,184,0.7)] bg-transparent text-text-soft text-[13px] font-medium transition-all duration-[0.18s] ease-out hover:bg-[rgba(15,23,42,0.9)] hover:text-text-main hover:border-[rgba(203,213,225,0.9)]"
+              className="flex items-center gap-1 px-1.5 py-1 rounded-full bg-transparent text-text-soft text-[13px] font-medium transition-colors duration-150 hover:text-text-main"
               aria-label="Select language"
               disabled={isTranslating}
             >
@@ -160,18 +159,54 @@ function Header() {
               )}
             </button>
             {languageDropdownOpen && (
-              <div className="absolute right-0 mt-2 w-40 rounded-xl bg-[rgba(6,9,22,0.98)] border border-[rgba(252,211,77,0.75)] shadow-lg overflow-hidden z-50" data-no-translate>
+              <div className="absolute right-0 mt-2 w-24 rounded-xl bg-[rgba(6,9,22,0.98)] border border-[rgba(252,211,77,0.75)] shadow-lg overflow-hidden z-50" data-no-translate>
                 {languages.filter(lang => lang.code !== currentLanguage).map((lang) => (
                   <button
                     key={lang.code}
                     onClick={() => handleLanguageChange(lang.code as 'fr' | 'en' | 'es')}
                     disabled={isTranslating}
-                    className={`w-full text-left px-4 py-2.5 text-sm transition-colors flex items-center gap-2.5 ${
+                    className={`w-full text-left px-3 py-2 text-sm transition-colors flex items-center gap-2 ${
                       'text-text-soft hover:bg-[rgba(15,23,42,0.5)] hover:text-text-main'
                     } ${isTranslating ? 'opacity-50 cursor-wait' : ''}`}
                   >
                     <span className="text-base">{lang.flag}</span>
-                    <span>{lang.name}</span>
+                    <span className="text-[11px] font-semibold tracking-[0.18em]">{lang.code.toUpperCase()}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          {/* Language Selector - Compact */}
+          <div className="hidden sm:block relative language-dropdown" data-no-translate>
+            <button
+              onClick={() => {
+                setLanguageDropdownOpen(!languageDropdownOpen)
+                setAccountDropdownOpen(false)
+              }}
+              className="flex items-center gap-1 px-1.5 py-1 rounded-full bg-transparent text-text-soft text-[13px] font-medium transition-colors duration-150 hover:text-text-main"
+              aria-label="Select language"
+              disabled={isTranslating}
+            >
+              <span className="text-base leading-none">{currentLang.flag}</span>
+              {isTranslating ? (
+                <Loader2 className="w-3 h-3 animate-spin" />
+              ) : (
+                <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${languageDropdownOpen ? 'rotate-180' : ''}`} />
+              )}
+            </button>
+            {languageDropdownOpen && (
+              <div className="absolute right-0 mt-2 w-24 rounded-xl bg-[rgba(6,9,22,0.98)] border border-[rgba(252,211,77,0.75)] shadow-lg overflow-hidden z-50" data-no-translate>
+                {languages.filter(lang => lang.code !== currentLanguage).map((lang) => (
+                  <button
+                    key={lang.code}
+                    onClick={() => handleLanguageChange(lang.code as 'fr' | 'en' | 'es')}
+                    disabled={isTranslating}
+                    className={`w-full text-left px-3 py-2 text-sm transition-colors flex items-center gap-2 ${
+                      'text-text-soft hover:bg-[rgba(15,23,42,0.5)] hover:text-text-main'
+                    } ${isTranslating ? 'opacity-50 cursor-wait' : ''}`}
+                  >
+                    <span className="text-base">{lang.flag}</span>
+                    <span className="text-[11px] font-semibold tracking-[0.18em]">{lang.code.toUpperCase()}</span>
                   </button>
                 ))}
               </div>
@@ -253,7 +288,7 @@ function Header() {
         <div className="lg:hidden pb-4 px-5 space-y-1 border-t border-[rgba(51,65,85,0.5)] pt-4 relative z-50">
           <div className="space-y-1 mb-3">
             <Link
-              href="/carousel"
+              href="/creations"
               className="block w-full text-left px-4 py-2.5 text-sm text-text-soft hover:text-text-main hover:bg-[rgba(15,23,42,0.5)] rounded-lg transition-colors touch-manipulation"
               onClick={(e) => {
                 setMobileMenuOpen(false)
@@ -284,34 +319,6 @@ function Header() {
             </Link>
           </div>
 
-          {/* Language Selector - Mobile */}
-          <div className="border-t border-[rgba(51,65,85,0.5)] pt-3 mt-3" data-no-translate>
-            <div className="px-4 py-2 text-xs text-text-muted mb-2">Langue / Language / Idioma</div>
-            <div className="space-y-1">
-              {languages.map((lang) => (
-                <button
-                  key={lang.code}
-                  onClick={() => {
-                    handleLanguageChange(lang.code as 'fr' | 'en' | 'es')
-                    setMobileMenuOpen(false)
-                  }}
-                  disabled={isTranslating}
-                  className={`w-full text-left px-4 py-2.5 text-sm rounded-lg transition-colors flex items-center gap-3 touch-manipulation ${
-                    currentLanguage === lang.code
-                      ? 'bg-[rgba(252,211,77,0.15)] text-text-main'
-                      : 'text-text-soft hover:text-text-main hover:bg-[rgba(15,23,42,0.5)]'
-                  } ${isTranslating ? 'opacity-50 cursor-wait' : ''}`}
-                >
-                  <span className="text-lg">{lang.flag}</span>
-                  <span>{lang.name}</span>
-                  {currentLanguage === lang.code && (
-                    <CheckCircle2 className="w-4 h-4 ml-auto text-accent-orange-soft" />
-                  )}
-                </button>
-              ))}
-            </div>
-          </div>
-          
           <div className="border-t border-[rgba(51,65,85,0.5)] pt-3 mt-3">
             {user ? (
               <>
@@ -492,7 +499,7 @@ export default function PricingPage() {
       backgroundAttachment: 'fixed'
     }}>
       <Header />
-      <div className="max-w-[1120px] mx-auto px-5 pt-4 pb-2">
+      <div className="max-w-[1120px] mx-auto px-5 pt-2 pb-1">
         <Link
           href="/"
           className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full border border-[rgba(148,163,184,0.7)] bg-[rgba(15,23,42,0.5)] backdrop-blur-sm text-text-soft hover:text-text-main hover:bg-[rgba(15,23,42,0.8)] hover:border-[rgba(203,213,225,0.9)] transition-all duration-[0.18s] ease-out text-sm font-semibold group touch-manipulation"
@@ -503,18 +510,15 @@ export default function PricingPage() {
         </Link>
       </div>
       {/* Main Content */}
-      <main className="py-12 md:py-16">
+      <main className="py-8 md:py-12">
         <div className="max-w-[1120px] mx-auto px-5">
-          <div className="text-center mb-8 md:mb-12">
+          <div className="text-center mb-6 md:mb-10">
             <div className="text-[11px] uppercase tracking-[0.16em] mb-1.5 font-semibold text-accent-orange">
               Tarifs
             </div>
             <h1 className="text-[32px] lg:text-[42px] mb-4 font-extrabold leading-tight">
               Choisissez le pack qui correspond à votre rythme
             </h1>
-            <p className="text-[14px] lg:text-[16px] text-text-soft max-w-[600px] mx-auto leading-relaxed">
-              Des packs attractifs et adaptés à tous les niveaux.
-            </p>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -542,10 +546,9 @@ export default function PricingPage() {
                       `
                     }}
                   >
-                    {/* Header section - centered with emoji next to title */}
-                    <div className="flex items-center justify-center gap-2 mb-3 mt-2">
-                      <Icon className="w-4 h-4 text-accent-orange-soft" />
-                      <div className="text-[11px] uppercase tracking-[0.14em] text-accent-orange-soft font-semibold text-center leading-tight">
+                    {/* Header section - centered title */}
+                    <div className="mb-3 mt-2 text-center">
+                      <div className="text-[12px] uppercase tracking-[0.14em] text-accent-orange-soft font-semibold leading-tight">
                         {plan.badge.split(' ').map((word, idx) => (
                           <React.Fragment key={idx}>
                             {word}
@@ -562,9 +565,9 @@ export default function PricingPage() {
                     
                     {/* Bottom section with price and button - centered */}
                     <div className="mt-auto pt-1 space-y-3 text-center">
-                      <div className="flex flex-col items-center gap-0.5">
-                        <span className="text-xl font-bold text-text-main">{plan.price}</span>
-                        <span className="text-[10px] text-text-muted">Sans abonnement</span>
+                      <div className="flex flex-col items-center gap-0">
+                        <span className="text-xl font-bold text-text-main mb-0.5">{plan.price}</span>
+                        <span className="text-[10px] text-text-soft mt-1">Sans abonnement</span>
                         {plan.offer && (
                           <span className="text-[11px] px-2 py-1 rounded-full bg-[rgba(22,163,74,0.18)] border border-[rgba(22,163,74,0.8)] text-[#bbf7d0] mt-1">
                             {plan.offer}
@@ -574,7 +577,7 @@ export default function PricingPage() {
                       <button
                         onClick={() => handleChoosePack(plan.pack)}
                         disabled={isProcessing === plan.pack || isLoading}
-                        className="w-full bg-transparent text-accent-orange-soft border border-[rgba(248,181,86,0.95)] shadow-[0_0_0_1px_rgba(248,181,86,0.4)] rounded-full text-[11px] font-medium px-3 py-1.5 cursor-pointer inline-flex items-center justify-center gap-1.5 transition-all duration-[0.18s] ease-out hover:bg-[radial-gradient(circle_at_top_left,rgba(255,138,31,0.16),transparent_70%)] hover:border-[rgba(248,181,86,1)] hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                        className="w-full bg-transparent text-accent-orange-soft border border-[rgba(248,181,86,0.95)] shadow-[0_0_0_1px_rgba(248,181,86,0.4)] rounded-full text-[13px] font-semibold px-4 py-2.5 cursor-pointer inline-flex items-center justify-center gap-2 transition-all duration-[0.18s] ease-out hover:bg-[radial-gradient(circle_at_top_left,rgba(255,138,31,0.16),transparent_70%)] hover:border-[rgba(248,181,86,1)] disabled:opacity-60 disabled:cursor-not-allowed"
                       >
                         {isProcessing === plan.pack ? (
                           <>

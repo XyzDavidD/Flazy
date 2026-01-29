@@ -119,6 +119,11 @@ export const translations: Record<string, Record<Language, string>> = {
   // ============================================
   // FAQ QUESTIONS
   // ============================================
+  "Vous écrivez le prompt, FLAZY s'occupe du reste ?": {
+    fr: "Vous écrivez le prompt, FLAZY s'occupe du reste ?",
+    en: 'You write the prompt, FLAZY handles the rest?',
+    es: '¿Tú escribes el prompt y FLAZY se encarga del resto?'
+  },
   'Combien de temps faut-il pour générer mes vidéos ?': {
     fr: 'Combien de temps faut-il pour générer mes vidéos ?',
     en: 'How long does it take to generate my videos?',
@@ -159,19 +164,19 @@ export const translations: Record<string, Record<Language, string>> = {
   // FAQ ANSWERS
   // ============================================
   'faq_answer_1': {
+    fr: "Donnez quelques indications simples et laissez FLAZY transformer vos idées en vidéos prêtes à poster.",
+    en: 'Provide a few simple instructions and let FLAZY turn your ideas into ready-to-post videos.',
+    es: 'Da unas indicaciones simples y deja que FLAZY convierta tus ideas en videos listos para publicar.',
+  },
+  'faq_answer_2': {
     fr: 'Le temps de génération dépend de la demande actuelle, mais dans la plupart des cas, les vidéos sont générées <strong>en quelques minutes</strong> après la validation de votre prompt.',
     en: 'Generation time depends on current demand, but in most cases, videos are generated <strong>within a few minutes</strong> after your prompt is validated.',
     es: 'El tiempo de generación depende de la demanda actual, pero en la mayoría de los casos, los videos se generan <strong>en pocos minutos</strong> después de validar tu prompt.',
   },
-  'faq_answer_2': {
+  'faq_answer_3': {
     fr: 'Vous conservez l\'intégralité des droits sur les vidéos générées.<br />Vous êtes libre de les utiliser à des fins personnelles ou professionnelles.',
     en: 'You retain full rights to the generated videos.<br />You are free to use them for personal or professional purposes.',
     es: 'Conservas la totalidad de los derechos sobre los videos generados.<br />Eres libre de usarlos con fines personales o profesionales.',
-  },
-  'faq_answer_3': {
-    fr: 'Par défaut, les vidéos sont disponibles <strong>sans aucun filigrane</strong> et sont prêtes à être publiées.',
-    en: 'By default, videos are available <strong>without any watermark</strong> and are ready to be published.',
-    es: 'Por defecto, los videos están disponibles <strong>sin ninguna marca de agua</strong> y están listos para publicarse.',
   },
   'faq_answer_4': {
     fr: 'Par défaut, les vidéos sont disponibles <strong>sans aucun filigrane</strong> et sont prêtes à être publiées.',
@@ -348,11 +353,6 @@ export const translations: Record<string, Record<Language, string>> = {
     fr: 'Aperçu des vidéos que vous pouvez générer avec FLAZY',
     en: 'Preview of videos you can generate with FLAZY',
     es: 'Vista previa de los videos que puedes generar con FLAZY',
-  },
-  'Chaque exemple ci-dessous illustre un type de vidéo que vous pouvez générer avec FLAZY.': {
-    fr: 'Chaque exemple ci-dessous illustre un type de vidéo que vous pouvez générer avec FLAZY.',
-    en: 'Each example below illustrates a type of video you can generate with FLAZY.',
-    es: 'Cada ejemplo a continuación ilustra un tipo de video que puedes generar con FLAZY.',
   },
   'Actualité': {
     fr: 'Actualité',

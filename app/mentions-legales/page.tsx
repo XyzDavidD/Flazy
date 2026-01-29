@@ -106,20 +106,19 @@ function Header() {
             />
             <div>
               <div className="font-extrabold tracking-[0.08em] uppercase text-[15px]">FLAZY</div>
-              <div className="text-[11px] text-text-muted">Vidéos IA virales prêtes à poster</div>
             </div>
           </Link>
         </div>
 
         <div className="flex items-center gap-3">
-          {/* Language Selector - Compact */}
-          <div className="hidden sm:block relative language-dropdown" data-no-translate>
+          {/* Language Selector - Mobile (Top Bar) */}
+          <div className="sm:hidden relative language-dropdown" data-no-translate>
             <button
               onClick={() => {
                 setLanguageDropdownOpen(!languageDropdownOpen)
                 setAccountDropdownOpen(false)
               }}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border border-[rgba(148,163,184,0.7)] bg-transparent text-text-soft text-[13px] font-medium transition-all duration-[0.18s] ease-out hover:bg-[rgba(15,23,42,0.9)] hover:text-text-main hover:border-[rgba(203,213,225,0.9)]"
+              className="flex items-center gap-1 px-1.5 py-1 rounded-full bg-transparent text-text-soft text-[13px] font-medium transition-colors duration-150 hover:text-text-main"
               aria-label="Select language"
               disabled={isTranslating}
             >
@@ -131,18 +130,54 @@ function Header() {
               )}
             </button>
             {languageDropdownOpen && (
-              <div className="absolute right-0 mt-2 w-40 rounded-xl bg-[rgba(6,9,22,0.98)] border border-[rgba(252,211,77,0.75)] shadow-lg overflow-hidden z-50" data-no-translate>
+              <div className="absolute right-0 mt-2 w-24 rounded-xl bg-[rgba(6,9,22,0.98)] border border-[rgba(252,211,77,0.75)] shadow-lg overflow-hidden z-50" data-no-translate>
                 {languages.filter(lang => lang.code !== currentLanguage).map((lang) => (
                   <button
                     key={lang.code}
                     onClick={() => handleLanguageChange(lang.code as 'fr' | 'en' | 'es')}
                     disabled={isTranslating}
-                    className={`w-full text-left px-4 py-2.5 text-sm transition-colors flex items-center gap-2.5 ${
+                    className={`w-full text-left px-3 py-2 text-sm transition-colors flex items-center gap-2 ${
                       'text-text-soft hover:bg-[rgba(15,23,42,0.5)] hover:text-text-main'
                     } ${isTranslating ? 'opacity-50 cursor-wait' : ''}`}
                   >
                     <span className="text-base">{lang.flag}</span>
-                    <span>{lang.name}</span>
+                    <span className="text-[11px] font-semibold tracking-[0.18em]">{lang.code.toUpperCase()}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          {/* Language Selector - Compact */}
+          <div className="hidden sm:block relative language-dropdown" data-no-translate>
+            <button
+              onClick={() => {
+                setLanguageDropdownOpen(!languageDropdownOpen)
+                setAccountDropdownOpen(false)
+              }}
+              className="flex items-center gap-1 px-1.5 py-1 rounded-full bg-transparent text-text-soft text-[13px] font-medium transition-colors duration-150 hover:text-text-main"
+              aria-label="Select language"
+              disabled={isTranslating}
+            >
+              <span className="text-base leading-none">{currentLang.flag}</span>
+              {isTranslating ? (
+                <Loader2 className="w-3 h-3 animate-spin" />
+              ) : (
+                <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${languageDropdownOpen ? 'rotate-180' : ''}`} />
+              )}
+            </button>
+            {languageDropdownOpen && (
+              <div className="absolute right-0 mt-2 w-24 rounded-xl bg-[rgba(6,9,22,0.98)] border border-[rgba(252,211,77,0.75)] shadow-lg overflow-hidden z-50" data-no-translate>
+                {languages.filter(lang => lang.code !== currentLanguage).map((lang) => (
+                  <button
+                    key={lang.code}
+                    onClick={() => handleLanguageChange(lang.code as 'fr' | 'en' | 'es')}
+                    disabled={isTranslating}
+                    className={`w-full text-left px-3 py-2 text-sm transition-colors flex items-center gap-2 ${
+                      'text-text-soft hover:bg-[rgba(15,23,42,0.5)] hover:text-text-main'
+                    } ${isTranslating ? 'opacity-50 cursor-wait' : ''}`}
+                  >
+                    <span className="text-base">{lang.flag}</span>
+                    <span className="text-[11px] font-semibold tracking-[0.18em]">{lang.code.toUpperCase()}</span>
                   </button>
                 ))}
               </div>
@@ -222,46 +257,6 @@ function Header() {
 
       {mobileMenuOpen && (
         <div className="lg:hidden pb-4 px-5 space-y-1 border-t border-[rgba(51,65,85,0.5)] pt-4 relative z-50">
-          {/* Language Selector - Mobile */}
-          <div className="border-t border-[rgba(51,65,85,0.5)] pt-3 mt-3 language-dropdown" data-no-translate>
-            <button
-              onClick={() => {
-                setLanguageDropdownOpen(!languageDropdownOpen)
-              }}
-              className="w-full text-left px-4 py-2.5 text-sm rounded-lg transition-colors flex items-center justify-between touch-manipulation text-text-soft hover:text-text-main hover:bg-[rgba(15,23,42,0.5)]"
-              disabled={isTranslating}
-            >
-              <div className="flex items-center gap-3">
-                <span className="text-lg">{currentLang.flag}</span>
-                <span>{currentLang.name}</span>
-              </div>
-              {isTranslating ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${languageDropdownOpen ? 'rotate-180' : ''}`} />
-              )}
-            </button>
-            {languageDropdownOpen && (
-              <div className="mt-1 space-y-1" data-no-translate>
-                {languages.filter(lang => lang.code !== currentLanguage).map((lang) => (
-                  <button
-                    key={lang.code}
-                    onClick={() => {
-                      handleLanguageChange(lang.code as 'fr' | 'en' | 'es')
-                    }}
-                    disabled={isTranslating}
-                    className={`w-full text-left px-4 py-2.5 text-sm rounded-lg transition-colors flex items-center gap-3 touch-manipulation ${
-                      'text-text-soft hover:text-text-main hover:bg-[rgba(15,23,42,0.5)]'
-                    } ${isTranslating ? 'opacity-50 cursor-wait' : ''}`}
-                  >
-                    <span className="text-lg">{lang.flag}</span>
-                    <span>{lang.name}</span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-          
           <div className="border-t border-[rgba(51,65,85,0.5)] pt-3 mt-3">
             {user ? (
               <>

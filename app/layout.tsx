@@ -7,13 +7,12 @@ export const metadata: Metadata = {
   description: 'Créez des vidéos virales et monétisables avec l\'IA',
   icons: {
     icon: [
-      { url: '/logo.png', type: 'image/png', sizes: '32x32' },
-      { url: '/logo.png', type: 'image/png', sizes: '16x16' },
+      { url: '/favicon.png', type: 'image/png', sizes: 'any' },
     ],
     apple: [
-      { url: '/logo.png', sizes: '180x180', type: 'image/png' },
+      { url: '/favicon.png', sizes: 'any', type: 'image/png' },
     ],
-    shortcut: '/logo.png',
+    shortcut: '/favicon.png',
   },
 }
 
@@ -30,10 +29,9 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="mobile-web-app-capable" content="yes" />
         {/* Favicon for various browsers and devices */}
-        <link rel="icon" href="/logo.png" type="image/png" sizes="32x32" />
-        <link rel="icon" href="/logo.png" type="image/png" sizes="16x16" />
-        <link rel="shortcut icon" href="/logo.png" type="image/png" />
-        <link rel="apple-touch-icon" href="/logo.png" sizes="180x180" />
+        <link rel="icon" href="/favicon.png" type="image/png" sizes="any" />
+        <link rel="shortcut icon" href="/favicon.png" type="image/png" />
+        <link rel="apple-touch-icon" href="/favicon.png" sizes="any" />
         <link rel="manifest" href="/site.webmanifest" />
         <meta name="theme-color" content="#ff8a1f" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />

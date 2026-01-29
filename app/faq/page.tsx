@@ -19,6 +19,7 @@ import {
   CheckCircle2,
   Loader2,
   Video,
+  Rocket,
 } from 'lucide-react'
 
 // Header Component (simplified for FAQ page)
@@ -108,17 +109,16 @@ function Header({ lang }: { lang: Language }) {
             />
             <div>
               <div className="font-extrabold tracking-[0.08em] uppercase text-[15px]">FLAZY</div>
-              <div className="text-[11px] text-text-muted">{t('Vidéos IA virales prêtes à poster', lang)}</div>
             </div>
           </Link>
         </div>
 
         <div className="hidden lg:flex items-center gap-[18px] text-[13px] text-text-muted absolute left-1/2 -translate-x-1/2">
           <Link
-            href="/carousel"
+            href="/creations"
             className="relative cursor-pointer transition-colors duration-[0.18s] ease-out hover:text-text-main after:content-[''] after:absolute after:left-0 after:-bottom-[6px] after:w-0 after:h-0.5 after:rounded-full after:bg-gradient-to-r after:from-[#ffb347] after:via-[#ff8a1f] after:to-[#ff4b2b] after:transition-all after:duration-[0.18s] after:ease-out hover:after:w-[18px]"
           >
-            {t('Carrousel', lang)}
+            Creations
           </Link>
           <Link
             href="/pricing"
@@ -135,14 +135,14 @@ function Header({ lang }: { lang: Language }) {
         </div>
 
         <div className="flex items-center gap-3">
-          {/* Language Selector - Compact */}
-          <div className="hidden sm:block relative language-dropdown" data-no-translate>
+          {/* Language Selector - Mobile (Top Bar) */}
+          <div className="sm:hidden relative language-dropdown" data-no-translate>
             <button
               onClick={() => {
                 setLanguageDropdownOpen(!languageDropdownOpen)
                 setAccountDropdownOpen(false)
               }}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border border-[rgba(148,163,184,0.7)] bg-transparent text-text-soft text-[13px] font-medium transition-all duration-[0.18s] ease-out hover:bg-[rgba(15,23,42,0.9)] hover:text-text-main hover:border-[rgba(203,213,225,0.9)]"
+              className="flex items-center gap-1 px-1.5 py-1 rounded-full bg-transparent text-text-soft text-[13px] font-medium transition-colors duration-150 hover:text-text-main"
               aria-label="Select language"
               disabled={isTranslating}
             >
@@ -154,18 +154,54 @@ function Header({ lang }: { lang: Language }) {
               )}
             </button>
             {languageDropdownOpen && (
-              <div className="absolute right-0 mt-2 w-40 rounded-xl bg-[rgba(6,9,22,0.98)] border border-[rgba(252,211,77,0.75)] shadow-lg overflow-hidden z-50" data-no-translate>
+              <div className="absolute right-0 mt-2 w-24 rounded-xl bg-[rgba(6,9,22,0.98)] border border-[rgba(252,211,77,0.75)] shadow-lg overflow-hidden z-50" data-no-translate>
                 {languages.filter(l => l.code !== currentLanguage).map((l) => (
                   <button
                     key={l.code}
                     onClick={() => handleLanguageChange(l.code as 'fr' | 'en' | 'es')}
                     disabled={isTranslating}
-                    className={`w-full text-left px-4 py-2.5 text-sm transition-colors flex items-center gap-2.5 ${
+                    className={`w-full text-left px-3 py-2 text-sm transition-colors flex items-center gap-2 ${
                       'text-text-soft hover:bg-[rgba(15,23,42,0.5)] hover:text-text-main'
                     } ${isTranslating ? 'opacity-50 cursor-wait' : ''}`}
                   >
                     <span className="text-base">{l.flag}</span>
-                    <span>{l.name}</span>
+                    <span className="text-[11px] font-semibold tracking-[0.18em]">{l.code.toUpperCase()}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          {/* Language Selector - Compact */}
+          <div className="hidden sm:block relative language-dropdown" data-no-translate>
+            <button
+              onClick={() => {
+                setLanguageDropdownOpen(!languageDropdownOpen)
+                setAccountDropdownOpen(false)
+              }}
+              className="flex items-center gap-1 px-1.5 py-1 rounded-full bg-transparent text-text-soft text-[13px] font-medium transition-colors duration-150 hover:text-text-main"
+              aria-label="Select language"
+              disabled={isTranslating}
+            >
+              <span className="text-base leading-none">{currentLang.flag}</span>
+              {isTranslating ? (
+                <Loader2 className="w-3 h-3 animate-spin" />
+              ) : (
+                <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${languageDropdownOpen ? 'rotate-180' : ''}`} />
+              )}
+            </button>
+            {languageDropdownOpen && (
+              <div className="absolute right-0 mt-2 w-24 rounded-xl bg-[rgba(6,9,22,0.98)] border border-[rgba(252,211,77,0.75)] shadow-lg overflow-hidden z-50" data-no-translate>
+                {languages.filter(l => l.code !== currentLanguage).map((l) => (
+                  <button
+                    key={l.code}
+                    onClick={() => handleLanguageChange(l.code as 'fr' | 'en' | 'es')}
+                    disabled={isTranslating}
+                    className={`w-full text-left px-3 py-2 text-sm transition-colors flex items-center gap-2 ${
+                      'text-text-soft hover:bg-[rgba(15,23,42,0.5)] hover:text-text-main'
+                    } ${isTranslating ? 'opacity-50 cursor-wait' : ''}`}
+                  >
+                    <span className="text-base">{l.flag}</span>
+                    <span className="text-[11px] font-semibold tracking-[0.18em]">{l.code.toUpperCase()}</span>
                   </button>
                 ))}
               </div>
@@ -247,7 +283,7 @@ function Header({ lang }: { lang: Language }) {
         <div className="lg:hidden pb-4 px-5 space-y-1 border-t border-[rgba(51,65,85,0.5)] pt-4 relative z-50">
           <div className="space-y-1 mb-3">
             <Link
-              href="/carousel"
+              href="/creations"
               className="block w-full text-left px-4 py-2.5 text-sm text-text-soft hover:text-text-main hover:bg-[rgba(15,23,42,0.5)] rounded-lg transition-colors touch-manipulation"
               onClick={(e) => {
                 setMobileMenuOpen(false)
@@ -278,34 +314,6 @@ function Header({ lang }: { lang: Language }) {
             </Link>
           </div>
 
-          {/* Language Selector - Mobile */}
-          <div className="border-t border-[rgba(51,65,85,0.5)] pt-3 mt-3" data-no-translate>
-            <div className="px-4 py-2 text-xs text-text-muted mb-2">Langue / Language / Idioma</div>
-            <div className="space-y-1">
-              {languages.map((l) => (
-                <button
-                  key={l.code}
-                  onClick={() => {
-                    handleLanguageChange(l.code as 'fr' | 'en' | 'es')
-                    setMobileMenuOpen(false)
-                  }}
-                  disabled={isTranslating}
-                  className={`w-full text-left px-4 py-2.5 text-sm rounded-lg transition-colors flex items-center gap-3 touch-manipulation ${
-                    currentLanguage === l.code
-                      ? 'bg-[rgba(252,211,77,0.15)] text-text-main'
-                      : 'text-text-soft hover:text-text-main hover:bg-[rgba(15,23,42,0.5)]'
-                  } ${isTranslating ? 'opacity-50 cursor-wait' : ''}`}
-                >
-                  <span className="text-lg">{l.flag}</span>
-                  <span>{l.name}</span>
-                  {currentLanguage === l.code && (
-                    <CheckCircle2 className="w-4 h-4 ml-auto text-accent-orange-soft" />
-                  )}
-                </button>
-              ))}
-            </div>
-          </div>
-          
           <div className="border-t border-[rgba(51,65,85,0.5)] pt-3 mt-3">
             {user ? (
               <>
@@ -403,8 +411,32 @@ export default function FAQPage() {
   const { language } = useTranslation()
   const lang = language as Language
 
+  const howItWorksSteps = [
+    {
+      title: 'Choisissez votre pack',
+      description: 'Sélectionnez le pack qui correspond à vos besoins (Starter, Creator, Pro ou Boost), puis finalisez votre commande.',
+      icon: CheckCircle2,
+    },
+    {
+      title: 'Décrivez votre vidéo',
+      description: 'Décrivez la vidéo que vous souhaitez générer : sujet, ambiance, style.',
+      icon: Video,
+    },
+    {
+      title: 'Génération automatique',
+      description: 'Votre vidéo est générée automatiquement en quelques minutes et accessible dans votre espace "Mes vidéos".',
+      icon: Rocket,
+    },
+    {
+      title: 'Publiez et monétisez',
+      description: "Téléchargez votre vidéo et publiez-la sur TikTok, Reels, YouTube Shorts ou toute autre plateforme. Vous conservez l'intégralité des droits sur vos vidéos.",
+      icon: CheckCircle2,
+    },
+  ]
+
   // FAQ questions - we use the dictionary keys
   const faqQuestions = [
+    "Vous écrivez le prompt, FLAZY s'occupe du reste ?",
     'Combien de temps faut-il pour générer mes vidéos ?',
     'Puis-je utiliser les vidéos à des fins commerciales ?',
     'Les vidéos contiennent-elles un filigrane ?',
@@ -449,25 +481,78 @@ export default function FAQPage() {
           </div>
 
           <div className="space-y-3 w-full">
+            <div
+              className="bg-[rgba(6,9,22,0.98)] rounded-[22px] border border-[rgba(252,211,77,0.7)] shadow-[0_18px_40px_rgba(0,0,0,0.8)] overflow-hidden hover:border-[rgba(252,211,77,0.9)] transition-all duration-300"
+            >
+              <button
+                onClick={() => setOpenIndex(openIndex === 0 ? null : 0)}
+                className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-[rgba(15,23,42,0.5)] transition-colors"
+              >
+                <h3 className="text-[15px] font-semibold text-text-main pr-4">Comment ça fonctionne ?</h3>
+                <ChevronDown
+                  className={`w-5 h-5 text-accent-orange-soft flex-shrink-0 transition-transform duration-300 ${
+                    openIndex === 0 ? 'rotate-180' : ''
+                  }`}
+                />
+              </button>
+              <div
+                className={`overflow-hidden transition-all duration-300 ${
+                  openIndex === 0 ? 'max-h-[1200px] opacity-100' : 'max-h-0 opacity-0'
+                }`}
+              >
+                <div className="px-6 pb-6 pt-2 border-t border-[rgba(51,65,85,0.5)]">
+                  <div className="text-[11px] uppercase tracking-[0.16em] mb-2 font-semibold text-[#ff8a1f]">
+                    Comment ça fonctionne
+                  </div>
+                  <h3 className="text-[18px] md:text-[20px] mb-4 font-extrabold leading-tight text-text-main">
+                    Créez des vidéos virales en quelques minutes, grâce à un processus simple et fluide
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {howItWorksSteps.map((step, stepIndex) => {
+                      const Icon = step.icon
+                      return (
+                        <div
+                          key={stepIndex}
+                          className="relative rounded-[16px] p-4 border border-[rgba(252,211,77,0.7)] shadow-[0_8px_24px_rgba(0,0,0,0.6)] h-full flex flex-col"
+                          style={{
+                            background: `
+                              radial-gradient(circle at top, rgba(255, 138, 31, 0.16), transparent 60%),
+                              rgba(6, 9, 22, 0.98)
+                            `
+                          }}
+                        >
+                          <div className="flex items-center gap-3 mb-2">
+                            <Icon className="w-5 h-5 text-accent-orange-soft flex-shrink-0" />
+                            <h4 className="text-sm font-bold text-text-main leading-tight">{step.title}</h4>
+                          </div>
+                          <p className="text-[11px] text-text-soft leading-relaxed flex-grow">{step.description}</p>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {faqQuestions.map((question, index) => (
               <div
                 key={index}
                 className="bg-[rgba(6,9,22,0.98)] rounded-[22px] border border-[rgba(252,211,77,0.7)] shadow-[0_18px_40px_rgba(0,0,0,0.8)] overflow-hidden hover:border-[rgba(252,211,77,0.9)] transition-all duration-300"
               >
                 <button
-                  onClick={() => setOpenIndex(openIndex === index ? null : index)}
+                  onClick={() => setOpenIndex(openIndex === index + 1 ? null : index + 1)}
                   className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-[rgba(15,23,42,0.5)] transition-colors"
                 >
                   <h3 className="text-[15px] font-semibold text-text-main pr-4">{t(question, lang)}</h3>
                   <ChevronDown
                     className={`w-5 h-5 text-accent-orange-soft flex-shrink-0 transition-transform duration-300 ${
-                      openIndex === index ? 'rotate-180' : ''
+                      openIndex === index + 1 ? 'rotate-180' : ''
                     }`}
                   />
                 </button>
                 <div
                   className={`overflow-hidden transition-all duration-300 ${
-                    openIndex === index ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                    openIndex === index + 1 ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
                   }`}
                 >
                   <div className="px-6 pb-4 pt-2 border-t border-[rgba(51,65,85,0.5)]">
@@ -484,15 +569,13 @@ export default function FAQPage() {
           <div className="mt-12 text-center">
             <Link
               href="/pricing"
-              className="relative overflow-hidden bg-transparent text-[#111827] shadow-[0_18px_45px_rgba(0,0,0,0.75)] z-0 rounded-full border-none text-[13px] font-semibold px-6 py-3 cursor-pointer inline-flex items-center gap-2 transition-all duration-[0.18s] ease-out hover:-translate-y-px hover:shadow-[0_22px_60px_rgba(0,0,0,0.95)]"
+              className="relative overflow-hidden bg-transparent text-white shadow-[0_18px_45px_rgba(0,0,0,0.75)] z-0 rounded-full border-none text-[13px] font-semibold px-6 py-3 cursor-pointer inline-flex items-center gap-2 transition-all duration-[0.18s] ease-out hover:-translate-y-px hover:shadow-[0_22px_60px_rgba(0,0,0,0.95)]"
               style={{
                 position: 'relative',
               }}
             >
               <span className="absolute inset-0 -z-10 rounded-full" style={{
-                backgroundImage: 'linear-gradient(90deg, #ff6b00 0%, #ffd700 25%, #ff4b2b 50%, #ffd700 75%, #ff6b00 100%)',
-                backgroundSize: '220% 100%',
-                animation: 'flazyTopbar 10s ease-in-out infinite alternate'
+                backgroundColor: '#ff8a1f'
               }}></span>
               <span>{t('Découvrez nos tarifs', lang)}</span>
               <ChevronRight className="w-4 h-4" />
