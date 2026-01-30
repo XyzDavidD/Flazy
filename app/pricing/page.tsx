@@ -8,6 +8,7 @@ import { supabase } from '@/lib/supabaseClient'
 import { useCredits } from '@/hooks/useCredits'
 import { useTranslation } from '@/lib/translations/context'
 import { t, type Language } from '@/lib/translations/dictionary'
+import { FlagIcon } from '@/components/FlagIcon'
 import {
   Sparkles,
   Users,
@@ -41,9 +42,9 @@ function Header() {
   const { language: currentLanguage, setLanguage, isLoading: isTranslating } = useTranslation()
 
   const languages = [
-    { code: 'fr', name: 'Français', flag: '🇫🇷' },
-    { code: 'en', name: 'English', flag: '🇬🇧' },
-    { code: 'es', name: 'Español', flag: '🇪🇸' },
+    { code: 'fr' as const, name: 'Français' },
+    { code: 'en' as const, name: 'English' },
+    { code: 'es' as const, name: 'Español' },
   ]
 
   const currentLang = languages.find(lang => lang.code === currentLanguage) || languages[0]
@@ -151,7 +152,7 @@ function Header() {
               aria-label="Select language"
               disabled={isTranslating}
             >
-              <span className="text-base leading-none">{currentLang.flag}</span>
+              <FlagIcon countryCode={currentLang.code} className="w-5 h-5" />
               {isTranslating ? (
                 <Loader2 className="w-3 h-3 animate-spin" />
               ) : (
@@ -169,7 +170,7 @@ function Header() {
                       'text-text-soft hover:bg-[rgba(15,23,42,0.5)] hover:text-text-main'
                     } ${isTranslating ? 'opacity-50 cursor-wait' : ''}`}
                   >
-                    <span className="text-base">{lang.flag}</span>
+                    <FlagIcon countryCode={lang.code} className="w-5 h-5" />
                     <span className="text-[11px] font-semibold tracking-[0.18em]">{lang.code.toUpperCase()}</span>
                   </button>
                 ))}
@@ -187,7 +188,7 @@ function Header() {
               aria-label="Select language"
               disabled={isTranslating}
             >
-              <span className="text-base leading-none">{currentLang.flag}</span>
+              <FlagIcon countryCode={currentLang.code} className="w-4 h-4" />
               {isTranslating ? (
                 <Loader2 className="w-3 h-3 animate-spin" />
               ) : (
@@ -205,7 +206,7 @@ function Header() {
                       'text-text-soft hover:bg-[rgba(15,23,42,0.5)] hover:text-text-main'
                     } ${isTranslating ? 'opacity-50 cursor-wait' : ''}`}
                   >
-                    <span className="text-base">{lang.flag}</span>
+                    <FlagIcon countryCode={lang.code} className="w-4 h-4" />
                     <span className="text-[11px] font-semibold tracking-[0.18em]">{lang.code.toUpperCase()}</span>
                   </button>
                 ))}
@@ -285,7 +286,16 @@ function Header() {
       </nav>
 
       {mobileMenuOpen && (
-        <div className="lg:hidden pb-4 px-5 space-y-1 border-t border-[rgba(51,65,85,0.5)] pt-4 relative z-50">
+        <div 
+          className="lg:hidden pb-4 px-5 space-y-1 border-t border-[rgba(51,65,85,0.5)] pt-4 relative z-50"
+          style={{
+            background: `
+              radial-gradient(circle at top, rgba(129, 140, 248, 0.5), transparent 60%),
+              radial-gradient(circle at bottom, rgba(255, 138, 31, 0.4), transparent 60%),
+              rgba(3, 7, 18, 0.98)
+            `
+          }}
+        >
           <div className="space-y-1 mb-3">
             <Link
               href="/creations"
@@ -513,9 +523,6 @@ export default function PricingPage() {
       <main className="py-8 md:py-12">
         <div className="max-w-[1120px] mx-auto px-5">
           <div className="text-center mb-6 md:mb-10">
-            <div className="text-[11px] uppercase tracking-[0.16em] mb-1.5 font-semibold text-accent-orange">
-              Tarifs
-            </div>
             <h1 className="text-[32px] lg:text-[42px] mb-4 font-extrabold leading-tight">
               Choisissez le pack qui correspond à votre rythme
             </h1>
@@ -560,7 +567,8 @@ export default function PricingPage() {
                     
                     {/* Content section - centered */}
                     <div className="text-center mb-2">
-                      <div className="text-[13px] text-text-soft font-medium">{plan.name}</div>
+                      <div className="text-[15px] text-text-main font-bold">{plan.name}</div>
+                      <div className="text-[11px] text-text-soft mt-0.5">{plan.name.replace(' tokens', ' vidéos')}</div>
                     </div>
                     
                     {/* Bottom section with price and button - centered */}

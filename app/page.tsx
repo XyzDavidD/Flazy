@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabaseClient'
 import { useCredits } from '@/hooks/useCredits'
 import { useTranslation } from '@/lib/translations/context'
 import { t, getFaqAnswer, type Language } from '@/lib/translations/dictionary'
+import { FlagIcon } from '@/components/FlagIcon'
 import {
   Lock,
   Shield,
@@ -50,9 +51,9 @@ function Header() {
   const { language: currentLanguage, setLanguage, isLoading: isTranslating } = useTranslation()
 
   const languages = [
-    { code: 'fr', name: 'Français', flag: '🇫🇷' },
-    { code: 'en', name: 'English', flag: '🇬🇧' },
-    { code: 'es', name: 'Español', flag: '🇪🇸' },
+    { code: 'fr' as const, name: 'Français' },
+    { code: 'en' as const, name: 'English' },
+    { code: 'es' as const, name: 'Español' },
   ]
 
   const currentLang = languages.find(lang => lang.code === currentLanguage) || languages[0]
@@ -170,7 +171,7 @@ function Header() {
               aria-label="Select language"
               disabled={isTranslating}
             >
-              <span className="text-base leading-none">{currentLang.flag}</span>
+              <FlagIcon countryCode={currentLang.code} className="w-5 h-5" />
               {isTranslating ? (
                 <Loader2 className="w-3 h-3 animate-spin" />
               ) : (
@@ -188,7 +189,7 @@ function Header() {
                       'text-text-soft hover:bg-[rgba(15,23,42,0.5)] hover:text-text-main'
                     } ${isTranslating ? 'opacity-50 cursor-wait' : ''}`}
                   >
-                    <span className="text-base">{lang.flag}</span>
+                    <FlagIcon countryCode={lang.code} className="w-5 h-5" />
                     <span className="text-[11px] font-semibold tracking-[0.18em]">{lang.code.toUpperCase()}</span>
                   </button>
                 ))}
@@ -206,7 +207,7 @@ function Header() {
               aria-label="Select language"
               disabled={isTranslating}
             >
-              <span className="text-base leading-none">{currentLang.flag}</span>
+              <FlagIcon countryCode={currentLang.code} className="w-4 h-4" />
               {isTranslating ? (
                 <Loader2 className="w-3 h-3 animate-spin" />
               ) : (
@@ -224,7 +225,7 @@ function Header() {
                       'text-text-soft hover:bg-[rgba(15,23,42,0.5)] hover:text-text-main'
                     } ${isTranslating ? 'opacity-50 cursor-wait' : ''}`}
                   >
-                    <span className="text-base">{lang.flag}</span>
+                    <FlagIcon countryCode={lang.code} className="w-4 h-4" />
                     <span className="text-[11px] font-semibold tracking-[0.18em]">{lang.code.toUpperCase()}</span>
                   </button>
                 ))}
@@ -304,7 +305,16 @@ function Header() {
       </nav>
 
       {mobileMenuOpen && (
-        <div className="lg:hidden pb-4 px-5 space-y-1 border-t border-[rgba(51,65,85,0.5)] pt-4 relative z-50">
+        <div 
+          className="lg:hidden pb-4 px-5 space-y-1 border-t border-[rgba(51,65,85,0.5)] pt-4 relative z-50"
+          style={{
+            background: `
+              radial-gradient(circle at top, rgba(129, 140, 248, 0.5), transparent 60%),
+              radial-gradient(circle at bottom, rgba(255, 138, 31, 0.4), transparent 60%),
+              rgba(3, 7, 18, 0.98)
+            `
+          }}
+        >
           <div className="space-y-1 mb-3">
             <Link
               href="/creations"
@@ -430,13 +440,13 @@ function Hero() {
             <div className="flex flex-wrap gap-2.5 mb-4 justify-center">
               <button
                 onClick={scrollToForm}
-                className="relative overflow-hidden bg-transparent text-white shadow-[0_18px_45px_rgba(0,0,0,0.75)] z-0 rounded-full border-none text-[13px] font-semibold px-6 py-3 cursor-pointer inline-flex items-center gap-2"
+                className="relative overflow-hidden bg-transparent text-[#000] shadow-[0_18px_45px_rgba(0,0,0,0.75)] z-0 rounded-full border-none text-[13px] font-semibold px-6 py-3 cursor-pointer inline-flex items-center gap-2"
                 style={{
                   position: 'relative',
                 }}
               >
                 <span className="absolute inset-0 -z-10 rounded-full" style={{
-                  backgroundColor: '#ff8a1f'
+                  backgroundImage: 'linear-gradient(135deg, #ff6b00 0%, #ffd700 25%, #ff8a1f 50%, #ff4b2b 75%, #ffd700 100%)'
                 }}></span>
                 <Camera className="w-4 h-4" />
                 Créer ma vidéo virale
@@ -444,10 +454,10 @@ function Hero() {
 
               <Link
                 href="/creations"
-                className="relative overflow-hidden bg-transparent text-white shadow-[0_14px_35px_rgba(0,0,0,0.7)] z-0 rounded-full border-none text-[13px] font-semibold px-6 py-3 cursor-pointer inline-flex items-center gap-2"
+                className="relative overflow-hidden bg-transparent text-[#000] shadow-[0_14px_35px_rgba(0,0,0,0.7)] z-0 rounded-full border-none text-[13px] font-semibold px-6 py-3 cursor-pointer inline-flex items-center gap-2"
               >
                 <span className="absolute inset-0 -z-10 rounded-full" style={{
-                  backgroundColor: '#d97706'
+                  backgroundImage: 'linear-gradient(135deg, #ff6b00 0%, #ffd700 25%, #ff8a1f 50%, #ff4b2b 75%, #ffd700 100%)'
                 }}></span>
                 <Eye className="w-4 h-4" />
                 Découvrir les créations
@@ -756,11 +766,11 @@ function FormSection() {
               </p>
               <Link
                 href="/pricing"
-                className="relative overflow-hidden bg-transparent text-white shadow-[0_18px_45px_rgba(0,0,0,0.75)] z-0 rounded-full border-none text-[13px] font-semibold px-6 py-3 inline-flex items-center justify-center gap-2 transition-all duration-[0.18s] ease-out hover:-translate-y-px hover:shadow-[0_22px_60px_rgba(0,0,0,0.95)]"
+                className="relative overflow-hidden bg-transparent text-[#000] shadow-[0_18px_45px_rgba(0,0,0,0.75)] z-0 rounded-full border-none text-[13px] font-semibold px-6 py-3 inline-flex items-center justify-center gap-2 transition-all duration-[0.18s] ease-out hover:-translate-y-px hover:shadow-[0_22px_60px_rgba(0,0,0,0.95)]"
                 style={{ position: 'relative' }}
               >
                 <span className="absolute inset-0 -z-10 rounded-full" style={{
-                  backgroundColor: '#ff8a1f'
+                  backgroundImage: 'linear-gradient(135deg, #ff6b00 0%, #ffd700 25%, #ff8a1f 50%, #ff4b2b 75%, #ffd700 100%)'
                 }}></span>
                 Recharger vos tokens
               </Link>
@@ -823,13 +833,13 @@ function FormSection() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="relative overflow-hidden bg-transparent text-white shadow-[0_18px_45px_rgba(0,0,0,0.75)] z-0 rounded-full border-none text-[13px] font-semibold px-[23px] py-[11px] h-[38px] inline-flex items-center justify-center gap-2 whitespace-nowrap text-center min-w-[140px] transition-all duration-[0.18s] ease-out hover:-translate-y-px hover:shadow-[0_22px_60px_rgba(0,0,0,0.95)] disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+                className="relative overflow-hidden bg-transparent text-[#000] shadow-[0_18px_45px_rgba(0,0,0,0.75)] z-0 rounded-full border-none text-[13px] font-semibold px-[23px] py-[11px] h-[38px] inline-flex items-center justify-center gap-2 whitespace-nowrap text-center min-w-[140px] transition-all duration-[0.18s] ease-out hover:-translate-y-px hover:shadow-[0_22px_60px_rgba(0,0,0,0.95)] disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0"
                 style={{
                   position: 'relative',
                 }}
               >
                 <span className="absolute inset-0 -z-10 rounded-full" style={{
-                  backgroundColor: '#ff8a1f'
+                  backgroundImage: 'linear-gradient(135deg, #ff6b00 0%, #ffd700 25%, #ff8a1f 50%, #ff4b2b 75%, #ffd700 100%)'
                 }}></span>
                 {isLoading ? (
                   <>
@@ -860,7 +870,7 @@ function FormSection() {
               }}
             >
               <p className="text-xs text-text-muted leading-snug md:leading-relaxed m-0">
-                Une fois votre prompt envoyé, la vidéo est générée automatiquement en quelques minutes. Elle est disponible dans votre espace (Mes vidéos).
+                Une fois votre prompt envoyé, la vidéo est générée automatiquement en quelques minutes. Elle apparaît dans votre espace utilisateur.
               </p>
             </div>
           </div>
@@ -1529,13 +1539,13 @@ export default function Home() {
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Link
                   href="/pricing"
-                  className="relative overflow-hidden bg-transparent text-white shadow-[0_18px_45px_rgba(0,0,0,0.75)] z-0 rounded-full border-none text-[13px] font-semibold px-6 py-3 cursor-pointer inline-flex items-center gap-2 transition-all duration-[0.18s] ease-out hover:-translate-y-px hover:shadow-[0_22px_60px_rgba(0,0,0,0.95)]"
+                  className="relative overflow-hidden bg-transparent text-[#000] shadow-[0_18px_45px_rgba(0,0,0,0.75)] z-0 rounded-full border-none text-[13px] font-semibold px-6 py-3 cursor-pointer inline-flex items-center gap-2 transition-all duration-[0.18s] ease-out hover:-translate-y-px hover:shadow-[0_22px_60px_rgba(0,0,0,0.95)]"
                   style={{
                     position: 'relative',
                   }}
                 >
                   <span className="absolute inset-0 -z-10 rounded-full" style={{
-                    backgroundColor: '#ff8a1f'
+                    backgroundImage: 'linear-gradient(135deg, #ff6b00 0%, #ffd700 25%, #ff8a1f 50%, #ff4b2b 75%, #ffd700 100%)'
                   }}></span>
                   <span>Choisir une offre</span>
                   <ChevronRight className="w-4 h-4" />

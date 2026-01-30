@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabaseClient'
 import { useCredits } from '@/hooks/useCredits'
 import { useTranslation } from '@/lib/translations/context'
 import { t, getFaqAnswer, type Language } from '@/lib/translations/dictionary'
+import { FlagIcon } from '@/components/FlagIcon'
 import {
   ChevronDown,
   Menu,
@@ -36,9 +37,9 @@ function Header({ lang }: { lang: Language }) {
   const { language: currentLanguage, setLanguage, isLoading: isTranslating } = useTranslation()
 
   const languages = [
-    { code: 'fr', name: 'Français', flag: '🇫🇷' },
-    { code: 'en', name: 'English', flag: '🇬🇧' },
-    { code: 'es', name: 'Español', flag: '🇪🇸' },
+    { code: 'fr' as const, name: 'Français' },
+    { code: 'en' as const, name: 'English' },
+    { code: 'es' as const, name: 'Español' },
   ]
 
   const currentLang = languages.find(l => l.code === currentLanguage) || languages[0]
@@ -146,7 +147,7 @@ function Header({ lang }: { lang: Language }) {
               aria-label="Select language"
               disabled={isTranslating}
             >
-              <span className="text-base leading-none">{currentLang.flag}</span>
+              <FlagIcon countryCode={currentLang.code} className="w-5 h-5" />
               {isTranslating ? (
                 <Loader2 className="w-3 h-3 animate-spin" />
               ) : (
@@ -164,7 +165,7 @@ function Header({ lang }: { lang: Language }) {
                       'text-text-soft hover:bg-[rgba(15,23,42,0.5)] hover:text-text-main'
                     } ${isTranslating ? 'opacity-50 cursor-wait' : ''}`}
                   >
-                    <span className="text-base">{l.flag}</span>
+                    <FlagIcon countryCode={l.code} className="w-5 h-5" />
                     <span className="text-[11px] font-semibold tracking-[0.18em]">{l.code.toUpperCase()}</span>
                   </button>
                 ))}
@@ -182,7 +183,7 @@ function Header({ lang }: { lang: Language }) {
               aria-label="Select language"
               disabled={isTranslating}
             >
-              <span className="text-base leading-none">{currentLang.flag}</span>
+              <FlagIcon countryCode={currentLang.code} className="w-4 h-4" />
               {isTranslating ? (
                 <Loader2 className="w-3 h-3 animate-spin" />
               ) : (
@@ -200,7 +201,7 @@ function Header({ lang }: { lang: Language }) {
                       'text-text-soft hover:bg-[rgba(15,23,42,0.5)] hover:text-text-main'
                     } ${isTranslating ? 'opacity-50 cursor-wait' : ''}`}
                   >
-                    <span className="text-base">{l.flag}</span>
+                    <FlagIcon countryCode={l.code} className="w-4 h-4" />
                     <span className="text-[11px] font-semibold tracking-[0.18em]">{l.code.toUpperCase()}</span>
                   </button>
                 ))}
@@ -280,7 +281,16 @@ function Header({ lang }: { lang: Language }) {
       </nav>
 
       {mobileMenuOpen && (
-        <div className="lg:hidden pb-4 px-5 space-y-1 border-t border-[rgba(51,65,85,0.5)] pt-4 relative z-50">
+        <div 
+          className="lg:hidden pb-4 px-5 space-y-1 border-t border-[rgba(51,65,85,0.5)] pt-4 relative z-50"
+          style={{
+            background: `
+              radial-gradient(circle at top, rgba(129, 140, 248, 0.5), transparent 60%),
+              radial-gradient(circle at bottom, rgba(255, 138, 31, 0.4), transparent 60%),
+              rgba(3, 7, 18, 0.98)
+            `
+          }}
+        >
           <div className="space-y-1 mb-3">
             <Link
               href="/creations"
@@ -407,7 +417,7 @@ function Footer({ lang }: { lang: Language }) {
 
 // FAQ Section
 export default function FAQPage() {
-  const [openIndex, setOpenIndex] = useState<number | null>(0)
+  const [openIndex, setOpenIndex] = useState<number | null>(null)
   const { language } = useTranslation()
   const lang = language as Language
 
@@ -436,7 +446,6 @@ export default function FAQPage() {
 
   // FAQ questions - we use the dictionary keys
   const faqQuestions = [
-    "Vous écrivez le prompt, FLAZY s'occupe du reste ?",
     'Combien de temps faut-il pour générer mes vidéos ?',
     'Puis-je utiliser les vidéos à des fins commerciales ?',
     'Les vidéos contiennent-elles un filigrane ?',
@@ -501,12 +510,9 @@ export default function FAQPage() {
                 }`}
               >
                 <div className="px-6 pb-6 pt-2 border-t border-[rgba(51,65,85,0.5)]">
-                  <div className="text-[11px] uppercase tracking-[0.16em] mb-2 font-semibold text-[#ff8a1f]">
-                    Comment ça fonctionne
-                  </div>
-                  <h3 className="text-[18px] md:text-[20px] mb-4 font-extrabold leading-tight text-text-main">
+                  <p className="text-[13px] text-text-soft leading-relaxed mb-4">
                     Créez des vidéos virales en quelques minutes, grâce à un processus simple et fluide
-                  </h3>
+                  </p>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     {howItWorksSteps.map((step, stepIndex) => {
                       const Icon = step.icon
@@ -569,13 +575,13 @@ export default function FAQPage() {
           <div className="mt-12 text-center">
             <Link
               href="/pricing"
-              className="relative overflow-hidden bg-transparent text-white shadow-[0_18px_45px_rgba(0,0,0,0.75)] z-0 rounded-full border-none text-[13px] font-semibold px-6 py-3 cursor-pointer inline-flex items-center gap-2 transition-all duration-[0.18s] ease-out hover:-translate-y-px hover:shadow-[0_22px_60px_rgba(0,0,0,0.95)]"
+              className="relative overflow-hidden bg-transparent text-[#000] shadow-[0_18px_45px_rgba(0,0,0,0.75)] z-0 rounded-full border-none text-[13px] font-semibold px-6 py-3 cursor-pointer inline-flex items-center gap-2 transition-all duration-[0.18s] ease-out hover:-translate-y-px hover:shadow-[0_22px_60px_rgba(0,0,0,0.95)]"
               style={{
                 position: 'relative',
               }}
             >
               <span className="absolute inset-0 -z-10 rounded-full" style={{
-                backgroundColor: '#ff8a1f'
+                backgroundImage: 'linear-gradient(135deg, #ff6b00 0%, #ffd700 25%, #ff8a1f 50%, #ff4b2b 75%, #ffd700 100%)'
               }}></span>
               <span>{t('Découvrez nos tarifs', lang)}</span>
               <ChevronRight className="w-4 h-4" />
