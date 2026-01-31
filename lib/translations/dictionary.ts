@@ -282,9 +282,9 @@ export const translations: Record<string, Record<Language, string>> = {
     es: 'Ejemplo:',
   },
   'prompt_example': {
-    fr: '« Une femme élégante explique comment elle a augmenté ses ventes grâce aux vidéos courtes. »',
-    en: '“An elegant woman explains how she increased her sales thanks to short videos.”',
-    es: '“Una mujer elegante explica cómo aumentó sus ventas gracias a los videos cortos.”',
+    fr: 'Une femme élégante explique comment elle a augmenté ses ventes grâce aux vidéos courtes.',
+    en: 'An elegant woman explains how she increased her sales thanks to short videos.',
+    es: 'Una mujer elegante explica cómo aumentó sus ventas gracias a los videos cortos.',
   },
   'Générer': {
     fr: 'Générer',

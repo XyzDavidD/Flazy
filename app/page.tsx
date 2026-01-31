@@ -802,7 +802,7 @@ function FormSection() {
               rows={4}
               disabled={false}
               className="w-full min-h-[100px] resize-none rounded-2xl border border-[rgba(75,85,99,0.95)] bg-[rgba(15,23,42,0.96)] text-text-main px-4 py-3 text-[13px] outline-none transition-all duration-[0.18s] ease-out placeholder:text-text-muted focus:border-accent-orange-soft focus:shadow-[0_0_0_1px_rgba(248,181,86,0.6)] focus:bg-[rgba(15,23,42,0.98)] disabled:opacity-50 disabled:cursor-not-allowed"
-              placeholder={`${t('Exemple', lang)} ${t('prompt_example', lang)}`}
+              placeholder={`${t('Exemple', lang)}\n${t('prompt_example', lang)}`}
               required
             />
 
@@ -930,6 +930,39 @@ function ExamplesSection() {
 
     return () => {
       cleanupFunctions.forEach(cleanup => cleanup())
+    }
+  }, [exampleVideos.length])
+
+  // Auto-pause videos when they go out of view
+  useEffect(() => {
+    const videoElements = videoRefs.current.filter(v => v !== null)
+    
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.1 // Video must be at least 10% visible
+    }
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        const video = entry.target as HTMLVideoElement
+        
+        // If video is not visible and is currently playing, pause it
+        if (!entry.isIntersecting && !video.paused) {
+          video.pause()
+        }
+      })
+    }, observerOptions)
+
+    // Observe all video elements
+    videoElements.forEach(video => {
+      if (video) {
+        observer.observe(video)
+      }
+    })
+
+    return () => {
+      observer.disconnect()
     }
   }, [exampleVideos.length])
   
