@@ -555,7 +555,7 @@ export default function PricingPage() {
                   >
                     {/* Header section - centered title */}
                     <div className="mb-3 mt-2 text-center">
-                      <div className="text-[12px] uppercase tracking-[0.14em] text-accent-orange-soft font-semibold leading-tight">
+                      <div className="text-[13px] uppercase tracking-[0.14em] text-accent-orange-soft font-semibold leading-tight">
                         {plan.badge.split(' ').map((word, idx) => (
                           <React.Fragment key={idx}>
                             {word}

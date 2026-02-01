@@ -446,7 +446,7 @@ function Hero() {
                 }}
               >
                 <span className="absolute inset-0 -z-10 rounded-full" style={{
-                  backgroundImage: 'linear-gradient(135deg, #ff6b00 0%, #ffd700 25%, #ff8a1f 50%, #ff4b2b 75%, #ffd700 100%)'
+                  backgroundImage: 'linear-gradient(90deg, #ff8a1f 0%, #ffd700 50%, #ff8a1f 100%)'
                 }}></span>
                 <Camera className="w-4 h-4" />
                 Créer ma vidéo virale
@@ -457,7 +457,7 @@ function Hero() {
                 className="relative overflow-hidden bg-transparent text-[#000] shadow-[0_14px_35px_rgba(0,0,0,0.7)] z-0 rounded-full border-none text-[13px] font-semibold px-6 py-3 cursor-pointer inline-flex items-center gap-2"
               >
                 <span className="absolute inset-0 -z-10 rounded-full" style={{
-                  backgroundImage: 'linear-gradient(135deg, #ff6b00 0%, #ffd700 25%, #ff8a1f 50%, #ff4b2b 75%, #ffd700 100%)'
+                  backgroundImage: 'linear-gradient(90deg, #ff8a1f 0%, #ffd700 50%, #ff8a1f 100%)'
                 }}></span>
                 <Eye className="w-4 h-4" />
                 Découvrir les créations
@@ -721,10 +721,10 @@ function FormSection() {
   const [showNoCreditsPopup, setShowNoCreditsPopup] = useState(false)
 
   return (
-    <section className="prompt-section pt-10 md:pt-12 pb-2 md:pb-4">
+    <section className="prompt-section pt-6 md:pt-12 pb-2 md:pb-4">
       <div className="max-w-[1120px] mx-auto px-5">
         <div className="text-left mb-6 md:mb-8">
-          <div className="mt-4 inline-flex items-center px-4 py-2 rounded-full bg-[rgba(255,138,31,0.1)] border border-[rgba(255,138,31,0.3)]">
+          <div className="mt-0 inline-flex items-center px-4 py-2 rounded-full bg-[rgba(255,138,31,0.1)] border border-[rgba(255,138,31,0.3)]">
             <div className="relative flex items-center w-2 h-2">
               <div className="absolute w-2 h-2 bg-[#22c55e] rounded-full animate-pulse"></div>
               <div className="absolute w-2 h-2 bg-[#22c55e] rounded-full animate-ping opacity-75"></div>
@@ -770,7 +770,7 @@ function FormSection() {
                 style={{ position: 'relative' }}
               >
                 <span className="absolute inset-0 -z-10 rounded-full" style={{
-                  backgroundImage: 'linear-gradient(135deg, #ff6b00 0%, #ffd700 25%, #ff8a1f 50%, #ff4b2b 75%, #ffd700 100%)'
+                  backgroundImage: 'linear-gradient(90deg, #ff8a1f 0%, #ffd700 50%, #ff8a1f 100%)'
                 }}></span>
                 Recharger vos tokens
               </Link>
@@ -802,7 +802,7 @@ function FormSection() {
               rows={4}
               disabled={false}
               className="w-full min-h-[100px] resize-none rounded-2xl border border-[rgba(75,85,99,0.95)] bg-[rgba(15,23,42,0.96)] text-text-main px-4 py-3 text-[13px] outline-none transition-all duration-[0.18s] ease-out placeholder:text-text-muted focus:border-accent-orange-soft focus:shadow-[0_0_0_1px_rgba(248,181,86,0.6)] focus:bg-[rgba(15,23,42,0.98)] disabled:opacity-50 disabled:cursor-not-allowed"
-              placeholder={`${t('Exemple', lang)}\n${t('prompt_example', lang)}`}
+              placeholder={`${t('Exemple', lang)} ${t('prompt_example', lang)}`}
               required
             />
 
@@ -839,7 +839,7 @@ function FormSection() {
                 }}
               >
                 <span className="absolute inset-0 -z-10 rounded-full" style={{
-                  backgroundImage: 'linear-gradient(135deg, #ff6b00 0%, #ffd700 25%, #ff8a1f 50%, #ff4b2b 75%, #ffd700 100%)'
+                  backgroundImage: 'linear-gradient(90deg, #ff8a1f 0%, #ffd700 50%, #ff8a1f 100%)'
                 }}></span>
                 {isLoading ? (
                   <>
@@ -1578,7 +1578,7 @@ export default function Home() {
                   }}
                 >
                   <span className="absolute inset-0 -z-10 rounded-full" style={{
-                    backgroundImage: 'linear-gradient(135deg, #ff6b00 0%, #ffd700 25%, #ff8a1f 50%, #ff4b2b 75%, #ffd700 100%)'
+                    backgroundImage: 'linear-gradient(90deg, #ff8a1f 0%, #ffd700 50%, #ff8a1f 100%)'
                   }}></span>
                   <span>Choisir une offre</span>
                   <ChevronRight className="w-4 h-4" />

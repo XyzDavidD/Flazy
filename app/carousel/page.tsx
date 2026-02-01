@@ -472,13 +472,22 @@ export default function CarouselPage() {
         try {
           const doc = document.documentElement as any
           if (doc.requestFullscreen) {
-            await doc.requestFullscreen()
+            await doc.requestFullscreen({ navigationUI: 'hide' })
           } else if ((doc as any).webkitRequestFullscreen) {
             await (doc as any).webkitRequestFullscreen()
           } else if ((doc as any).mozRequestFullScreen) {
             await (doc as any).mozRequestFullScreen()
           } else if ((doc as any).msRequestFullscreen) {
             await (doc as any).msRequestFullscreen()
+          }
+          
+          // Force immersive mode on mobile browsers
+          if ((screen as any).orientation && (screen as any).orientation.lock) {
+            try {
+              await (screen as any).orientation.lock('portrait')
+            } catch (e) {
+              console.log('Orientation lock not supported')
+            }
           }
         } catch (error) {
           // Fullscreen API might not be available or user denied
@@ -745,16 +754,23 @@ export default function CarouselPage() {
 
             {/* Download button - below mute button */}
             <button
-              onClick={() => {
+              onClick={async () => {
                 const currentVideo = videos[currentIndex]
                 if (currentVideo) {
-                  const link = document.createElement('a')
-                  link.href = currentVideo.videoUrl
-                  link.download = 'flazy-video.mp4'
-                  link.target = '_blank'
-                  document.body.appendChild(link)
-                  link.click()
-                  document.body.removeChild(link)
+                  try {
+                    const response = await fetch(currentVideo.videoUrl)
+                    const blob = await response.blob()
+                    const url = window.URL.createObjectURL(blob)
+                    const link = document.createElement('a')
+                    link.href = url
+                    link.download = `flazy-video-${Date.now()}.mp4`
+                    document.body.appendChild(link)
+                    link.click()
+                    document.body.removeChild(link)
+                    window.URL.revokeObjectURL(url)
+                  } catch (error) {
+                    console.error('Download error:', error)
+                  }
                 }
               }}
               className="absolute right-4 z-30 w-10 h-10 md:w-12 md:h-12 rounded-full bg-black/70 backdrop-blur-sm border border-white/30 flex items-center justify-center hover:bg-black/90 transition-all duration-200 touch-manipulation shadow-lg"

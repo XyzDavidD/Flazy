@@ -581,7 +581,7 @@ export default function FAQPage() {
               }}
             >
               <span className="absolute inset-0 -z-10 rounded-full" style={{
-                backgroundImage: 'linear-gradient(135deg, #ff6b00 0%, #ffd700 25%, #ff8a1f 50%, #ff4b2b 75%, #ffd700 100%)'
+                backgroundImage: 'linear-gradient(90deg, #ff8a1f 0%, #ffd700 50%, #ff8a1f 100%)'
               }}></span>
               <span>{t('Découvrez nos tarifs', lang)}</span>
               <ChevronRight className="w-4 h-4" />
