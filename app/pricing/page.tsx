@@ -390,6 +390,7 @@ function Header() {
 
 export default function PricingPage() {
   const router = useRouter()
+  const { language: currentLanguage } = useTranslation()
   const [user, setUser] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isProcessing, setIsProcessing] = useState<string | null>(null)
