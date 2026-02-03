@@ -401,6 +401,8 @@ function Header() {
 
 // Hero Component
 function Hero() {
+  const { language } = useTranslation()
+  
   const scrollToForm = () => {
     const element = document.getElementById('prompt-zone')
     if (element) {
@@ -420,20 +422,20 @@ function Hero() {
                 animation: 'flazyTopbar 10s ease-in-out infinite alternate'
               }}>
                 <Sparkles className="w-3 h-3" />
-                {t('Nouveau', currentLanguage)}
+                {t('Nouveau', language)}
               </span>
-              <span>{t('Générateur FLAZY maintenant disponible', currentLanguage)}</span>
+              <span>{t('Générateur FLAZY maintenant disponible', language)}</span>
             </div>
 
             <h1 className="text-[34px] lg:text-[42px] leading-[1.08] mb-3.5 font-extrabold">
-              <span>{t('Générateur de', currentLanguage)} </span>
+              <span>{t('Générateur de', language)} </span>
               <span className="bg-gradient-to-br from-[#ffe29f] via-[#ffb347] via-[#ff8a1f] via-[#ff4b2b] to-[#ffe29f] bg-[length:220%_220%] animate-[flazyGradient_6s_ease-in-out_infinite_alternate] bg-clip-text text-transparent">
-                {t('Vidéos IA Virales & Monétisables', currentLanguage)}
+                {t('Vidéos IA Virales & Monétisables', language)}
               </span>
             </h1>
 
             <p className="mb-6 text-text-soft text-sm lg:text-base max-w-[480px] mx-auto leading-relaxed">
-              {t('Transformez vos idées en vidéos de 10 secondes prêtes à poster sur TikTok, Reels Instagram et YouTube Shorts. Simple, rapide et efficace.', currentLanguage)}
+              {t('Transformez vos idées en vidéos de 10 secondes prêtes à poster sur TikTok, Reels Instagram et YouTube Shorts. Simple, rapide et efficace.', language)}
             </p>
 
             <div className="flex flex-wrap gap-2.5 mb-4 justify-center">
@@ -448,7 +450,7 @@ function Hero() {
                   backgroundImage: 'linear-gradient(90deg, #ff8a1f 0%, #ffd700 50%, #ff8a1f 100%)'
                 }}></span>
                 <Camera className="w-4 h-4" />
-                {t('Créer ma vidéo virale', currentLanguage)}
+                {t('Créer ma vidéo virale', language)}
               </button>
 
               <Link
@@ -459,7 +461,7 @@ function Hero() {
                   backgroundImage: 'linear-gradient(90deg, #ff8a1f 0%, #ffd700 50%, #ff8a1f 100%)'
                 }}></span>
                 <Eye className="w-4 h-4" />
-                {t('Découvrir les créations', currentLanguage)}
+                {t('Découvrir les créations', language)}
               </Link>
             </div>
           </div>
