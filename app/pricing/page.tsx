@@ -305,7 +305,7 @@ function Header() {
                 e.stopPropagation()
               }}
             >
-              Creations
+              {t('Creations', currentLanguage)}
             </Link>
             <Link
               href="/pricing"
@@ -315,7 +315,7 @@ function Header() {
                 e.stopPropagation()
               }}
             >
-              Tarifs
+              {t('Tarifs', currentLanguage)}
             </Link>
             <Link
               href="/faq"
@@ -325,7 +325,7 @@ function Header() {
                 e.stopPropagation()
               }}
             >
-              FAQ
+              {t('FAQ', currentLanguage)}
             </Link>
           </div>
 
@@ -336,7 +336,7 @@ function Header() {
                   <span className="text-accent-orange-soft font-semibold">
                     {creditsLoading ? '—' : (credits ?? 0)}
                   </span>
-                  <span>crédits</span>
+                  <span>{t('crédits', currentLanguage)}</span>
                 </div>
                 <Link
                   href="/mes-videos"
@@ -344,7 +344,7 @@ function Header() {
                   className="block w-full text-left px-4 py-2.5 text-sm text-text-soft hover:text-text-main hover:bg-[rgba(15,23,42,0.5)] rounded-lg transition-colors flex items-center gap-2 touch-manipulation"
                 >
                   <Video className="w-4 h-4" />
-                  Mes vidéos
+                  {t('Mes vidéos', currentLanguage)}
                 </Link>
                 <button
                   onClick={() => {
@@ -555,8 +555,8 @@ export default function PricingPage() {
                   >
                     {/* Header section - centered title */}
                     <div className="mb-3 mt-2 text-center">
-                      <div className="text-[13px] uppercase tracking-[0.14em] text-accent-orange-soft font-semibold leading-tight">
-                        {plan.badge.split(' ').map((word, idx) => (
+                      <div className="text-[13px] uppercase tracking-[0.14em] text-accent-orange-soft font-semibold leading-tight" translate="no">
+                        {t(plan.badge, currentLanguage).split(' ').map((word, idx) => (
                           <React.Fragment key={idx}>
                             {word}
                             {idx === 0 && <br />}

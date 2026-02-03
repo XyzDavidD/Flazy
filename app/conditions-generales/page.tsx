@@ -347,6 +347,7 @@ function Footer() {
             <a
               href="mailto:Support@flazy.app"
               className="text-text-muted hover:text-text-main transition-colors"
+              translate="no"
             >
               Support@flazy.app
             </a>

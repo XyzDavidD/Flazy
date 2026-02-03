@@ -143,19 +143,19 @@ function Header() {
             href="/creations"
             className="relative cursor-pointer transition-colors duration-[0.18s] ease-out hover:text-text-main after:content-[''] after:absolute after:left-0 after:-bottom-[6px] after:w-0 after:h-0.5 after:rounded-full after:bg-gradient-to-r after:from-[#ffb347] after:via-[#ff8a1f] after:to-[#ff4b2b] after:transition-all after:duration-[0.18s] after:ease-out hover:after:w-[18px]"
           >
-            Creations
+            {t('Creations', currentLanguage)}
           </Link>
           <Link
             href="/pricing"
             className="relative cursor-pointer transition-colors duration-[0.18s] ease-out hover:text-text-main after:content-[''] after:absolute after:left-0 after:-bottom-[6px] after:w-0 after:h-0.5 after:rounded-full after:bg-gradient-to-r after:from-[#ffb347] after:via-[#ff8a1f] after:to-[#ff4b2b] after:transition-all after:duration-[0.18s] after:ease-out hover:after:w-[18px]"
           >
-            Tarifs
+            {t('Tarifs', currentLanguage)}
           </Link>
           <Link
             href="/faq"
             className="relative cursor-pointer transition-colors duration-[0.18s] ease-out hover:text-text-main after:content-[''] after:absolute after:left-0 after:-bottom-[6px] after:w-0 after:h-0.5 after:rounded-full after:bg-gradient-to-r after:from-[#ffb347] after:via-[#ff8a1f] after:to-[#ff4b2b] after:transition-all after:duration-[0.18s] after:ease-out hover:after:w-[18px]"
           >
-            FAQ
+            {t('FAQ', currentLanguage)}
           </Link>
         </div>
 
@@ -252,7 +252,7 @@ function Header() {
                       className="flex items-center gap-2 px-4 py-2 rounded-full border border-[rgba(148,163,184,0.7)] bg-transparent text-text-soft text-[13px] font-semibold transition-all duration-[0.18s] ease-out hover:bg-[rgba(15,23,42,0.9)] hover:text-text-main hover:border-[rgba(203,213,225,0.9)]"
                     >
                       <User className="w-4 h-4" />
-                      Mon compte
+                      {t('Mon compte', currentLanguage)}
                       <ChevronDown className={`w-3 h-3 transition-transform ${accountDropdownOpen ? 'rotate-180' : ''}`} />
                     </button>
                     {accountDropdownOpen && (
@@ -263,14 +263,14 @@ function Header() {
                           className="w-full text-left px-4 py-3 text-sm text-text-soft hover:bg-[rgba(15,23,42,0.5)] transition-colors flex items-center gap-2"
                         >
                           <Video className="w-4 h-4" />
-                          Mes vidéos
+                          {t('Mes vidéos', currentLanguage)}
                         </Link>
                         <button
                           onClick={handleLogout}
                           className="w-full text-left px-4 py-3 text-sm text-text-soft hover:bg-[rgba(15,23,42,0.5)] transition-colors flex items-center gap-2"
                         >
                           <LogOut className="w-4 h-4" />
-                          Se déconnecter
+                          {t('Se déconnecter', currentLanguage)}
                         </button>
                       </div>
                     )}
@@ -282,13 +282,13 @@ function Header() {
                     href="/auth/login"
                     className="hidden sm:flex items-center justify-center px-4 py-2 rounded-full border border-[rgba(148,163,184,0.7)] bg-transparent text-text-soft text-[13px] font-semibold transition-all duration-[0.18s] ease-out hover:bg-[rgba(15,23,42,0.9)] hover:text-text-main hover:border-[rgba(203,213,225,0.9)]"
                   >
-                    Se connecter
+                    {t('Se connecter', currentLanguage)}
                   </Link>
                   <Link
                     href="/auth/signup"
                     className="hidden sm:flex items-center justify-center px-4 py-2 rounded-full border border-[rgba(148,163,184,0.7)] bg-transparent text-text-soft text-[13px] font-semibold transition-all duration-[0.18s] ease-out hover:bg-[rgba(15,23,42,0.9)] hover:text-text-main hover:border-[rgba(203,213,225,0.9)]"
                   >
-                    S'inscrire
+                    {t("S'inscrire", currentLanguage)}
                   </Link>
                 </>
               )}
@@ -420,21 +420,20 @@ function Hero() {
                 animation: 'flazyTopbar 10s ease-in-out infinite alternate'
               }}>
                 <Sparkles className="w-3 h-3" />
-                Nouveau
+                {t('Nouveau', currentLanguage)}
               </span>
-              <span>Générateur FLAZY maintenant disponible</span>
+              <span>{t('Générateur FLAZY maintenant disponible', currentLanguage)}</span>
             </div>
 
             <h1 className="text-[34px] lg:text-[42px] leading-[1.08] mb-3.5 font-extrabold">
-              <span>Générateur de </span>
+              <span>{t('Générateur de', currentLanguage)} </span>
               <span className="bg-gradient-to-br from-[#ffe29f] via-[#ffb347] via-[#ff8a1f] via-[#ff4b2b] to-[#ffe29f] bg-[length:220%_220%] animate-[flazyGradient_6s_ease-in-out_infinite_alternate] bg-clip-text text-transparent">
-                Vidéos IA Virales & Monétisables
+                {t('Vidéos IA Virales & Monétisables', currentLanguage)}
               </span>
             </h1>
 
             <p className="mb-6 text-text-soft text-sm lg:text-base max-w-[480px] mx-auto leading-relaxed">
-              Transformez vos idées en vidéos de 10 secondes prêtes à poster sur TikTok, Reels Instagram et
-              YouTube Shorts. Simple, rapide et efficace.
+              {t('Transformez vos idées en vidéos de 10 secondes prêtes à poster sur TikTok, Reels Instagram et YouTube Shorts. Simple, rapide et efficace.', currentLanguage)}
             </p>
 
             <div className="flex flex-wrap gap-2.5 mb-4 justify-center">
@@ -449,7 +448,7 @@ function Hero() {
                   backgroundImage: 'linear-gradient(90deg, #ff8a1f 0%, #ffd700 50%, #ff8a1f 100%)'
                 }}></span>
                 <Camera className="w-4 h-4" />
-                Créer ma vidéo virale
+                {t('Créer ma vidéo virale', currentLanguage)}
               </button>
 
               <Link
@@ -460,7 +459,7 @@ function Hero() {
                   backgroundImage: 'linear-gradient(90deg, #ff8a1f 0%, #ffd700 50%, #ff8a1f 100%)'
                 }}></span>
                 <Eye className="w-4 h-4" />
-                Découvrir les créations
+                {t('Découvrir les créations', currentLanguage)}
               </Link>
             </div>
           </div>
@@ -833,7 +832,7 @@ function FormSection() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="relative overflow-hidden bg-transparent text-[#000] shadow-[0_18px_45px_rgba(0,0,0,0.75)] z-0 rounded-full border-none text-[13px] font-semibold px-[23px] py-[11px] h-[38px] inline-flex items-center justify-center gap-2 whitespace-nowrap text-center min-w-[140px] transition-all duration-[0.18s] ease-out hover:-translate-y-px hover:shadow-[0_22px_60px_rgba(0,0,0,0.95)] disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+                className="relative overflow-hidden bg-transparent text-[#000] shadow-[0_18px_45px_rgba(0,0,0,0.75)] z-0 rounded-full border-[2.5px] border-[rgba(252,211,77,0.9)] text-[13px] font-semibold px-[23px] py-[11px] h-[38px] inline-flex items-center justify-center gap-2 whitespace-nowrap text-center min-w-[140px] transition-all duration-[0.18s] ease-out hover:-translate-y-px hover:shadow-[0_22px_60px_rgba(0,0,0,0.95)] disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0"
                 style={{
                   position: 'relative',
                 }}
@@ -1489,7 +1488,7 @@ function Footer() {
     <footer className="py-6 border-t border-[rgba(30,41,59,0.9)] bg-[rgba(3,7,18,0.98)] text-[11px] text-text-muted mt-12">
       <div className="max-w-[1120px] mx-auto px-5">
         <div className="flex items-center justify-between gap-2.5 flex-wrap">
-          <div>© {currentYear} FLAZY. {t('Tous droits réservés.', lang)}</div>
+          <div>© {currentYear} FLAZY {t('Tous droits réservés', lang)}</div>
           <div className="flex gap-3.5 flex-wrap">
             <Link href="/mentions-legales" className="text-text-muted hover:text-text-main transition-colors">
               {t('Mentions légales', lang)}
@@ -1503,6 +1502,7 @@ function Footer() {
             <a
               href="mailto:Support@flazy.app"
               className="text-text-muted hover:text-text-main transition-colors"
+              translate="no"
             >
               Support@flazy.app
             </a>

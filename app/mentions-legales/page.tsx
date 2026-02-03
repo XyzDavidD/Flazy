@@ -348,6 +348,7 @@ function Footer() {
             <a
               href="mailto:Support@flazy.app"
               className="text-text-muted hover:text-text-main transition-colors"
+              translate="no"
             >
               Support@flazy.app
             </a>
@@ -385,7 +386,7 @@ export default function MentionsLegales() {
                 FLAZY est une plateforme de génération de vidéos par intelligence artificielle.
               </p>
               <p className="mb-3">
-                <strong>Email :</strong> Support@flazy.app
+                <strong>Email :</strong> <span translate="no">Support@flazy.app</span>
               </p>
               <p>
                 Cet email constitue le point de contact officiel pour toute demande liée au service.

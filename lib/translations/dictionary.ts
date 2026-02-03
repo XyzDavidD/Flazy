@@ -42,6 +42,11 @@ export const translations: Record<string, Record<Language, string>> = {
     en: 'Sign out',
     es: 'Cerrar sesión',
   },
+  'Mes vidéos': {
+    fr: 'Mes vidéos',
+    en: 'My videos',
+    es: 'Mis videos',
+  },
   'crédits': {
     fr: 'crédits',
     en: 'credits',
@@ -71,10 +76,10 @@ export const translations: Record<string, Record<Language, string>> = {
   // ============================================
   // FOOTER
   // ============================================
-  'Tous droits réservés.': {
-    fr: 'Tous droits réservés.',
-    en: 'All rights reserved.',
-    es: 'Todos los derechos reservados.',
+  'Tous droits réservés': {
+    fr: 'Tous droits réservés',
+    en: 'All rights reserved',
+    es: 'Todos los derechos reservados',
   },
   'Mentions légales': {
     fr: 'Mentions légales',
