@@ -464,6 +464,11 @@ export const translations: Record<string, Record<Language, string>> = {
     en: 'How it works',
     es: 'Cómo funciona',
   },
+  'Comment ça fonctionne ?': {
+    fr: 'Comment ça fonctionne ?',
+    en: 'How does it work?',
+    es: '¿Cómo funciona?',
+  },
   'Créez des vidéos virales en quelques minutes, grâce à un processus simple et fluide': {
     fr: 'Créez des vidéos virales en quelques minutes, grâce à un processus simple et fluide',
     en: 'Create viral videos in minutes with a simple and smooth process',

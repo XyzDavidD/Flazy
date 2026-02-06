@@ -424,23 +424,23 @@ export default function FAQPage() {
 
   const howItWorksSteps = [
     {
-      title: 'Choisissez votre pack',
-      description: 'Sélectionnez le pack qui correspond à vos besoins (Starter, Creator, Pro ou Boost), puis finalisez votre commande.',
+      title: t('Choisissez votre pack', lang),
+      description: t('Sélectionnez le pack qui correspond à vos besoins (Starter, Creator, Pro ou Boost), puis finalisez votre commande.', lang),
       icon: CheckCircle2,
     },
     {
-      title: 'Décrivez votre vidéo',
-      description: 'Décrivez la vidéo que vous souhaitez générer : sujet, ambiance, style.',
+      title: t('Décrivez votre vidéo', lang),
+      description: t('Décrivez la vidéo que vous souhaitez générer : sujet, ambiance, style.', lang),
       icon: Video,
     },
     {
-      title: 'Génération automatique',
-      description: 'Votre vidéo est générée automatiquement en quelques minutes et accessible dans votre espace "Mes vidéos".',
+      title: t('Génération automatique', lang),
+      description: t('Votre vidéo est générée automatiquement en quelques minutes et accessible dans votre espace "Mes vidéos".', lang),
       icon: Rocket,
     },
     {
-      title: 'Publiez et monétisez',
-      description: "Téléchargez votre vidéo et publiez-la sur TikTok, Reels, YouTube Shorts ou toute autre plateforme. Vous conservez l'intégralité des droits sur vos vidéos.",
+      title: t('Publiez et monétisez', lang),
+      description: t("Téléchargez votre vidéo et publiez-la sur TikTok, Reels, YouTube Shorts ou toute autre plateforme. Vous conservez l'intégralité des droits sur vos vidéos.", lang),
       icon: CheckCircle2,
     },
   ]
@@ -498,7 +498,7 @@ export default function FAQPage() {
                 onClick={() => setOpenIndex(openIndex === 0 ? null : 0)}
                 className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-[rgba(15,23,42,0.5)] transition-colors"
               >
-                <h3 className="text-[15px] font-semibold text-text-main pr-4">Comment ça fonctionne ?</h3>
+                <h3 className="text-[15px] font-semibold text-text-main pr-4">{t('Comment ça fonctionne ?', lang)}</h3>
                 <ChevronDown
                   className={`w-5 h-5 text-accent-orange-soft flex-shrink-0 transition-transform duration-300 ${
                     openIndex === 0 ? 'rotate-180' : ''
@@ -512,7 +512,7 @@ export default function FAQPage() {
               >
                 <div className="px-6 pb-6 pt-2 border-t border-[rgba(51,65,85,0.5)]">
                   <p className="text-[13px] text-text-soft leading-relaxed mb-4">
-                    Créez des vidéos virales en quelques minutes, grâce à un processus simple et fluide
+                    {t('Créez des vidéos virales en quelques minutes, grâce à un processus simple et fluide', lang)}
                   </p>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     {howItWorksSteps.map((step, stepIndex) => {
