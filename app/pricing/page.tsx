@@ -525,7 +525,7 @@ export default function PricingPage() {
         <div className="max-w-[1120px] mx-auto px-5">
           <div className="text-center mb-6 md:mb-10">
             <h1 className="text-[32px] lg:text-[42px] mb-4 font-extrabold leading-tight">
-              Choisissez le pack qui correspond à votre rythme
+              {t('Choisissez le pack qui correspond à votre rythme', currentLanguage)}
             </h1>
           </div>
 
@@ -537,7 +537,7 @@ export default function PricingPage() {
                   {plan.recommended && (
                     <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
                       <div className="bg-gradient-to-br from-[#ff6b00] via-[#ffd700] to-[#ff4b2b] text-[#111827] text-[11px] font-bold uppercase tracking-wide px-4 py-1.5 rounded-full shadow-[0_4px_16px_rgba(0,0,0,0.5)] whitespace-nowrap">
-                        Le plus populaire
+                        {t('Le plus populaire', currentLanguage)}
                       </div>
                     </div>
                   )}
@@ -568,15 +568,15 @@ export default function PricingPage() {
                     
                     {/* Content section - centered */}
                     <div className="text-center mb-2">
-                      <div className="text-[15px] text-text-main font-bold">{plan.name}</div>
-                      <div className="text-[11px] text-text-soft mt-0.5">{plan.name.replace(' tokens', ' vidéos')}</div>
+                      <div className="text-[15px] text-text-main font-bold">{plan.name.split(' ')[0]} {t('tokens', currentLanguage)}</div>
+                      <div className="text-[11px] text-text-soft mt-0.5">{plan.name.split(' ')[0]} {t('vidéos', currentLanguage)}</div>
                     </div>
                     
                     {/* Bottom section with price and button - centered */}
                     <div className="mt-auto pt-1 space-y-3 text-center">
                       <div className="flex flex-col items-center gap-0">
                         <span className="text-xl font-bold text-text-main mb-0.5">{plan.price}</span>
-                        <span className="text-[10px] text-text-soft mt-1">Sans abonnement</span>
+                        <span className="text-[10px] text-text-soft mt-1">{t('Sans abonnement', currentLanguage)}</span>
                         {plan.offer && (
                           <span className="text-[11px] px-2 py-1 rounded-full bg-[rgba(22,163,74,0.18)] border border-[rgba(22,163,74,0.8)] text-[#bbf7d0] mt-1">
                             {plan.offer}
@@ -591,10 +591,10 @@ export default function PricingPage() {
                         {isProcessing === plan.pack ? (
                           <>
                             <Loader2 className="w-3 h-3 animate-spin" />
-                            <span>Chargement...</span>
+                            <span>{t('Chargement...', currentLanguage)}</span>
                           </>
                         ) : (
-                          'Sélectionner'
+                          t('Sélectionner', currentLanguage)
                         )}
                       </button>
                     </div>
@@ -607,7 +607,7 @@ export default function PricingPage() {
           <div className="mt-12 flex flex-wrap items-center justify-center gap-6 pt-8 border-t border-[rgba(51,65,85,0.3)]">
             <div className="flex items-center gap-2 text-text-soft text-xs">
               <Lock className="w-4 h-4 text-accent-orange-soft" />
-              <span>Paiement sécurisé SSL</span>
+              <span>{t('Paiement sécurisé SSL', currentLanguage)}</span>
             </div>
             <div className="flex items-center gap-2">
               <Image
@@ -620,7 +620,7 @@ export default function PricingPage() {
             </div>
             <div className="flex items-center gap-2 text-text-soft text-xs">
               <Shield className="w-4 h-4 text-accent-orange-soft" />
-              <span>Données protégées</span>
+              <span>{t('Données protégées', currentLanguage)}</span>
             </div>
           </div>
         </div>

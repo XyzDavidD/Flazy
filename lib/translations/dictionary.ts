@@ -210,6 +210,75 @@ export const translations: Record<string, Record<Language, string>> = {
   },
 
   // ============================================
+  // PRICING PAGE
+  // ============================================
+  'Choisissez le pack qui correspond à votre rythme': {
+    fr: 'Choisissez le pack qui correspond à votre rythme',
+    en: 'Choose the plan that fits your pace',
+    es: 'Elige el plan que se adapta a tu ritmo',
+  },
+  'Pack Starter': {
+    fr: 'Pack Starter',
+    en: 'Starter Pack',
+    es: 'Plan Inicial',
+  },
+  'Pack Creator': {
+    fr: 'Pack Creator',
+    en: 'Creator Pack',
+    es: 'Plan Creador',
+  },
+  'Pack Pro': {
+    fr: 'Pack Pro',
+    en: 'Pro Pack',
+    es: 'Plan Profesional',
+  },
+  'Pack Boost': {
+    fr: 'Pack Boost',
+    en: 'Boost Pack',
+    es: 'Plan Avanzado',
+  },
+  'tokens': {
+    fr: 'tokens',
+    en: 'tokens',
+    es: 'créditos',
+  },
+  'vidéos': {
+    fr: 'vidéos',
+    en: 'videos',
+    es: 'videos',
+  },
+  'Le plus populaire': {
+    fr: 'Le plus populaire',
+    en: 'Most popular',
+    es: 'El más popular',
+  },
+  'Sans abonnement': {
+    fr: 'Sans abonnement',
+    en: 'No subscription',
+    es: 'Sin suscripción',
+  },
+  'Sélectionner': {
+    fr: 'Sélectionner',
+    en: 'Select',
+    es: 'Seleccionar',
+  },
+  'Chargement...': {
+    fr: 'Chargement...',
+    en: 'Loading...',
+    es: 'Cargando...',
+  },
+  'Paiement sécurisé SSL': {
+    fr: 'Paiement sécurisé SSL',
+    en: 'SSL secure payment',
+    es: 'Pago seguro SSL',
+  },
+  'Données protégées': {
+    fr: 'Données protégées',
+    en: 'Protected data',
+    es: 'Datos protegidos',
+  },
+
+  // ============================================
   // HOMEPAGE - HERO
   // ============================================
   'Nouveau': {
