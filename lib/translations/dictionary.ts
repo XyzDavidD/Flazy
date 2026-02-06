@@ -365,6 +365,26 @@ export const translations: Record<string, Record<Language, string>> = {
     en: 'Generate',
     es: 'Generar',
   },
+  'Autoriser la publication de cette vidéo dans le feed public': {
+    fr: 'Autoriser la publication de cette vidéo dans le feed public',
+    en: 'Allow this video to be published in the public feed',
+    es: 'Permitir que este video se publique en el feed público',
+  },
+  'Une fois votre prompt envoyé, la vidéo est générée automatiquement en quelques minutes. Elle apparaît dans votre espace utilisateur.': {
+    fr: 'Une fois votre prompt envoyé, la vidéo est générée automatiquement en quelques minutes. Elle apparaît dans votre espace utilisateur.',
+    en: 'Once your prompt is submitted, the video is automatically generated in a few minutes. It will appear in your user space.',
+    es: 'Una vez enviado tu prompt, el video se genera automáticamente en unos minutos. Aparecerá en tu espacio de usuario.',
+  },
+  'Exemples de vidéos virales': {
+    fr: 'Exemples de vidéos virales',
+    en: 'Examples of viral videos',
+    es: 'Ejemplos de videos virales',
+  },
+  'Aperçu des vidéos que vous pouvez générer avec FLAZY': {
+    fr: 'Aperçu des vidéos que vous pouvez générer avec FLAZY',
+    en: 'Preview of videos you can generate with FLAZY',
+    es: 'Vista previa de los videos que puedes generar con FLAZY',
+  },
   'Génération en cours...': {
     fr: 'Génération en cours...',
     en: 'Generating...',
@@ -415,19 +435,6 @@ export const translations: Record<string, Record<Language, string>> = {
     es: 'Recargar tus tokens',
   },
 
-  // ============================================
-  // EXAMPLES SECTION
-  // ============================================
-  'Exemples de vidéos virales': {
-    fr: 'Exemples de vidéos virales',
-    en: 'Examples of viral videos',
-    es: 'Ejemplos de videos virales',
-  },
-  'Aperçu des vidéos que vous pouvez générer avec FLAZY': {
-    fr: 'Aperçu des vidéos que vous pouvez générer avec FLAZY',
-    en: 'Preview of videos you can generate with FLAZY',
-    es: 'Vista previa de los videos que puedes generar con FLAZY',
-  },
   'Actualité': {
     fr: 'Actualité',
     en: 'News',
@@ -497,96 +504,6 @@ export const translations: Record<string, Record<Language, string>> = {
     en: 'Download your video and publish it on TikTok, Reels, YouTube Shorts or any other platform. You retain full rights to your videos.',
     es: 'Descarga tu video y publícalo en TikTok, Reels, YouTube Shorts o cualquier otra plataforma. Conservas la totalidad de los derechos sobre tus videos.',
   },
-
-  // ============================================
-  // PRICING SECTION
-  // ============================================
-  'Choisissez le pack qui correspond à votre rythme': {
-    fr: 'Choisissez le pack qui correspond à votre rythme',
-    en: 'Choose the pack that matches your pace',
-    es: 'Elige el pack que se adapte a tu ritmo',
-  },
-  'Des packs attractifs et adaptés à tous les niveaux.': {
-    fr: 'Des packs attractifs et adaptés à tous les niveaux.',
-    en: 'Attractive packs adapted to all levels.',
-    es: 'Packs atractivos adaptados a todos los niveles.',
-  },
-  'Pack Starter': {
-    fr: 'Pack Starter',
-    en: 'Starter Pack',
-    es: 'Pack Starter',
-  },
-  'Pack Creator': {
-    fr: 'Pack Creator',
-    en: 'Creator Pack',
-    es: 'Pack Creator',
-  },
-  'Pack Pro': {
-    fr: 'Pack Pro',
-    en: 'Pro Pack',
-    es: 'Pack Pro',
-  },
-  'Pack Boost': {
-    fr: 'Pack Boost',
-    en: 'Boost Pack',
-    es: 'Pack Boost',
-  },
-  '5 tokens': {
-    fr: '5 tokens',
-    en: '5 tokens',
-    es: '5 tokens',
-  },
-  '10 tokens': {
-    fr: '10 tokens',
-    en: '10 tokens',
-    es: '10 tokens',
-  },
-  '25 tokens': {
-    fr: '25 tokens',
-    en: '25 tokens',
-    es: '25 tokens',
-  },
-  '50 tokens': {
-    fr: '50 tokens',
-    en: '50 tokens',
-    es: '50 tokens',
-  },
-  'Aucun abonnement requis': {
-    fr: 'Aucun abonnement requis',
-    en: 'No subscription required',
-    es: 'Sin suscripción requerida',
-  },
-  'Le plus populaire': {
-    fr: 'Le plus populaire',
-    en: 'Most popular',
-    es: 'El más popular',
-  },
-  'Choisir ce pack': {
-    fr: 'Choisir ce pack',
-    en: 'Choose this pack',
-    es: 'Elegir este pack',
-  },
-  'Sélectionner': {
-    fr: 'Sélectionner',
-    en: 'Select',
-    es: 'Seleccionar',
-  },
-  'Chargement...': {
-    fr: 'Chargement...',
-    en: 'Loading...',
-    es: 'Cargando...',
-  },
-  'Paiement sécurisé SSL': {
-    fr: 'Paiement sécurisé SSL',
-    en: 'Secure SSL payment',
-    es: 'Pago seguro SSL',
-  },
-  'Données protégées': {
-    fr: 'Données protégées',
-    en: 'Protected data',
-    es: 'Datos protegidos',
-  },
-
   // ============================================
   // STEPS SECTION (Homepage)
   // ============================================

@@ -441,13 +441,13 @@ function Hero() {
             <div className="flex flex-wrap gap-2.5 mb-4 justify-center">
               <button
                 onClick={scrollToForm}
-                className="relative overflow-hidden bg-transparent text-[#000] shadow-[0_18px_45px_rgba(0,0,0,0.75)] z-0 rounded-full border-none text-[13px] font-semibold px-6 py-3 cursor-pointer inline-flex items-center gap-2"
+                className="relative overflow-hidden bg-transparent text-[#0b0f19] z-0 rounded-full border border-[rgba(255,173,95,0.45)] text-[13px] font-semibold px-6 py-3 cursor-pointer inline-flex items-center gap-2 shadow-[0_10px_26px_rgba(7,10,20,0.55)] transition-all duration-200 ease-out hover:-translate-y-px hover:shadow-[0_16px_38px_rgba(7,10,20,0.6)] hover:border-[rgba(255,173,95,0.7)]"
                 style={{
                   position: 'relative',
                 }}
               >
                 <span className="absolute inset-0 -z-10 rounded-full" style={{
-                  backgroundImage: 'linear-gradient(90deg, #ff8a1f 0%, #ffd700 50%, #ff8a1f 100%)'
+                  backgroundImage: 'linear-gradient(90deg, #ff6b00 0%, #ffd36a 50%, #ff5a1f 100%)'
                 }}></span>
                 <Camera className="w-4 h-4" />
                 {t('Créer ma vidéo virale', language)}
@@ -455,10 +455,10 @@ function Hero() {
 
               <Link
                 href="/creations"
-                className="relative overflow-hidden bg-transparent text-[#000] shadow-[0_14px_35px_rgba(0,0,0,0.7)] z-0 rounded-full border-none text-[13px] font-semibold px-6 py-3 cursor-pointer inline-flex items-center gap-2"
+                className="relative overflow-hidden bg-transparent text-[#0b0f19] z-0 rounded-full border border-[rgba(255,173,95,0.35)] text-[13px] font-semibold px-6 py-3 cursor-pointer inline-flex items-center gap-2 shadow-[0_8px_22px_rgba(7,10,20,0.5)] transition-all duration-200 ease-out hover:-translate-y-px hover:shadow-[0_14px_34px_rgba(7,10,20,0.58)] hover:border-[rgba(255,173,95,0.6)]"
               >
                 <span className="absolute inset-0 -z-10 rounded-full" style={{
-                  backgroundImage: 'linear-gradient(90deg, #ff8a1f 0%, #ffd700 50%, #ff8a1f 100%)'
+                  backgroundImage: 'linear-gradient(90deg, #ff6b00 0%, #ffd36a 50%, #ff5a1f 100%)'
                 }}></span>
                 <Eye className="w-4 h-4" />
                 {t('Découvrir les créations', language)}
@@ -570,7 +570,6 @@ function FormSection() {
   
   // Get current language for translations
   const { language } = useTranslation()
-  const lang = language as Language
 
   // Check auth state for user (for form gating)
   useEffect(() => {
@@ -793,7 +792,7 @@ function FormSection() {
             >
             <div className="text-xs text-text-soft mb-3 flex items-center gap-2">
               <Video className="w-4 h-4 text-accent-orange-soft" />
-              <span className="font-semibold">{t('Décrivez votre vidéo', lang)}</span>
+              <span className="font-semibold">{t('Décrivez votre vidéo', language)}</span>
             </div>
 
             <textarea
@@ -803,7 +802,7 @@ function FormSection() {
               rows={4}
               disabled={false}
               className="w-full min-h-[100px] resize-none rounded-2xl border border-[rgba(75,85,99,0.95)] bg-[rgba(15,23,42,0.96)] text-text-main px-4 py-3 text-[13px] outline-none transition-all duration-[0.18s] ease-out placeholder:text-text-muted focus:border-accent-orange-soft focus:shadow-[0_0_0_1px_rgba(248,181,86,0.6)] focus:bg-[rgba(15,23,42,0.98)] disabled:opacity-50 disabled:cursor-not-allowed"
-              placeholder={`${t('Exemple', lang)} ${t('prompt_example', lang)}`}
+              placeholder={`${t('Exemple', language)} ${t('prompt_example', language)}`}
               required
             />
 
@@ -825,7 +824,7 @@ function FormSection() {
                   </div>
                 </div>
                 <span className="text-[12px] text-text-soft group-hover:text-text-main transition-colors leading-snug">
-                  Autoriser la publication de cette vidéo dans le feed public
+                  {t('Autoriser la publication de cette vidéo dans le feed public', language)}
                 </span>
               </label>
             </div>
@@ -834,14 +833,19 @@ function FormSection() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="relative overflow-hidden bg-transparent text-[#000] shadow-[0_18px_45px_rgba(0,0,0,0.75)] z-0 rounded-full border-[2.5px] border-[rgba(252,211,77,0.9)] text-[13px] font-semibold px-[23px] py-[11px] h-[38px] inline-flex items-center justify-center gap-2 whitespace-nowrap text-center min-w-[140px] transition-all duration-[0.18s] ease-out hover:-translate-y-px hover:shadow-[0_22px_60px_rgba(0,0,0,0.95)] disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+                className="relative overflow-hidden bg-transparent text-[#111827] z-0 rounded-full border-none text-[13px] font-semibold px-[23px] py-[11px] h-[38px] inline-flex items-center justify-center gap-2 whitespace-nowrap text-center min-w-[140px] shadow-[0_12px_32px_rgba(0,0,0,0.6)] transition-all duration-[0.2s] ease-out hover:-translate-y-px hover:shadow-[0_18px_40px_rgba(0,0,0,0.7)] disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0"
                 style={{
                   position: 'relative',
                 }}
               >
-                <span className="absolute inset-0 -z-10 rounded-full" style={{
-                  backgroundImage: 'linear-gradient(90deg, #ff8a1f 0%, #ffd700 50%, #ff8a1f 100%)'
-                }}></span>
+                <span
+                  className="absolute inset-0 -z-10 rounded-full"
+                  style={{
+                    backgroundImage: 'linear-gradient(90deg, #ff6b00 0%, #ffd700 25%, #ff4b2b 50%, #ffd700 75%, #ff6b00 100%)',
+                    backgroundSize: '220% 100%',
+                    animation: 'flazyTopbar 10s ease-in-out infinite alternate'
+                  }}
+                ></span>
                 {isLoading ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -871,7 +875,7 @@ function FormSection() {
               }}
             >
               <p className="text-xs text-text-muted leading-snug md:leading-relaxed m-0">
-                Une fois votre prompt envoyé, la vidéo est générée automatiquement en quelques minutes. Elle apparaît dans votre espace utilisateur.
+                {t('Une fois votre prompt envoyé, la vidéo est générée automatiquement en quelques minutes. Elle apparaît dans votre espace utilisateur.', language)}
               </p>
             </div>
           </div>
@@ -884,6 +888,7 @@ function FormSection() {
 
 // Examples Section with Playable Videos
 function ExamplesSection() {
+  const { language } = useTranslation()
   const [playingIndex, setPlayingIndex] = useState<number | null>(null)
   const [pausedIndex, setPausedIndex] = useState<number | null>(null)
   const [exampleVideos, setExampleVideos] = useState<any[]>([])
@@ -1128,10 +1133,10 @@ function ExamplesSection() {
       <div className="max-w-[1120px] mx-auto px-5">
         <div className="text-left mb-6 md:mb-8">
           <div className="text-[11px] uppercase tracking-[0.16em] mb-1.5 font-semibold text-accent-orange">
-            Exemples de vidéos virales
+            {t('Exemples de vidéos virales', language).toUpperCase()}
           </div>
           <h2 className="text-[28px] lg:text-[32px] mb-3 font-extrabold leading-tight">
-            Aperçu des vidéos que vous pouvez générer avec FLAZY
+            {t('Aperçu des vidéos que vous pouvez générer avec FLAZY', language)}
           </h2>
           <p className="text-[14px] lg:text-[15px] text-text-soft max-w-[600px] leading-relaxed">
           </p>

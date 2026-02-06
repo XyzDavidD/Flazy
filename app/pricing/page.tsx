@@ -124,19 +124,19 @@ function Header() {
             href="/creations"
             className="relative cursor-pointer transition-colors duration-[0.18s] ease-out hover:text-text-main after:content-[''] after:absolute after:left-0 after:-bottom-[6px] after:w-0 after:h-0.5 after:rounded-full after:bg-gradient-to-r after:from-[#ffb347] after:via-[#ff8a1f] after:to-[#ff4b2b] after:transition-all after:duration-[0.18s] after:ease-out hover:after:w-[18px]"
           >
-            Creations
+            {t('Creations', currentLanguage)}
           </Link>
           <Link
             href="/pricing"
             className="relative cursor-pointer transition-colors duration-[0.18s] ease-out hover:text-text-main after:content-[''] after:absolute after:left-0 after:-bottom-[6px] after:w-0 after:h-0.5 after:rounded-full after:bg-gradient-to-r after:from-[#ffb347] after:via-[#ff8a1f] after:to-[#ff4b2b] after:transition-all after:duration-[0.18s] after:ease-out hover:after:w-[18px]"
           >
-            Tarifs
+            {t('Tarifs', currentLanguage)}
           </Link>
           <Link
             href="/faq"
             className="relative cursor-pointer transition-colors duration-[0.18s] ease-out hover:text-text-main after:content-[''] after:absolute after:left-0 after:-bottom-[6px] after:w-0 after:h-0.5 after:rounded-full after:bg-gradient-to-r after:from-[#ffb347] after:via-[#ff8a1f] after:to-[#ff4b2b] after:transition-all after:duration-[0.18s] after:ease-out hover:after:w-[18px]"
           >
-            FAQ
+            {t('FAQ', currentLanguage)}
           </Link>
         </div>
 
@@ -516,15 +516,15 @@ export default function PricingPage() {
           className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full border border-[rgba(148,163,184,0.7)] bg-[rgba(15,23,42,0.5)] backdrop-blur-sm text-text-soft hover:text-text-main hover:bg-[rgba(15,23,42,0.8)] hover:border-[rgba(203,213,225,0.9)] transition-all duration-[0.18s] ease-out text-sm font-semibold group touch-manipulation"
         >
           <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-          <span className="hidden sm:inline">Retour à l'accueil</span>
-          <span className="sm:hidden">Retour</span>
+          <span className="hidden sm:inline" translate="no">{t("Retour à l'accueil", currentLanguage)}</span>
+          <span className="sm:hidden" translate="no">{t('Retour', currentLanguage)}</span>
         </Link>
       </div>
       {/* Main Content */}
       <main className="py-8 md:py-12">
         <div className="max-w-[1120px] mx-auto px-5">
           <div className="text-center mb-6 md:mb-10">
-            <h1 className="text-[32px] lg:text-[42px] mb-4 font-extrabold leading-tight">
+            <h1 className="text-[32px] lg:text-[42px] mb-4 font-extrabold leading-tight" translate="no">
               {t('Choisissez le pack qui correspond à votre rythme', currentLanguage)}
             </h1>
           </div>
@@ -536,7 +536,7 @@ export default function PricingPage() {
                 <div key={i} className="relative flex flex-col h-full">
                   {plan.recommended && (
                     <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
-                      <div className="bg-gradient-to-br from-[#ff6b00] via-[#ffd700] to-[#ff4b2b] text-[#111827] text-[11px] font-bold uppercase tracking-wide px-4 py-1.5 rounded-full shadow-[0_4px_16px_rgba(0,0,0,0.5)] whitespace-nowrap">
+                      <div className="bg-gradient-to-br from-[#ff6b00] via-[#ffd700] to-[#ff4b2b] text-[#111827] text-[11px] font-bold uppercase tracking-wide px-4 py-1.5 rounded-full shadow-[0_4px_16px_rgba(0,0,0,0.5)] whitespace-nowrap" translate="no">
                         {t('Le plus populaire', currentLanguage)}
                       </div>
                     </div>
@@ -567,7 +567,7 @@ export default function PricingPage() {
                     </div>
                     
                     {/* Content section - centered */}
-                    <div className="text-center mb-2">
+                    <div className="text-center mb-2" translate="no">
                       <div className="text-[15px] text-text-main font-bold">{plan.name.split(' ')[0]} {t('tokens', currentLanguage)}</div>
                       <div className="text-[11px] text-text-soft mt-0.5">{plan.name.split(' ')[0]} {t('vidéos', currentLanguage)}</div>
                     </div>
@@ -575,8 +575,8 @@ export default function PricingPage() {
                     {/* Bottom section with price and button - centered */}
                     <div className="mt-auto pt-1 space-y-3 text-center">
                       <div className="flex flex-col items-center gap-0">
-                        <span className="text-xl font-bold text-text-main mb-0.5">{plan.price}</span>
-                        <span className="text-[10px] text-text-soft mt-1">{t('Sans abonnement', currentLanguage)}</span>
+                        <span className="text-xl font-bold text-text-main mb-0.5" translate="no">{plan.price}</span>
+                        <span className="text-[10px] text-text-soft mt-1" translate="no">{t('Sans abonnement', currentLanguage)}</span>
                         {plan.offer && (
                           <span className="text-[11px] px-2 py-1 rounded-full bg-[rgba(22,163,74,0.18)] border border-[rgba(22,163,74,0.8)] text-[#bbf7d0] mt-1">
                             {plan.offer}
@@ -586,8 +586,15 @@ export default function PricingPage() {
                       <button
                         onClick={() => handleChoosePack(plan.pack)}
                         disabled={isProcessing === plan.pack || isLoading}
-                        className="w-full bg-transparent text-accent-orange-soft border border-[rgba(248,181,86,0.95)] shadow-[0_0_0_1px_rgba(248,181,86,0.4)] rounded-full text-[13px] font-semibold px-4 py-2.5 cursor-pointer inline-flex items-center justify-center gap-2 transition-all duration-[0.18s] ease-out hover:bg-[radial-gradient(circle_at_top_left,rgba(255,138,31,0.16),transparent_70%)] hover:border-[rgba(248,181,86,1)] disabled:opacity-60 disabled:cursor-not-allowed"
+                        className="w-full relative overflow-hidden bg-transparent text-[#0b0f19] z-0 rounded-full border border-[rgba(255,173,95,0.4)] text-[13px] font-semibold px-4 py-2.5 cursor-pointer inline-flex items-center justify-center gap-2 shadow-[0_8px_22px_rgba(7,10,20,0.5)] transition-all duration-200 ease-out hover:-translate-y-px hover:shadow-[0_14px_34px_rgba(7,10,20,0.58)] hover:border-[rgba(255,173,95,0.65)] disabled:opacity-60 disabled:cursor-not-allowed"
+                        translate="no"
                       >
+                        <span
+                          className="absolute inset-0 -z-10 rounded-full"
+                          style={{
+                            backgroundImage: 'linear-gradient(90deg, #ff6b00 0%, #ffd36a 50%, #ff5a1f 100%)'
+                          }}
+                        ></span>
                         {isProcessing === plan.pack ? (
                           <>
                             <Loader2 className="w-3 h-3 animate-spin" />
@@ -604,7 +611,7 @@ export default function PricingPage() {
             })}
           </div>
 
-          <div className="mt-12 flex flex-wrap items-center justify-center gap-6 pt-8 border-t border-[rgba(51,65,85,0.3)]">
+          <div className="mt-12 flex flex-wrap items-center justify-center gap-6 pt-8 border-t border-[rgba(51,65,85,0.3)]" translate="no">
             <div className="flex items-center gap-2 text-text-soft text-xs">
               <Lock className="w-4 h-4 text-accent-orange-soft" />
               <span>{t('Paiement sécurisé SSL', currentLanguage)}</span>

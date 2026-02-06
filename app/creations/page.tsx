@@ -745,16 +745,38 @@ export default function CarouselPage() {
 
             {/* Download button - below mute button */}
             <button
-              onClick={() => {
+              onClick={async () => {
                 const currentVideo = videos[currentIndex]
-                if (currentVideo) {
+                if (!currentVideo) return
+
+                try {
+                  const response = await fetch(currentVideo.videoUrl)
+                  if (!response.ok) {
+                    throw new Error(`Download failed: ${response.status}`)
+                  }
+
+                  const blob = await response.blob()
+                  const objectUrl = URL.createObjectURL(blob)
+
+                  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
+
                   const link = document.createElement('a')
-                  link.href = currentVideo.videoUrl
-                  link.download = 'flazy-video.mp4'
-                  link.target = '_blank'
-                  document.body.appendChild(link)
-                  link.click()
-                  document.body.removeChild(link)
+                  link.href = objectUrl
+                  link.download = `flazy-video-${Date.now()}.mp4`
+                  link.rel = 'noopener'
+
+                  if (isIOS) {
+                    // iOS Safari ignores download; open the blob directly as a fallback
+                    window.open(objectUrl, '_blank', 'noopener,noreferrer')
+                  } else {
+                    document.body.appendChild(link)
+                    link.click()
+                    document.body.removeChild(link)
+                  }
+
+                  setTimeout(() => URL.revokeObjectURL(objectUrl), 1000)
+                } catch (error) {
+                  console.error('Download error:', error)
                 }
               }}
               className="absolute right-4 z-30 w-9 h-9 md:w-11 md:h-11 rounded-full bg-black/70 backdrop-blur-sm border border-white/30 flex items-center justify-center hover:bg-black/90 transition-all duration-200 touch-manipulation shadow-lg"
