@@ -8,14 +8,14 @@ interface FlagIconProps {
 export const FlagIcon: React.FC<FlagIconProps> = ({ countryCode, className = '' }) => {
   const flags = {
     fr: (
-      <svg className={className} viewBox="0 0 900 600" xmlns="http://www.w3.org/2000/svg">
+      <svg className="w-full h-full block" viewBox="0 0 900 600" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
         <rect width="900" height="600" fill="#ED2939"/>
         <rect width="600" height="600" fill="#fff"/>
         <rect width="300" height="600" fill="#002395"/>
       </svg>
     ),
     en: (
-      <svg className={className} viewBox="0 0 60 30" xmlns="http://www.w3.org/2000/svg">
+      <svg className="w-full h-full block" viewBox="0 0 60 30" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
         <clipPath id="s">
           <path d="M0,0 v30 h60 v-30 z"/>
         </clipPath>
@@ -32,12 +32,16 @@ export const FlagIcon: React.FC<FlagIconProps> = ({ countryCode, className = '' 
       </svg>
     ),
     es: (
-      <svg className={className} viewBox="0 0 750 500" xmlns="http://www.w3.org/2000/svg">
+      <svg className="w-full h-full block" viewBox="0 0 750 500" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
         <rect width="750" height="500" fill="#c60b1e"/>
         <rect width="750" height="250" y="125" fill="#ffc400"/>
       </svg>
     ),
   }
 
-  return flags[countryCode] || null
+  return (
+    <span className={`inline-flex overflow-hidden aspect-[3/2] h-auto ${className}`}>
+      {flags[countryCode] || null}
+    </span>
+  )
 }

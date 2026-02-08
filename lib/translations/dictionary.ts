@@ -455,6 +455,11 @@ export const translations: Record<string, Record<Language, string>> = {
     en: 'Viral',
     es: 'Viral',
   },
+  'Choisir une offre': {
+    fr: 'Choisir une offre',
+    en: 'Choose an offer',
+    es: 'Elegir una oferta',
+  },
 
   // ============================================
   // HOW IT WORKS SECTION

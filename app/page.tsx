@@ -730,7 +730,7 @@ function FormSection() {
               <div className="absolute w-2 h-2 bg-[#22c55e] rounded-full animate-ping opacity-75"></div>
             </div>
             <span className="text-[13px] text-text-soft font-medium ml-1.5">
-              <strong className="text-accent-orange-soft">{displayedGenerations}</strong>{' '}générations en cours
+              <strong className="text-accent-orange-soft">{displayedGenerations}</strong>{' '}{t('générations en cours', language)}
             </span>
           </div>
         </div>
@@ -770,7 +770,7 @@ function FormSection() {
                 style={{ position: 'relative' }}
               >
                 <span className="absolute inset-0 -z-10 rounded-full" style={{
-                  backgroundImage: 'linear-gradient(90deg, #ff8a1f 0%, #ffd700 50%, #ff8a1f 100%)'
+                  backgroundImage: 'linear-gradient(90deg, #ff6b00 0%, #ffd36a 50%, #ff5a1f 100%)'
                 }}></span>
                 Recharger vos tokens
               </Link>
@@ -849,10 +849,10 @@ function FormSection() {
                 {isLoading ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Génération en cours...</span>
+                    <span>{t('Génération en cours...', language)}</span>
                   </>
                 ) : (
-                  'Générer'
+                  t('Générer', language)
                 )}
               </button>
             </div>
@@ -1196,7 +1196,9 @@ function ExamplesSection() {
                 </div>
                 <div className="flex items-center gap-2 mt-auto">
                   <Icon className="w-3.5 h-3.5 text-accent-orange-soft flex-shrink-0" />
-                  <h3 className="text-[12px] font-semibold text-text-main leading-tight m-0">{example.title}</h3>
+                  <h3 className="text-[12px] font-semibold text-text-main leading-tight m-0">
+                    {t(example.title, language)}
+                  </h3>
                 </div>
               </div>
             )
@@ -1522,6 +1524,7 @@ function Footer() {
 
 // Main Page Component
 export default function Home() {
+  const { language } = useTranslation()
   const [isChecking, setIsChecking] = useState(true)
 
   useEffect(() => {
@@ -1585,9 +1588,9 @@ export default function Home() {
                   }}
                 >
                   <span className="absolute inset-0 -z-10 rounded-full" style={{
-                    backgroundImage: 'linear-gradient(90deg, #ff8a1f 0%, #ffd700 50%, #ff8a1f 100%)'
+                    backgroundImage: 'linear-gradient(90deg, #ff6b00 0%, #ffd36a 50%, #ff5a1f 100%)'
                   }}></span>
-                  <span>Choisir une offre</span>
+                  <span>{t('Choisir une offre', language)}</span>
                   <ChevronRight className="w-4 h-4" />
                 </Link>
                 

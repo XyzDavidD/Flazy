@@ -200,7 +200,7 @@ export default function ResetPasswordPage() {
                 }}
               >
                 <span className="absolute inset-0 -z-10 rounded-full" style={{
-                  backgroundImage: 'linear-gradient(90deg, #ff8a1f 0%, #ffd700 50%, #ff8a1f 100%)'
+                  backgroundImage: 'linear-gradient(90deg, #ff6b00 0%, #ffd36a 50%, #ff5a1f 100%)'
                 }}></span>
                 {isLoading ? 'Mise à jour...' : 'Mettre à jour le mot de passe'}
               </button>

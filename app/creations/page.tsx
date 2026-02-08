@@ -46,6 +46,7 @@ export default function CarouselPage() {
   interface VideoData {
     id: string
     videoUrl: string
+    videoPath: string
   }
 
   const shuffleArray = <T,>(array: T[]) => {
@@ -124,6 +125,7 @@ export default function CarouselPage() {
             return {
               id: video.id,
               videoUrl: urlData.publicUrl,
+              videoPath: video.video_path,
             }
           })
 
@@ -745,40 +747,27 @@ export default function CarouselPage() {
 
             {/* Download button - below mute button */}
             <button
-              onClick={async () => {
+              onClick={async (event) => {
+                event.preventDefault()
+                event.stopPropagation()
                 const currentVideo = videos[currentIndex]
                 if (!currentVideo) return
 
                 try {
-                  const response = await fetch(currentVideo.videoUrl)
-                  if (!response.ok) {
-                    throw new Error(`Download failed: ${response.status}`)
-                  }
-
-                  const blob = await response.blob()
-                  const objectUrl = URL.createObjectURL(blob)
-
-                  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
-
+                  const downloadUrl = `/api/download?path=${encodeURIComponent(currentVideo.videoPath)}`
                   const link = document.createElement('a')
-                  link.href = objectUrl
+                  link.href = downloadUrl
                   link.download = `flazy-video-${Date.now()}.mp4`
                   link.rel = 'noopener'
-
-                  if (isIOS) {
-                    // iOS Safari ignores download; open the blob directly as a fallback
-                    window.open(objectUrl, '_blank', 'noopener,noreferrer')
-                  } else {
-                    document.body.appendChild(link)
-                    link.click()
-                    document.body.removeChild(link)
-                  }
-
-                  setTimeout(() => URL.revokeObjectURL(objectUrl), 1000)
+                  document.body.appendChild(link)
+                  link.click()
+                  document.body.removeChild(link)
                 } catch (error) {
                   console.error('Download error:', error)
                 }
               }}
+              onPointerDown={(event) => event.stopPropagation()}
+              onTouchStart={(event) => event.stopPropagation()}
               className="absolute right-4 z-30 w-9 h-9 md:w-11 md:h-11 rounded-full bg-black/70 backdrop-blur-sm border border-white/30 flex items-center justify-center hover:bg-black/90 transition-all duration-200 touch-manipulation shadow-lg"
               aria-label="Télécharger la vidéo"
               style={{ 
