@@ -16,6 +16,14 @@
     scroll-behavior: smooth;
     /* Fullscreen mobile support */
     height: -webkit-fill-available;
+    /* Prevent pull-to-refresh and overscroll */
+    overscroll-behavior: none;
+  }
+  
+  body {
+    /* Prevent bouncing on iOS */
+    position: relative;
+    overscroll-behavior: none;
   }
   
   /* Support for safe areas on mobile devices */
@@ -28,6 +36,18 @@
 }
 
 /* Fullscreen mobile carousel support */
+.carousel-fullscreen {
+  /* Prevent any scrolling or bouncing */
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
+  /* Ensure content stays fixed */
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
 @supports (-webkit-touch-callout: none) {
   .carousel-fullscreen {
     min-height: -webkit-fill-available;
@@ -40,6 +60,12 @@
     height: 100dvh;
     min-height: 100dvh;
   }
+}
+
+/* Use custom property for more reliable viewport height on mobile */
+.carousel-fullscreen {
+  height: calc(var(--vh, 1vh) * 100);
+  min-height: calc(var(--vh, 1vh) * 100);
 }
 
 @keyframes flazyTopbar {

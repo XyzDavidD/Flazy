@@ -447,7 +447,7 @@ function Hero() {
                 }}
               >
                 <span className="absolute inset-0 -z-10 rounded-full" style={{
-                  backgroundImage: 'linear-gradient(90deg, #ff6b00 0%, #ffd36a 50%, #ff5a1f 100%)'
+                  backgroundImage: 'linear-gradient(90deg, #ff6b00 0%, #ffd700 50%, #ff5a1f 100%)'
                 }}></span>
                 <Camera className="w-4 h-4" />
                 {t('Créer ma vidéo virale', language)}
@@ -458,7 +458,7 @@ function Hero() {
                 className="relative overflow-hidden bg-transparent text-[#0b0f19] z-0 rounded-full border border-[rgba(255,173,95,0.35)] text-[13px] font-semibold px-6 py-3 cursor-pointer inline-flex items-center gap-2 shadow-[0_8px_22px_rgba(7,10,20,0.5)] transition-all duration-200 ease-out hover:-translate-y-px hover:shadow-[0_14px_34px_rgba(7,10,20,0.58)] hover:border-[rgba(255,173,95,0.6)]"
               >
                 <span className="absolute inset-0 -z-10 rounded-full" style={{
-                  backgroundImage: 'linear-gradient(90deg, #ff6b00 0%, #ffd36a 50%, #ff5a1f 100%)'
+                  backgroundImage: 'linear-gradient(90deg, #ff6b00 0%, #ffd700 50%, #ff5a1f 100%)'
                 }}></span>
                 <Eye className="w-4 h-4" />
                 {t('Découvrir les créations', language)}
@@ -770,7 +770,7 @@ function FormSection() {
                 style={{ position: 'relative' }}
               >
                 <span className="absolute inset-0 -z-10 rounded-full" style={{
-                  backgroundImage: 'linear-gradient(90deg, #ff6b00 0%, #ffd36a 50%, #ff5a1f 100%)'
+                  backgroundImage: 'linear-gradient(90deg, #ff6b00 0%, #ffd700 50%, #ff5a1f 100%)'
                 }}></span>
                 Recharger vos tokens
               </Link>
@@ -841,7 +841,7 @@ function FormSection() {
                 <span
                   className="absolute inset-0 -z-10 rounded-full"
                   style={{
-                    backgroundImage: 'linear-gradient(90deg, #ff6b00 0%, #ffd700 25%, #ff4b2b 50%, #ffd700 75%, #ff6b00 100%)',
+                    backgroundImage: 'linear-gradient(90deg, #ff6b00 0%, #ffd700 25%, #ff6b00 50%, #ffd700 75%, #ff6b00 100%)',
                     backgroundSize: '220% 100%',
                     animation: 'flazyTopbar 10s ease-in-out infinite alternate'
                   }}
@@ -1588,7 +1588,7 @@ export default function Home() {
                   }}
                 >
                   <span className="absolute inset-0 -z-10 rounded-full" style={{
-                    backgroundImage: 'linear-gradient(90deg, #ff6b00 0%, #ffd36a 50%, #ff5a1f 100%)'
+                    backgroundImage: 'linear-gradient(90deg, #ff6b00 0%, #ffd700 50%, #ff5a1f 100%)'
                   }}></span>
                   <span>{t('Choisir une offre', language)}</span>
                   <ChevronRight className="w-4 h-4" />

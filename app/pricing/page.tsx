@@ -592,7 +592,7 @@ export default function PricingPage() {
                         <span
                           className="absolute inset-0 -z-10 rounded-full"
                           style={{
-                            backgroundImage: 'linear-gradient(90deg, #ff6b00 0%, #ffd36a 50%, #ff5a1f 100%)'
+                            backgroundImage: 'linear-gradient(90deg, #ff6b00 0%, #ffd700 50%, #ff5a1f 100%)'
                           }}
                         ></span>
                         {isProcessing === plan.pack ? (

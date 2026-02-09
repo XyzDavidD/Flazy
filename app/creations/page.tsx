@@ -427,88 +427,57 @@ export default function CarouselPage() {
     return () => window.removeEventListener('keydown', handleKeyPress)
   }, [goToPrevious, goToNext, togglePlayPause])
 
-  // Prevent body scroll and enable fullscreen on mobile
+  // Prevent body scroll and optimize mobile viewport handling
   useEffect(() => {
     const isMobile = window.innerWidth < 768
     if (isMobile) {
-      // Prevent body scroll
+      // Lock body scroll - prevents address bar issues
+      const originalOverflow = document.body.style.overflow
+      const originalPosition = document.body.style.position
+      const originalWidth = document.body.style.width
+      const originalHeight = document.body.style.height
+      const originalTouchAction = document.body.style.touchAction
+      
       document.body.style.overflow = 'hidden'
       document.body.style.position = 'fixed'
       document.body.style.width = '100%'
-      document.body.style.height = '100dvh' // Use dynamic viewport height
+      document.body.style.height = '100%'
+      document.body.style.touchAction = 'none' // Prevent pull-to-refresh
       
-      // Set viewport height CSS variable for better mobile support
+      // Set viewport height CSS variable for dynamic viewport support
       const setViewportHeight = () => {
-        const vh = window.innerHeight * 0.01
+        // Use visualViewport API if available (more accurate on mobile)
+        const height = window.visualViewport?.height || window.innerHeight
+        const vh = height * 0.01
         document.documentElement.style.setProperty('--vh', `${vh}px`)
       }
+      
       setViewportHeight()
-      window.addEventListener('resize', setViewportHeight)
+      
+      // Listen to visual viewport changes (handles keyboard, address bar, etc.)
+      if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', setViewportHeight)
+      } else {
+        window.addEventListener('resize', setViewportHeight)
+      }
       window.addEventListener('orientationchange', setViewportHeight)
       
-      // Hide address bar by scrolling
-      const hideAddressBar = () => {
-        window.scrollTo(0, 1)
-        setTimeout(() => {
-          window.scrollTo(0, 0)
-        }, 0)
-        setViewportHeight()
-      }
-      
-      // Hide address bar on load
-      hideAddressBar()
-      
-      // Prevent address bar from showing on scroll
-      let lastScrollY = window.scrollY
-      const preventAddressBar = () => {
-        if (window.scrollY < lastScrollY) {
-          window.scrollTo(0, 1)
-        }
-        lastScrollY = window.scrollY
-      }
-      
-      window.addEventListener('scroll', preventAddressBar, { passive: false })
-      
-      // Try to enter fullscreen if supported
-      const enterFullscreen = async () => {
-        try {
-          const doc = document.documentElement as any
-          if (doc.requestFullscreen) {
-            await doc.requestFullscreen()
-          } else if ((doc as any).webkitRequestFullscreen) {
-            await (doc as any).webkitRequestFullscreen()
-          } else if ((doc as any).mozRequestFullScreen) {
-            await (doc as any).mozRequestFullScreen()
-          } else if ((doc as any).msRequestFullscreen) {
-            await (doc as any).msRequestFullscreen()
-          }
-        } catch (error) {
-          // Fullscreen API might not be available or user denied
-          console.log('Fullscreen not available:', error)
-        }
-      }
-      
-      // Attempt fullscreen on user interaction
-      const handleFirstInteraction = () => {
-        enterFullscreen()
-        document.removeEventListener('touchstart', handleFirstInteraction)
-        document.removeEventListener('click', handleFirstInteraction)
-      }
-      
-      document.addEventListener('touchstart', handleFirstInteraction, { once: true })
-      document.addEventListener('click', handleFirstInteraction, { once: true })
+      // Force content to be at top on load
+      window.scrollTo(0, 0)
       
       return () => {
-        document.body.style.overflow = 'unset'
-        document.body.style.position = 'unset'
-        document.body.style.width = 'unset'
-        document.body.style.height = 'unset'
-        window.removeEventListener('resize', setViewportHeight)
+        document.body.style.overflow = originalOverflow
+        document.body.style.position = originalPosition
+        document.body.style.width = originalWidth
+        document.body.style.height = originalHeight
+        document.body.style.touchAction = originalTouchAction
+        
+        if (window.visualViewport) {
+          window.visualViewport.removeEventListener('resize', setViewportHeight)
+        } else {
+          window.removeEventListener('resize', setViewportHeight)
+        }
         window.removeEventListener('orientationchange', setViewportHeight)
-        window.removeEventListener('orientationchange', hideAddressBar)
-        window.removeEventListener('scroll', preventAddressBar)
-        document.removeEventListener('touchstart', handleFirstInteraction)
-        document.removeEventListener('click', handleFirstInteraction)
       }
     }
   }, [])
@@ -553,14 +522,18 @@ export default function CarouselPage() {
             #020314
           `,
           backgroundAttachment: 'fixed',
-          // Fullscreen mobile support - use dvh (dynamic viewport height) to account for browser UI
-          height: '100dvh',
-          minHeight: '100dvh',
-          maxHeight: '100dvh',
+          // Mobile: Use calc with CSS variable for true viewport height (accounts for address bar)
+          height: 'calc(var(--vh, 1vh) * 100)',
+          minHeight: 'calc(var(--vh, 1vh) * 100)',
+          maxHeight: 'calc(var(--vh, 1vh) * 100)',
+          // Safe area insets for notched devices
           paddingTop: 'env(safe-area-inset-top)',
           paddingBottom: 'env(safe-area-inset-bottom)',
           paddingLeft: 'env(safe-area-inset-left)',
           paddingRight: 'env(safe-area-inset-right)',
+          // Prevent overscroll and ensure no scrollbars
+          overscrollBehavior: 'none',
+          overflow: 'hidden',
         }}
       >
       {/* Back button - top left */}
