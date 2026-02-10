@@ -103,21 +103,72 @@ export default function UserVideosPage() {
     setMessage(null)
 
     try {
-      const formData = new FormData()
-      formData.append('video', file)
-      formData.append('userId', userId)
-      formData.append('title', file.name)
-      formData.append('description', '')
+      // For large files, upload directly to Supabase Storage from client
+      // This bypasses Vercel's function payload limit
+      const timestamp = Date.now()
+      const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_')
+      const videoPath = `${userId}/${timestamp}-${sanitizedFileName}`
 
+      // Try uploading directly to Supabase Storage from client
+      // If this fails due to permissions, fall back to API upload
+      const { error: directUploadError } = await supabase.storage
+        .from('videos')
+        .upload(videoPath, file, {
+          contentType: file.type,
+          upsert: false,
+          cacheControl: '3600',
+        })
+
+      if (directUploadError) {
+        // If direct upload fails (likely due to RLS), fall back to API upload
+        console.log('Direct upload failed, falling back to API upload:', directUploadError)
+        
+        const formData = new FormData()
+        formData.append('video', file)
+        formData.append('userId', userId)
+        formData.append('title', file.name)
+        formData.append('description', '')
+
+        const response = await fetch('/api/admin/user-videos', {
+          method: 'POST',
+          body: formData,
+        })
+
+        const data = await response.json()
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to upload video')
+        }
+
+        setMessage({ type: 'success', text: 'Vidéo uploadée avec succès' })
+        setTimeout(() => setMessage(null), 3000)
+        await fetchVideos()
+        if (fileInputRef.current) {
+          fileInputRef.current.value = ''
+        }
+        return
+      }
+
+      // Direct upload succeeded, now save the record via API
       const response = await fetch('/api/admin/user-videos', {
         method: 'POST',
-        body: formData,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          video_path: videoPath,
+          userId: userId,
+          title: file.name,
+          description: '',
+        }),
       })
 
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to upload video')
+        // Clean up uploaded file if record creation fails
+        await supabase.storage.from('videos').remove([videoPath])
+        throw new Error(data.error || 'Failed to save video record')
       }
 
       setMessage({ type: 'success', text: 'Vidéo uploadée avec succès' })
@@ -308,24 +359,29 @@ export default function UserVideosPage() {
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
-              {videos.map((video) => (
-                <div
-                  key={video.id}
-                  className="bg-[rgba(6,9,22,0.98)] rounded-xl p-2 border border-[rgba(252,211,77,0.6)] shadow-[0_8px_20px_rgba(0,0,0,0.6)] hover:border-[rgba(252,211,77,0.9)] transition-all duration-200"
-                  style={{
-                    background: `
-                      radial-gradient(circle at top, rgba(255, 138, 31, 0.15), transparent 60%),
-                      rgba(6, 9, 22, 0.98)
-                    `
-                  }}
-                >
-                  <div className="relative aspect-[9/16] rounded-lg overflow-hidden mb-2 bg-[#020617]">
-                    <video
-                      src={video.video_path}
-                      controls
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
+              {videos.map((video) => {
+                const videoUrl = video.video_path.startsWith('http') 
+                  ? video.video_path 
+                  : supabase.storage.from('videos').getPublicUrl(video.video_path).data.publicUrl
+                
+                return (
+                  <div
+                    key={video.id}
+                    className="bg-[rgba(6,9,22,0.98)] rounded-xl p-2 border border-[rgba(252,211,77,0.6)] shadow-[0_8px_20px_rgba(0,0,0,0.6)] hover:border-[rgba(252,211,77,0.9)] transition-all duration-200"
+                    style={{
+                      background: `
+                        radial-gradient(circle at top, rgba(255, 138, 31, 0.15), transparent 60%),
+                        rgba(6, 9, 22, 0.98)
+                      `
+                    }}
+                  >
+                    <div className="relative aspect-[9/16] rounded-lg overflow-hidden mb-2 bg-[#020617]">
+                      <video
+                        src={videoUrl}
+                        controls
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
                   <div className="space-y-1">
                     {video.title && (
                       <p className="text-xs text-text-main truncate font-medium">{video.title}</p>
@@ -344,7 +400,8 @@ export default function UserVideosPage() {
                     </div>
                   </div>
                 </div>
-              ))}
+              )
+            })}
             </div>
           )}
         </div>

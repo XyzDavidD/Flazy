@@ -63,70 +63,96 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const client = getSupabaseClient()
-    const formData = await request.formData()
-    const videoFile = formData.get('video') as File
-    const userId = formData.get('userId') as string
-    const title = formData.get('title') as string || ''
-    const description = formData.get('description') as string || ''
+    
+    // Check if request is JSON (direct upload) or FormData (fallback)
+    const contentType = request.headers.get('content-type') || ''
+    let videoPath: string
+    let userId: string
+    let title: string
+    let description: string
+    let file: File | null = null
 
-    if (!videoFile) {
-      return NextResponse.json(
-        { error: 'No video file provided' },
-        { status: 400 }
-      )
-    }
+    if (contentType.includes('application/json')) {
+      // Direct upload: video_path is provided, file already uploaded
+      const body = await request.json()
+      videoPath = body.video_path
+      userId = body.userId
+      title = body.title || ''
+      description = body.description || ''
 
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'User ID is required' },
-        { status: 400 }
-      )
+      if (!videoPath || !userId) {
+        return NextResponse.json(
+          { error: 'Missing required fields: video_path, userId' },
+          { status: 400 }
+        )
+      }
+    } else {
+      // Fallback: file is provided, need to upload
+      const formData = await request.formData()
+      file = formData.get('video') as File
+      userId = formData.get('userId') as string
+      title = formData.get('title') as string || ''
+      description = formData.get('description') as string || ''
+
+      if (!file || !userId) {
+        return NextResponse.json(
+          { error: 'Missing required fields: video, userId' },
+          { status: 400 }
+        )
+      }
+
+      // Validate file type
+      if (!file.type.startsWith('video/')) {
+        return NextResponse.json(
+          { error: 'File must be a video' },
+          { status: 400 }
+        )
+      }
+
+      // Generate unique filename
+      const timestamp = Date.now()
+      const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_')
+      videoPath = `${userId}/${timestamp}-${sanitizedFileName}`
+
+      // Upload video to Supabase Storage
+      const arrayBuffer = await file.arrayBuffer()
+      const buffer = Buffer.from(arrayBuffer)
+
+      const { data: uploadData, error: uploadError } = await client
+        .storage
+        .from('videos')
+        .upload(videoPath, buffer, {
+          contentType: file.type,
+          upsert: false,
+          cacheControl: '3600',
+        })
+
+      if (uploadError) {
+        console.error('Upload error:', uploadError)
+        return NextResponse.json(
+          { error: 'Failed to upload video', details: uploadError.message },
+          { status: 500 }
+        )
+      }
     }
 
     // Verify user exists
     const { data: userData, error: userError } = await client.auth.admin.getUserById(userId)
     if (userError || !userData) {
+      // Clean up uploaded file if user doesn't exist
+      await client.storage.from('videos').remove([videoPath])
       return NextResponse.json(
         { error: 'User not found' },
         { status: 404 }
       )
     }
 
-    // Upload video to Supabase Storage
-    const fileExt = videoFile.name.split('.').pop()
-    const fileName = `${userId}/${Date.now()}.${fileExt}`
-    
-    const arrayBuffer = await videoFile.arrayBuffer()
-    const buffer = Buffer.from(arrayBuffer)
-
-    const { data: uploadData, error: uploadError } = await client
-      .storage
-      .from('videos')
-      .upload(fileName, buffer, {
-        contentType: videoFile.type,
-        upsert: false,
-      })
-
-    if (uploadError) {
-      console.error('Upload error:', uploadError)
-      return NextResponse.json(
-        { error: 'Failed to upload video', details: uploadError.message },
-        { status: 500 }
-      )
-    }
-
-    // Get public URL
-    const { data: urlData } = client
-      .storage
-      .from('videos')
-      .getPublicUrl(fileName)
-
-    // Save to database
+    // Save to database - use video_path directly (not full URL)
     const { data: dbData, error: dbError } = await client
       .from('user_videos')
       .insert({
         user_id: userId,
-        video_path: urlData.publicUrl,
+        video_path: videoPath,
         title,
         description,
       })
@@ -136,7 +162,7 @@ export async function POST(request: NextRequest) {
     if (dbError) {
       console.error('Database error:', dbError)
       // Try to delete the uploaded file
-      await client.storage.from('videos').remove([fileName])
+      await client.storage.from('videos').remove([videoPath])
       return NextResponse.json(
         { error: 'Failed to save video metadata', details: dbError.message },
         { status: 500 }
@@ -185,10 +211,17 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
-    // Extract file path from URL
-    const url = new URL(video.video_path)
-    const pathParts = url.pathname.split('/videos/')
-    const filePath = pathParts[1]
+    // Handle both old format (full URL) and new format (path only)
+    let filePath: string
+    if (video.video_path.startsWith('http')) {
+      // Old format: extract path from URL
+      const url = new URL(video.video_path)
+      const pathParts = url.pathname.split('/videos/')
+      filePath = pathParts[1]
+    } else {
+      // New format: already a path
+      filePath = video.video_path
+    }
 
     // Delete from storage
     if (filePath) {
