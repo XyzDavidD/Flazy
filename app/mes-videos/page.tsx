@@ -116,24 +116,30 @@ export default function MesVideosPage() {
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-              {videos.map((video) => (
-                <div
-                  key={video.id}
-                  className="bg-[rgba(6,9,22,0.98)] rounded-xl p-2.5 border border-[rgba(252,211,77,0.6)] shadow-[0_8px_20px_rgba(0,0,0,0.6)] hover:border-[rgba(252,211,77,0.9)] transition-all duration-200 hover:-translate-y-1"
-                  style={{
-                    background: `
-                      radial-gradient(circle at top, rgba(255, 138, 31, 0.15), transparent 60%),
-                      rgba(6, 9, 22, 0.98)
-                    `
-                  }}
-                >
-                  <div className="relative aspect-[9/16] rounded-lg overflow-hidden mb-2 bg-[#020617]">
-                    <video
-                      src={video.video_path}
-                      controls
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
+              {videos.map((video) => {
+                // Handle both old format (full URL) and new format (path only)
+                const videoUrl = video.video_path.startsWith('http') 
+                  ? video.video_path 
+                  : supabase.storage.from('videos').getPublicUrl(video.video_path).data.publicUrl
+                
+                return (
+                  <div
+                    key={video.id}
+                    className="bg-[rgba(6,9,22,0.98)] rounded-xl p-2.5 border border-[rgba(252,211,77,0.6)] shadow-[0_8px_20px_rgba(0,0,0,0.6)] hover:border-[rgba(252,211,77,0.9)] transition-all duration-200 hover:-translate-y-1"
+                    style={{
+                      background: `
+                        radial-gradient(circle at top, rgba(255, 138, 31, 0.15), transparent 60%),
+                        rgba(6, 9, 22, 0.98)
+                      `
+                    }}
+                  >
+                    <div className="relative aspect-[9/16] rounded-lg overflow-hidden mb-2 bg-[#020617]">
+                      <video
+                        src={videoUrl}
+                        controls
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
                   <div className="space-y-1">
                     {video.title && (
                       <p className="text-xs text-text-main truncate font-medium">{video.title}</p>
@@ -149,8 +155,8 @@ export default function MesVideosPage() {
                       })}
                     </div>
                   </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           )}
         </div>
