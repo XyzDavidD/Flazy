@@ -140,19 +140,20 @@ export default function MesVideosPage() {
                         className="w-full h-full object-cover"
                       />
                     </div>
-                  <div className="space-y-1">
-                    {video.title && (
-                      <p className="text-xs text-text-main truncate font-medium">{video.title}</p>
-                    )}
-                    {video.description && (
-                      <p className="text-[10px] text-text-muted line-clamp-2">{video.description}</p>
-                    )}
-                    <div className="text-[9px] text-text-muted">
-                      {new Date(video.created_at).toLocaleDateString('fr-FR', {
-                        day: 'numeric',
-                        month: 'long',
-                        year: 'numeric'
-                      })}
+                    <div className="space-y-1">
+                      {video.title && (
+                        <p className="text-xs text-text-main truncate font-medium">{video.title}</p>
+                      )}
+                      {video.description && (
+                        <p className="text-[10px] text-text-muted line-clamp-2">{video.description}</p>
+                      )}
+                      <div className="text-[9px] text-text-muted">
+                        {new Date(video.created_at).toLocaleDateString('fr-FR', {
+                          day: 'numeric',
+                          month: 'long',
+                          year: 'numeric'
+                        })}
+                      </div>
                     </div>
                   </div>
                 )
