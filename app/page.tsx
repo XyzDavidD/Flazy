@@ -357,6 +357,14 @@ function Header() {
                   </span>
                   <span>crédits</span>
                 </div>
+                <Link
+                  href="/mes-videos"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block w-full text-left px-4 py-2.5 text-sm text-text-soft hover:text-text-main hover:bg-[rgba(15,23,42,0.5)] rounded-lg transition-colors flex items-center gap-2 touch-manipulation"
+                >
+                  <Video className="w-4 h-4" />
+                  {t('Mes vidéos', currentLanguage)}
+                </Link>
                 <button
                   onClick={() => {
                     handleLogout()
