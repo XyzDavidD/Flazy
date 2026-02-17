@@ -257,17 +257,27 @@ function Header() {
       </nav>
 
       {mobileMenuOpen && (
-        <div 
-          className="lg:hidden pb-4 px-5 space-y-1 border-t border-[rgba(51,65,85,0.5)] pt-4 relative z-50"
-          style={{
-            background: `
-              radial-gradient(circle at top, rgba(129, 140, 248, 0.5), transparent 60%),
-              radial-gradient(circle at bottom, rgba(255, 138, 31, 0.4), transparent 60%),
-              rgba(3, 7, 18, 0.98)
-            `
-          }}
-        >
-          <div className="border-t border-[rgba(51,65,85,0.5)] pt-3 mt-3">
+        <>
+          {/* Backdrop overlay - click to close */}
+          <div 
+            className="lg:hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-40"
+            onClick={() => setMobileMenuOpen(false)}
+            aria-hidden="true"
+          />
+          
+          {/* Mobile menu */}
+          <div 
+            className="lg:hidden pb-4 px-5 space-y-1 border-t border-[rgba(51,65,85,0.5)] pt-4 relative z-50"
+            style={{
+              background: `
+                radial-gradient(circle at top, rgba(129, 140, 248, 0.5), transparent 60%),
+                radial-gradient(circle at bottom, rgba(255, 138, 31, 0.4), transparent 60%),
+                rgba(3, 7, 18, 0.98)
+              `
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="border-t border-[rgba(51,65,85,0.5)] pt-3 mt-3">
             {user ? (
               <>
                 <div className="px-4 py-2 flex items-center gap-1.5 text-text-soft text-sm mb-2">
@@ -321,6 +331,7 @@ function Header() {
             )}
           </div>
         </div>
+        </>
       )}
     </header>
   )

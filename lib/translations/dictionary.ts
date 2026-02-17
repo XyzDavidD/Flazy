@@ -435,6 +435,20 @@ export const translations: Record<string, Record<Language, string>> = {
     es: 'Recargar tus tokens',
   },
 
+  // ============================================
+  // ERROR MESSAGES
+  // ============================================
+  'Veuillez remplir le prompt.': {
+    fr: 'Veuillez remplir le prompt.',
+    en: 'Please fill in the prompt.',
+    es: 'Por favor completa el prompt.',
+  },
+  'Vous devez être connecté pour générer une vidéo.': {
+    fr: 'Vous devez être connecté pour générer une vidéo.',
+    en: 'You must be logged in to generate a video.',
+    es: 'Debes iniciar sesión para generar un video.',
+  },
+
   'Actualité': {
     fr: 'Actualité',
     en: 'News',

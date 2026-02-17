@@ -305,103 +305,114 @@ function Header() {
       </nav>
 
       {mobileMenuOpen && (
-        <div 
-          className="lg:hidden pb-4 px-5 space-y-1 border-t border-[rgba(51,65,85,0.5)] pt-4 relative z-50"
-          style={{
-            background: `
-              radial-gradient(circle at top, rgba(129, 140, 248, 0.5), transparent 60%),
-              radial-gradient(circle at bottom, rgba(255, 138, 31, 0.4), transparent 60%),
-              rgba(3, 7, 18, 0.98)
-            `
-          }}
-        >
-          <div className="space-y-1 mb-3">
-            <Link
-              href="/creations"
-              className="block w-full text-left px-4 py-2.5 text-sm text-text-soft hover:text-text-main hover:bg-[rgba(15,23,42,0.5)] rounded-lg transition-colors touch-manipulation"
-              onClick={(e) => {
-                setMobileMenuOpen(false)
-                e.stopPropagation()
-              }}
-            >
-              Creations
-            </Link>
-            <Link
-              href="/pricing"
-              className="block w-full text-left px-4 py-2.5 text-sm text-text-soft hover:text-text-main hover:bg-[rgba(15,23,42,0.5)] rounded-lg transition-colors touch-manipulation"
-              onClick={(e) => {
-                setMobileMenuOpen(false)
-                e.stopPropagation()
-              }}
-            >
-              Tarifs
-            </Link>
-            <Link
-              href="/faq"
-              className="block w-full text-left px-4 py-2.5 text-sm text-text-soft hover:text-text-main hover:bg-[rgba(15,23,42,0.5)] rounded-lg transition-colors touch-manipulation"
-              onClick={(e) => {
-                setMobileMenuOpen(false)
-                e.stopPropagation()
-              }}
-            >
-              FAQ
-            </Link>
-          </div>
+        <>
+          {/* Backdrop overlay - click to close */}
+          <div 
+            className="lg:hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-40"
+            onClick={() => setMobileMenuOpen(false)}
+            aria-hidden="true"
+          />
+          
+          {/* Mobile menu */}
+          <div 
+            className="lg:hidden pb-4 px-5 space-y-1 border-t border-[rgba(51,65,85,0.5)] pt-4 relative z-50"
+            style={{
+              background: `
+                radial-gradient(circle at top, rgba(129, 140, 248, 0.5), transparent 60%),
+                radial-gradient(circle at bottom, rgba(255, 138, 31, 0.4), transparent 60%),
+                rgba(3, 7, 18, 0.98)
+              `
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="space-y-1 mb-3">
+              <Link
+                href="/creations"
+                className="block w-full text-left px-4 py-2.5 text-sm text-text-soft hover:text-text-main hover:bg-[rgba(15,23,42,0.5)] rounded-lg transition-colors touch-manipulation"
+                onClick={(e) => {
+                  setMobileMenuOpen(false)
+                  e.stopPropagation()
+                }}
+              >
+                Creations
+              </Link>
+              <Link
+                href="/pricing"
+                className="block w-full text-left px-4 py-2.5 text-sm text-text-soft hover:text-text-main hover:bg-[rgba(15,23,42,0.5)] rounded-lg transition-colors touch-manipulation"
+                onClick={(e) => {
+                  setMobileMenuOpen(false)
+                  e.stopPropagation()
+                }}
+              >
+                Tarifs
+              </Link>
+              <Link
+                href="/faq"
+                className="block w-full text-left px-4 py-2.5 text-sm text-text-soft hover:text-text-main hover:bg-[rgba(15,23,42,0.5)] rounded-lg transition-colors touch-manipulation"
+                onClick={(e) => {
+                  setMobileMenuOpen(false)
+                  e.stopPropagation()
+                }}
+              >
+                FAQ
+              </Link>
+            </div>
 
-          <div className="border-t border-[rgba(51,65,85,0.5)] pt-3 mt-3">
-            {user ? (
-              <>
-                <div className="px-4 py-2 flex items-center gap-1.5 text-text-soft text-sm mb-2">
-                  <span className="text-accent-orange-soft font-semibold">
-                    {creditsLoading ? '—' : (credits ?? 0)}
-                  </span>
-                  <span>crédits</span>
+            <div className="border-t border-[rgba(51,65,85,0.5)] pt-3 mt-3">
+              {user ? (
+                <>
+                  <div className="px-4 py-2 flex items-center gap-1.5 text-text-soft text-sm mb-2">
+                    <span className="text-accent-orange-soft font-semibold">
+                      {creditsLoading ? '—' : (credits ?? 0)}
+                    </span>
+                    <span>crédits</span>
+                  </div>
+                  <Link
+                    href="/mes-videos"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block w-full text-left px-4 py-2.5 text-sm text-text-soft hover:text-text-main hover:bg-[rgba(15,23,42,0.5)] rounded-lg transition-colors flex items-center gap-2 touch-manipulation"
+                  >
+                    <Video className="w-4 h-4" />
+                    {t('Mes vidéos', currentLanguage)}
+                  </Link>
+                  <button
+                    onClick={() => {
+                      handleLogout()
+                      setMobileMenuOpen(false)
+                    }}
+                    className="block w-full text-left px-4 py-2.5 text-sm text-text-soft hover:text-text-main hover:bg-[rgba(15,23,42,0.5)] rounded-lg transition-colors flex items-center gap-2 touch-manipulation"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Se déconnecter
+                  </button>
+                </>
+              ) : (
+                <div className="space-y-1">
+                  <Link
+                    href="/auth/login"
+                    className="block w-full text-left px-4 py-2.5 text-sm text-text-soft hover:text-text-main hover:bg-[rgba(15,23,42,0.5)] rounded-lg transition-colors touch-manipulation"
+                    onClick={(e) => {
+                      setMobileMenuOpen(false)
+                      e.stopPropagation()
+                    }}
+                  >
+                    Se connecter
+                  </Link>
+                  <Link
+                    href="/auth/signup"
+                    className="block w-full text-left px-4 py-2.5 text-sm text-text-soft hover:text-text-main hover:bg-[rgba(15,23,42,0.5)] rounded-lg transition-colors touch-manipulation"
+                    onClick={(e) => {
+                      setMobileMenuOpen(false)
+                      e.stopPropagation()
+                    }}
+                  >
+                    S'inscrire
+                  </Link>
                 </div>
-                <Link
-                  href="/mes-videos"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="block w-full text-left px-4 py-2.5 text-sm text-text-soft hover:text-text-main hover:bg-[rgba(15,23,42,0.5)] rounded-lg transition-colors flex items-center gap-2 touch-manipulation"
-                >
-                  <Video className="w-4 h-4" />
-                  {t('Mes vidéos', currentLanguage)}
-                </Link>
-                <button
-                  onClick={() => {
-                    handleLogout()
-                    setMobileMenuOpen(false)
-                  }}
-                  className="block w-full text-left px-4 py-2.5 text-sm text-text-soft hover:text-text-main hover:bg-[rgba(15,23,42,0.5)] rounded-lg transition-colors flex items-center gap-2 touch-manipulation"
-                >
-                  <LogOut className="w-4 h-4" />
-                  Se déconnecter
-                </button>
-              </>
-            ) : (
-              <div className="space-y-1">
-                <Link
-                  href="/auth/login"
-                  className="block w-full text-left px-4 py-2.5 text-sm text-text-soft hover:text-text-main hover:bg-[rgba(15,23,42,0.5)] rounded-lg transition-colors touch-manipulation"
-                  onClick={(e) => {
-                    setMobileMenuOpen(false)
-                    e.stopPropagation()
-                  }}
-                >
-                  Se connecter
-                </Link>
-                <Link
-                  href="/auth/signup"
-                  className="block w-full text-left px-4 py-2.5 text-sm text-text-soft hover:text-text-main hover:bg-[rgba(15,23,42,0.5)] rounded-lg transition-colors touch-manipulation"
-                  onClick={(e) => {
-                    setMobileMenuOpen(false)
-                    e.stopPropagation()
-                  }}
-                >
-                  S'inscrire
-                </Link>
-              </div>
-            )}
+              )}
+            </div>
           </div>
-        </div>
+        </>
       )}
     </header>
   )
@@ -625,18 +636,40 @@ function FormSection() {
     }
   }, [])
 
+  // Auto-dismiss success message after 30 seconds
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => {
+        setSuccess(false)
+      }, 30000) // 30 seconds
+
+      return () => clearTimeout(timer)
+    }
+  }, [success])
+
+  // Auto-dismiss error message after 60 seconds
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        setError(null)
+      }, 60000) // 60 seconds (1 minute)
+
+      return () => clearTimeout(timer)
+    }
+  }, [error])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
     setSuccess(false)
 
     if (!prompt.trim()) {
-      setError('Veuillez remplir le prompt.')
+      setError(t('Veuillez remplir le prompt.', language))
       return
     }
 
     if (!user) {
-      setError('Vous devez être connecté pour générer une vidéo.')
+      setError(t('Vous devez être connecté pour générer une vidéo.', language))
       return
     }
 

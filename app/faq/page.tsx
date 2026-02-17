@@ -281,17 +281,27 @@ function Header({ lang }: { lang: Language }) {
       </nav>
 
       {mobileMenuOpen && (
-        <div 
-          className="lg:hidden pb-4 px-5 space-y-1 border-t border-[rgba(51,65,85,0.5)] pt-4 relative z-50"
-          style={{
-            background: `
-              radial-gradient(circle at top, rgba(129, 140, 248, 0.5), transparent 60%),
-              radial-gradient(circle at bottom, rgba(255, 138, 31, 0.4), transparent 60%),
-              rgba(3, 7, 18, 0.98)
-            `
-          }}
-        >
-          <div className="space-y-1 mb-3">
+        <>
+          {/* Backdrop overlay - click to close */}
+          <div 
+            className="lg:hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-40"
+            onClick={() => setMobileMenuOpen(false)}
+            aria-hidden="true"
+          />
+          
+          {/* Mobile menu */}
+          <div 
+            className="lg:hidden pb-4 px-5 space-y-1 border-t border-[rgba(51,65,85,0.5)] pt-4 relative z-50"
+            style={{
+              background: `
+                radial-gradient(circle at top, rgba(129, 140, 248, 0.5), transparent 60%),
+                radial-gradient(circle at bottom, rgba(255, 138, 31, 0.4), transparent 60%),
+                rgba(3, 7, 18, 0.98)
+              `
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="space-y-1 mb-3">
             <Link
               href="/creations"
               className="block w-full text-left px-4 py-2.5 text-sm text-text-soft hover:text-text-main hover:bg-[rgba(15,23,42,0.5)] rounded-lg transition-colors touch-manipulation"
@@ -378,6 +388,7 @@ function Header({ lang }: { lang: Language }) {
             )}
           </div>
         </div>
+        </>
       )}
     </header>
   )
