@@ -1,5 +1,6 @@
 // Root layout for FLAZY application
 import type { Metadata } from 'next'
+import { Suspense } from 'react'
 import './globals.css'
 import { Providers } from './providers'
 import { Analytics } from '@/components/Analytics'
@@ -90,7 +91,9 @@ fbq('track', 'PageView');`
         </noscript>
         {/* End Meta Pixel (noscript) */}
         <Providers>
-          <Analytics />
+          <Suspense fallback={null}>
+            <Analytics />
+          </Suspense>
           {children}
         </Providers>
       </body>
