@@ -595,16 +595,6 @@ export const translations: Record<string, Record<Language, string>> = {
     en: 'View packs',
     es: 'Ver packs',
   },
-  'Vous devez être connecté pour générer une vidéo.': {
-    fr: 'Vous devez être connecté pour générer une vidéo.',
-    en: 'You must be logged in to generate a video.',
-    es: 'Debes iniciar sesión para generar un video.',
-  },
-  'Veuillez remplir le prompt.': {
-    fr: 'Veuillez remplir le prompt.',
-    en: 'Please fill in the prompt.',
-    es: 'Por favor completa el prompt.',
-  },
 
   // ============================================
   // CAROUSEL PAGE
