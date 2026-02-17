@@ -259,14 +259,14 @@ function Header() {
         <>
           {/* Backdrop overlay - click to close */}
           <div 
-            className="lg:hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-40"
+            className="lg:hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-50"
             onClick={() => setMobileMenuOpen(false)}
             aria-hidden="true"
           />
           
           {/* Mobile menu */}
           <div 
-            className="lg:hidden pb-4 px-5 space-y-1 border-t border-[rgba(51,65,85,0.5)] pt-4 relative z-50"
+            className="lg:hidden pb-4 px-5 space-y-1 border-t border-[rgba(51,65,85,0.5)] pt-4 relative z-[60]"
             style={{
               background: `
                 radial-gradient(circle at top, rgba(129, 140, 248, 0.5), transparent 60%),
