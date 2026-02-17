@@ -89,6 +89,20 @@ function Header({ lang }: { lang: Language }) {
     }
   }, [])
 
+  // Close mobile menu on scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      if (mobileMenuOpen) {
+        setMobileMenuOpen(false)
+      }
+    }
+
+    if (mobileMenuOpen) {
+      window.addEventListener('scroll', handleScroll)
+      return () => window.removeEventListener('scroll', handleScroll)
+    }
+  }, [mobileMenuOpen])
+
   const handleLogout = async () => {
     await supabase.auth.signOut()
     setUser(null)
@@ -96,7 +110,7 @@ function Header({ lang }: { lang: Language }) {
   }
 
   return (
-    <header className="sticky top-0 z-40 backdrop-blur-[18px] bg-gradient-to-b from-[rgba(5,6,18,0.96)] to-[rgba(5,6,18,0.9)] border-b border-[rgba(51,65,85,0.85)]">
+    <header className={`sticky top-0 backdrop-blur-[18px] bg-gradient-to-b from-[rgba(5,6,18,0.96)] to-[rgba(5,6,18,0.9)] border-b border-[rgba(51,65,85,0.85)] ${mobileMenuOpen ? 'z-[120]' : 'z-40'}`}>
       <nav className="relative flex items-center justify-between py-[14px] px-5 max-w-[1120px] mx-auto flex-wrap">
         <div className="flex items-center gap-3">
           <Link href="/" className="flex items-center gap-3">
@@ -272,7 +286,7 @@ function Header({ lang }: { lang: Language }) {
           )}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="lg:hidden p-2 text-text-soft touch-manipulation z-[120] relative"
+            className="lg:hidden p-2 text-text-soft touch-manipulation z-[130] relative"
             aria-label="Toggle menu"
           >
             {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
