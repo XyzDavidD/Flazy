@@ -296,7 +296,7 @@ function Header() {
           )}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="lg:hidden p-2 text-text-soft touch-manipulation z-50 relative"
+            className="lg:hidden p-2 text-text-soft touch-manipulation z-[120] relative"
             aria-label="Toggle menu"
           >
             {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -308,14 +308,14 @@ function Header() {
         <>
           {/* Backdrop overlay - click to close */}
           <div 
-            className="lg:hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-50"
+            className="lg:hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-[100]"
             onClick={() => setMobileMenuOpen(false)}
             aria-hidden="true"
           />
           
           {/* Mobile menu */}
           <div 
-            className="lg:hidden pb-4 px-5 space-y-1 border-t border-[rgba(51,65,85,0.5)] pt-4 relative z-[60]"
+            className="lg:hidden pb-4 px-5 space-y-1 border-t border-[rgba(51,65,85,0.5)] pt-4 relative z-[110]"
             style={{
               background: `
                 radial-gradient(circle at top, rgba(129, 140, 248, 0.5), transparent 60%),
