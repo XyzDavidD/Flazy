@@ -52,26 +52,16 @@ export async function GET(request: NextRequest) {
     const { data: purchaseData, error: purchaseError } = await client
       .from('purchases')
       .select('user_id')
-
     if (purchaseError) {
-      console.error('Error fetching purchases:', purchaseError)
-      return NextResponse.json(
-        { error: 'Failed to fetch purchases', details: purchaseError.message },
-        { status: 500 }
-      )
+      console.error('Error fetching purchases (non-fatal):', purchaseError)
     }
 
     // Fetch user IDs who have a credits row (manually given free trial credits)
     const { data: creditsData, error: creditsError } = await client
       .from('user_credits')
       .select('user_id')
-
     if (creditsError) {
-      console.error('Error fetching user_credits:', creditsError)
-      return NextResponse.json(
-        { error: 'Failed to fetch user credits', details: creditsError.message },
-        { status: 500 }
-      )
+      console.error('Error fetching user_credits (non-fatal):', creditsError)
     }
 
     // Merge and deduplicate: show anyone who purchased OR has a credits row
@@ -79,9 +69,9 @@ export async function GET(request: NextRequest) {
       ...(purchaseData || []).map((p: { user_id: string }) => p.user_id),
       ...(creditsData || []).map((c: { user_id: string }) => c.user_id),
     ]
-    const purchasedUserIds = [...new Set(allUserIds)]
+    const qualifiedUserIds = [...new Set(allUserIds)]
 
-    if (purchasedUserIds.length === 0) {
+    if (qualifiedUserIds.length === 0) {
       return NextResponse.json({ users: [] })
     }
 
@@ -97,7 +87,7 @@ export async function GET(request: NextRequest) {
     }
 
     const users = data.users
-      .filter(user => purchasedUserIds.includes(user.id))
+      .filter(user => qualifiedUserIds.includes(user.id))
       .map(user => ({
         id: user.id,
         email: user.email,
