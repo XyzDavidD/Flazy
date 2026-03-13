@@ -49,25 +49,34 @@ export async function GET(request: NextRequest) {
       })
     }
     
-    // Otherwise, fetch all users from auth.users
-    const { data, error } = await client.auth.admin.listUsers()
+    // Paginate through ALL users (listUsers returns max 50 per page by default)
+    const allUsers: { id: string; email: string | undefined; created_at: string }[] = []
+    let page = 1
+    const perPage = 1000
 
-    if (error) {
-      console.error('Error fetching users:', error)
-      return NextResponse.json(
-        { error: 'Failed to fetch users', details: error.message },
-        { status: 500 }
-      )
+    while (true) {
+      const { data, error } = await client.auth.admin.listUsers({ page, perPage })
+
+      if (error) {
+        console.error('Error fetching users:', error)
+        return NextResponse.json(
+          { error: 'Failed to fetch users', details: error.message },
+          { status: 500 }
+        )
+      }
+
+      for (const user of data.users) {
+        allUsers.push({ id: user.id, email: user.email, created_at: user.created_at })
+      }
+
+      if (data.users.length < perPage) break
+      page++
     }
 
-    // Return simplified user data
-    const users = data.users.map(user => ({
-      id: user.id,
-      email: user.email,
-      created_at: user.created_at,
-    }))
+    // Sort newest first
+    allUsers.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
 
-    return NextResponse.json({ users })
+    return NextResponse.json({ users: allUsers })
   } catch (error) {
     console.error('Error in users API:', error)
     return NextResponse.json(
